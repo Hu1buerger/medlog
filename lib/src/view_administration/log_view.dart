@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/add_administration/add_log_entry.dart';
+import 'package:medlog/src/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/administration_log/administration_log_controller.dart';
 import 'package:medlog/src/administration_log/administration_log_entry.dart';
 import 'package:medlog/src/view_administration/log_entry_view.dart';

@@ -5,15 +5,19 @@ import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
 import 'administration_log_entry.dart';
 
 class AdministrationLogController with ChangeNotifier {
+
+  PharmaceuticalController pharmaController;
+
   int _lastID = 0;
 
-  late List<AdministrationLogEntry> _log;
-
+  List<AdministrationLogEntry> _log = [];
   List<AdministrationLogEntry> get log => _log;
 
+  AdministrationLogController(this.pharmaController);
+
   Future<void> loadLog() async {
-    var medikinet = PharmaceuticalController.provider.getOrCreate("Medikinet", "30mg");
-    var adalimumab = PharmaceuticalController.provider.getOrCreate("Adalimumab", "40mg");
+    var medikinet = pharmaController.getOrCreate("Medikinet", "30mg");
+    var adalimumab = pharmaController.getOrCreate("Adalimumab", "40mg");
 
     _log = [
       AdministrationLogEntry(-1, medikinet, DateTime(2020, 10, 05, 18, 07)),

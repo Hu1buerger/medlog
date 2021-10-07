@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:medlog/src/add_administration/add_log_entry.dart';
+import 'package:medlog/src/add_entrys/add_log_entry.dart';
+import 'package:medlog/src/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/administration_log/administration_log_controller.dart';
+import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/view_administration/log_view.dart';
 
 
@@ -11,9 +13,11 @@ class MyApp extends StatelessWidget {
   const MyApp({
     Key? key,
     required this.logController,
+    required this.pharmaController
   }) : super(key: key);
 
   final AdministrationLogController logController;
+  final PharmaceuticalController pharmaController;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +69,9 @@ class MyApp extends StatelessWidget {
               case LogView.routeName:
                 return LogView(logController: logController);
               case AddLogEntry.routeName:
-                return AddLogEntry(logController: logController);
+                return AddLogEntry(logController: logController, pharmaController: pharmaController,);
+              case AddPharmaceutical.route_name:
+                return AddPharmaceutical(pharmController: pharmaController);
               default:
                 return Text("ILLEGAL ROUTE ${routeSettings.name}");
             }

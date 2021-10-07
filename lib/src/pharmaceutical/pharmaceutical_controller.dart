@@ -1,51 +1,57 @@
+import 'package:medlog/src/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
 
 class PharmaceuticalController {
-  static PharmaceuticalController provider = PharmaceuticalController({});
 
-  //map of medname to pharmaceuticals;
-  Map<String, List<Pharmaceutical>> _pharmaMap;
+  final PharmaService pharmaservice;
 
-
-  List<Pharmaceutical> get pharmaceuticals =>
-      _pharmaMap.isEmpty ? [] :
-      _pharmaMap.values.reduce((List<Pharmaceutical> previousValue, List<Pharmaceutical> element) =>
-      previousValue + element);
+  List<Pharmaceutical> pharmStore = [];
+  List<Pharmaceutical> get pharmaceuticals => pharmStore;
 
   List<String> get tradenames {
     return pharmaceuticals.map((e) => e.tradename).toSet().toList();
   }
 
-  PharmaceuticalController(this._pharmaMap);
+  PharmaceuticalController(this.pharmaservice);
 
-  addPharmaceutical(Pharmaceutical pharm) {
+  Future<void> load() async {
+    var pharms = await pharmaservice.load();
+    for(var p in pharms) {
+      _addPharmaceutical(p);
+    }
+  }
+
+  Future<void> store() async{
+
+  }
+
+  createPharmaceutical(String tradename, String dosage, String activeSubstance){
+    Pharmaceutical p = Pharmaceutical(DocumentState.user_created, tradename, dosage, activeSubstance);
+    _addPharmaceutical(p);
+  }
+
+  _addPharmaceutical(Pharmaceutical pharm) {
     var p = pharmaceuticalByNameAndDosage(pharm.tradename, pharm.dosage);
     // check wheter it is already known
-    if (p != null) return;
-
+    if (p != null) {
+      assert(p.id == pharm.id);
+      return;
+    }
     _insert(pharm);
   }
 
-  _insert(Pharmaceutical pharm) {
-    if (!_pharmaMap.containsKey(pharm.tradename)) {
-      _pharmaMap[pharm.tradename] = <Pharmaceutical>[];
-    }
-
-    _pharmaMap[pharm.tradename]!.add(pharm);
-  }
-
   Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, String dose) {
-    var listOfSameName = _pharmaMap[tradename];
-    if (listOfSameName == null) return null;
-
-    var p = listOfSameName.where((element) => element.dosage == dose);
+    var p = pharmaceuticals
+        .where((element) => element.tradename == tradename)
+        .where((element) => element.dosage == dose)
+        .toList();
 
     assert(p.length < 2);
 
     return p.isNotEmpty ? p.first : null;
   }
 
-  List<Pharmaceutical> pharmaceuticalByTradeName(String tradename){
+  List<Pharmaceutical> pharmaceuticalByTradeName(String tradename) {
     return pharmaceuticals.where((element) => element.tradename == tradename).toList();
   }
 
@@ -53,10 +59,20 @@ class PharmaceuticalController {
     var p = pharmaceuticalByNameAndDosage(tradename, dose);
 
     if (p == null) {
-      p = Pharmaceutical(tradename, dose);
+      p = Pharmaceutical(DocumentState.user_created, tradename, dose, "UNASSIGNED");
       _insert(p);
     }
 
     return p;
+  }
+
+  void _insert(Pharmaceutical p) {
+    if(p.id == -1) {
+      p = Pharmaceutical(p.documentState, p.tradename, p.dosage, p.activeIngredient, id: pharmaservice.getNextFreeID());
+    }else{
+      if(pharmaceuticals.any((element) => element.id == p.id)) throw StateError("Id is already taken");
+    }
+
+    pharmStore.add(p);
   }
 }

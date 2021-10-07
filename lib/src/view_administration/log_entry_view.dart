@@ -10,8 +10,8 @@ class LogEntryWidget extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(item.medname),
-      subtitle: Text(item.dose),
+      title: Text(item.pharamaceutical.tradename),
+      subtitle: Text(item.pharamaceutical.dosage),
       trailing: Text(item.adminDate.toString()),
     );
   }
