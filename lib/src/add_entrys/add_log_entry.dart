@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlog/src/add_entrys/add_pharmaceutical.dart';
-import 'package:medlog/src/administration_log/administration_log_controller.dart';
+import 'package:medlog/src/administration_log/log_controller.dart';
 import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
 
@@ -12,17 +12,17 @@ import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
 /// This Widget is supposed to handle the feature to track the intake of medications
 ///
 /// TODO: search through the medication database notonly by tradname but also by active_substance; use a filter/strategy
-/// TODO: make this visualy appealing
+/// TODO: make this visually appealing
 class AddLogEntry extends StatefulWidget {
   static const String routeName = "/addMedicationIntakeLog";
 
-  late final PharmaceuticalController pharmaController;
-  final AdministrationLogController logController;
+  final PharmaceuticalController pharmaController;
+  final LogController logController;
 
-  AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
+  const AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _AddLogEntryState(pharmaController, logController);
+  State<StatefulWidget> createState() => _AddLogEntryState();
 }
 
 class _AddLogEntryState extends State<AddLogEntry> {
@@ -31,8 +31,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
   static const String DIALOG_ADD_PHARM_OK = "Yes";
   static const String DIALOG_ADD_PHARM_ABORT = "No";
 
-  final PharmaceuticalController pharmaController;
-  final AdministrationLogController logController;
+  PharmaceuticalController get pharmaController => widget.pharmaController;
+  LogController get logController => widget.logController;
 
   TextEditingController searchQueryController = TextEditingController();
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
@@ -42,7 +42,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   Pharmaceutical? selectedPharmaceutical;
   DateTime adminTime = DateTime.now();
 
-  _AddLogEntryState(this.pharmaController, this.logController);
+  _AddLogEntryState();
 
   @override
   void initState() {
@@ -56,21 +56,11 @@ class _AddLogEntryState extends State<AddLogEntry> {
     super.setState(fn);
   }
 
-  String fullName(Pharmaceutical p) => "${p.tradename} ${p.dosage}";
-
-  List<Pharmaceutical> sortPharmaceuticals(List<Pharmaceutical> list) {
-    list.sort((a, b) => fullName(a).compareTo(fullName(b)));
-    return list;
-  }
-
-  List<Pharmaceutical> filterList(String query) =>
-      pharmaController.pharmaceuticals.where((element) => element.tradename.contains(query)).toList();
-
   void onReset(BuildContext context) {
     //Navigator.pop(context);
     modus = _Modus.searching;
     searchQueryController.text = "";
-    updateQuery("");
+    updateQuery("", context);
   }
 
   void onDone(BuildContext context) {
@@ -80,12 +70,19 @@ class _AddLogEntryState extends State<AddLogEntry> {
     Navigator.pop(context);
   }
 
-  updateQuery(String query) {
-    currentOptions = sortPharmaceuticals(filterList(query));
+  List<Pharmaceutical> sortPharmaceuticals(List<Pharmaceutical> list) {
+    list.sort((a, b) => a.displayName.compareTo(b.displayName));
+    return list;
+  }
+
+  updateQuery(String query, BuildContext context) {
+    currentOptions = sortPharmaceuticals(pharmaController.filter(query));
     if (currentOptions.isEmpty) {
       modus = _Modus.failed;
+      onSearchEmpty(context);
+    }else {
+      setState(() {});
     }
-    setState(() {});
   }
 
   selectPharmaceutical(Pharmaceutical p) {
@@ -144,7 +141,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             decoration: const InputDecoration(
                 border: OutlineInputBorder(), hintText: 'Enter a search term', prefixIcon: Icon(Icons.search)),
             autocorrect: false,
-            onChanged: updateQuery,
+            onChanged: (value) => updateQuery(value, context),
             onEditingComplete: () => onEditingComplete(context),
           ),
         ),
@@ -157,7 +154,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
                 return ListTile(
                   title: Text(currentItem.tradename),
-                  subtitle: Text("${currentItem.activeIngredient} ${currentItem.dosage}"),
+                  subtitle: Text(currentItem.dosage),
                   onTap: () => selectPharmaceutical(currentItem),
                 );
               }),
@@ -170,6 +167,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(modus == _Modus.selected);
     assert(selectedPharmaceutical != null);
 
+    //TODO: add dismissable
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -178,7 +176,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             child: Card(
               child: ListTile(
                 title: Text(selectedPharmaceutical!.tradename),
-                subtitle: Text("${selectedPharmaceutical!.activeIngredient} ${selectedPharmaceutical!.dosage}"),
+                subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
               )
             )),
         Padding(

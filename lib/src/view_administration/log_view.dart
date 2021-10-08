@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlog/src/add_entrys/add_log_entry.dart';
-import 'package:medlog/src/administration_log/administration_log_controller.dart';
-import 'package:medlog/src/administration_log/administration_log_entry.dart';
-import 'package:medlog/src/view_administration/log_entry_view.dart';
+import 'package:medlog/src/administration_log/log_controller.dart';
+import 'package:medlog/src/administration_log/log_entry.dart';
+import 'package:medlog/src/view_administration/log_entry_widget.dart';
 
 class LogView extends StatelessWidget {
   static const String title = "Log";
@@ -11,9 +11,9 @@ class LogView extends StatelessWidget {
 
   const LogView({Key? key, required this.logController}) : super(key: key);
 
-  final AdministrationLogController logController;
+  final LogController logController;
 
-  List<AdministrationLogEntry> get items => logController.log;
+  List<LogEntry> get items => logController.log;
 
   @override
   Widget build(BuildContext context) {

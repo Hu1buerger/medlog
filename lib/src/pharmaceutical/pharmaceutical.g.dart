@@ -8,11 +8,14 @@ part of 'pharmaceutical.dart';
 
 Pharmaceutical _$PharmaceuticalFromJson(Map<String, dynamic> json) =>
     Pharmaceutical(
-      _$enumDecode(_$DocumentStateEnumMap, json['documentState']),
-      json['tradename'] as String,
-      json['dosage'] as String,
-      json['activeIngredient'] as String,
-      pzn: json['pzn'] as String? ?? "UNASSIGNED",
+      tradename: json['tradename'] as String,
+      dosage: json['dosage'] as String,
+      activeSubstance: json['activeSubstance'] as String?,
+      human_known_name: json['human_known_name'] as String?,
+      pzn: json['pzn'] as String?,
+      documentState:
+          _$enumDecodeNullable(_$DocumentStateEnumMap, json['documentState']) ??
+              DocumentState.user_created,
       id: json['id'] as int? ?? -1,
     );
 
@@ -20,10 +23,11 @@ Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
     <String, dynamic>{
       'id': instance.id,
       'documentState': _$DocumentStateEnumMap[instance.documentState],
-      'pzn': instance.pzn,
+      'human_known_name': instance.human_known_name,
       'tradename': instance.tradename,
-      'activeIngredient': instance.activeIngredient,
       'dosage': instance.dosage,
+      'activeSubstance': instance.activeSubstance,
+      'pzn': instance.pzn,
     };
 
 K _$enumDecode<K, V>(
@@ -50,6 +54,17 @@ K _$enumDecode<K, V>(
       return MapEntry(unknownValue, enumValues.values.first);
     },
   ).key;
+}
+
+K? _$enumDecodeNullable<K, V>(
+  Map<K, V> enumValues,
+  dynamic source, {
+  K? unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<K, V>(enumValues, source, unknownValue: unknownValue);
 }
 
 const _$DocumentStateEnumMap = {

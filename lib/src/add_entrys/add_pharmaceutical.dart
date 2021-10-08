@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/view_administration/log_view.dart';
 
 class AddPharmaceutical extends StatefulWidget {
   static const String route_name = "Add_Pharmaceutical";
@@ -23,7 +23,17 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
 
   void onSubmit(BuildContext context){
     if(_formKey.currentState!.validate() == false) return;
-    widget.pharmController.createPharmaceutical(tradenameCrtl.text, dosageCrtl.text, activeSubstCrtl.text);
+
+    var humanKnownName = tradenameCrtl.text;
+    var dosage = dosageCrtl.text;
+    var tradeName = humanKnownName.split(dosage).first;
+    widget.pharmController.createPharmaceutical(
+        Pharmaceutical(
+          human_known_name: humanKnownName,
+          tradename: tradeName,
+          activeSubstance: activeSubstCrtl.text,
+          dosage: dosage,
+        ));
 
     Navigator.pop(context);
   }

@@ -14,11 +14,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
   intl: ^0.17.0
 
-  shared_preferences: ^2.0.8
+  logging: ^1.0.2
   json_serializable: ^5.0.2
   json_annotation: ^4.1.0
+  shared_preferences: ^2.0.8
 
 dev_dependencies:
   flutter_test:
