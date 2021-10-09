@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/administration_log/log_controller.dart';
-import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/model/log_entry/log_entry.dart';
 
 class DetailedLogEntryWidget extends StatelessWidget {
   static const String routeName = "/detailedLogEntry";

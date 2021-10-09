@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/model/log_entry/log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/view_log/detailed_log_entry_widget.dart';

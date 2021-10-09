@@ -12,11 +12,10 @@ Pharmaceutical _$PharmaceuticalFromJson(Map<String, dynamic> json) =>
       dosage: json['dosage'] as String,
       activeSubstance: json['activeSubstance'] as String?,
       human_known_name: json['human_known_name'] as String?,
-      pzn: json['pzn'] as String?,
       documentState:
           _$enumDecodeNullable(_$DocumentStateEnumMap, json['documentState']) ??
               DocumentState.user_created,
-      id: json['id'] as int? ?? -1,
+      id: json['id'] as String? ?? "",
     );
 
 Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
@@ -27,7 +26,6 @@ Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
       'tradename': instance.tradename,
       'dosage': instance.dosage,
       'activeSubstance': instance.activeSubstance,
-      'pzn': instance.pzn,
     };
 
 K _$enumDecode<K, V>(

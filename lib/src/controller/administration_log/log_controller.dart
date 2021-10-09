@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/administration_log/log_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/model/log_entry/log_entry.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 /// Handles the keeping of records
@@ -25,8 +25,8 @@ class LogController with ChangeNotifier {
     var logs = await logService.load();
     if(logs.isNotEmpty){
       for(var e in logs){
-        var trackedPharmaceutical = pharmaController.getTrackedInstance(e.pharamaceutical);
-        e.pharamaceutical = trackedPharmaceutical;
+        var trackedPharmaceutical = pharmaController.getTrackedInstance(e.pharmaceutical);
+        e.pharmaceutical = trackedPharmaceutical;
       }
       _log = logs;
       _sortLog();

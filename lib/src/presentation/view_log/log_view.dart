@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/administration_log/log_controller.dart';
-import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/model/log_entry/log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/view_log/log_entry_widget.dart';
 

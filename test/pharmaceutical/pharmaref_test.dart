@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
+import 'pharmaceutical_controller_test.dart' show testEquals;
+
+/// test the updating of a ref (matches the usecase of updating a pharmaceutical i.e. changing the name)
 void main() {
   Pharmaceutical a = Pharmaceutical(
       tradename: "TRADENAME_A",
@@ -25,12 +28,4 @@ void main() {
     expect(b, equals(ref.ref));
     expect(a, isNot(equals(ref.ref)));
   });
-}
-
-void testEquals(Pharmaceutical a, Pharmaceutical b) {
-  expect(a.id, b.id);
-  expect(a.tradename, b.tradename);
-  expect(a.dosage, b.dosage);
-  expect(a.activeSubstance, b.activeSubstance);
-  expect(a.pzn, b.pzn);
 }

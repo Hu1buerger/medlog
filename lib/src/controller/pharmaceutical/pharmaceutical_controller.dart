@@ -1,18 +1,24 @@
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid_util.dart';
 
 class PharmaceuticalController {
+  /// uid generator using crypto random number generator;
+  static final Uuid uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG()});
   final Logger _logger = Logger("PharmaceuticalController");
   final PharmaService _pharmaservice;
 
-  List<PharmaceuticalRef> _pharmStore = [];
+  final List<PharmaceuticalRef> _pharmStore = [];
 
   List<Pharmaceutical> get pharmaceuticals => _pharmStore;
 
   List<String> get tradenames {
     return pharmaceuticals.map((e) => e.tradename).toSet().toList();
   }
+
+  List<String> get human_known_names => pharmaceuticals.map((e) => e.human_known_name).toList();
 
   PharmaceuticalController(this._pharmaservice);
 
@@ -35,16 +41,15 @@ class PharmaceuticalController {
   }
 
   Pharmaceutical getTrackedInstance(Pharmaceutical p) {
-    assert(p.id != -1);
+    assert(p.id_is_set == false);
 
     List<Pharmaceutical> matches;
     // non user_created instances can assure that the id is unique
     if (p.documentState != DocumentState.user_created) {
       // get match by id
-      matches = pharmaceuticals
-          .where((element) => element.documentState != DocumentState.user_created)
-          .where((element) => element.id == p.id)
-          .toList();
+      matches = pharmaceuticals.where((element) => element.id == p.id).toList();
+
+      assert(matches.length < 2);
     } else {
       matches = pharmaceuticals
           .where((element) =>
@@ -72,9 +77,12 @@ class PharmaceuticalController {
     _insert(pharm);
   }
 
+  ///
+  /// inserting takes an amortized constant time
+  /// if checking for duplicates is necessary the worst case runtime should be O(N) where N is the length of known pharmaceuticals
   void _insert(Pharmaceutical p) {
-    if (p.id == -1) {
-      p = PharmaceuticalRef(p.cloneAndUpdate(id: _pharmaservice.getNextFreeID()));
+    if (p.id_is_set == false) {
+      p = PharmaceuticalRef(p.cloneAndUpdate(id: _createPharmaID()));
     } else {
       if (pharmaceuticals.any((element) => element.id == p.id)) throw StateError("Id is already taken");
     }
@@ -87,19 +95,24 @@ class PharmaceuticalController {
     p.registered = true;
   }
 
+  // might use optional instead of nullable type
+  Pharmaceutical? pharmaceuticalByID(String id){
+   assert(_isValidPharmaID(id));
+   var results = pharmaceuticals.where((element) => element.id == id).toList();
+   assert(results.length < 2);
+
+   return results.isEmpty ? null : results.single;
+  }
+
   Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, String dose) {
     var p = pharmaceuticals
-        .where((element) => element.tradename.startsWith(tradename))
+        .where((element) => element.human_known_name.startsWith(tradename))
         .where((element) => element.dosage == dose)
         .toList();
 
     assert(p.length < 2);
 
     return p.isNotEmpty ? p.first : null;
-  }
-
-  List<Pharmaceutical> pharmaceuticalByTradeName(String tradename) {
-    return pharmaceuticals.where((element) => element.tradename == tradename).toList();
   }
 
   List<Pharmaceutical> filter(String query) {
@@ -109,5 +122,14 @@ class PharmaceuticalController {
     ];
 
     return pharmaceuticals.where((element) => filters.map((e) => e(element, query)).contains(true)).toList();
+  }
+
+  bool _isValidPharmaID(String id) {
+    // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
+    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
+  }
+
+  String _createPharmaID() {
+    return uuid.v4();
   }
 }

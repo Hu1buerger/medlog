@@ -17,10 +17,10 @@ dependencies:
 
   intl: ^0.17.0
 
-  logging: ^1.0.2
-  json_serializable: ^5.0.2
   json_annotation: ^4.1.0
+  logging: ^1.0.2
   shared_preferences: ^2.0.8
+  uuid: ^3.0.5
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +28,7 @@ dev_dependencies:
 
   flutter_lints: ^1.0.4
   build_runner: ^2.1.4
+  json_serializable: ^5.0.2
 
 flutter:
   uses-material-design: true

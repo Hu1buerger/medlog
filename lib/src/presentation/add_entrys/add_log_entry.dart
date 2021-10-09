@@ -32,13 +32,15 @@ class _AddLogEntryState extends State<AddLogEntry> {
   static const String DIALOG_ADD_PHARM_ABORT = "No";
 
   PharmaceuticalController get pharmaController => widget.pharmaController;
+
   LogController get logController => widget.logController;
 
   TextEditingController searchQueryController = TextEditingController();
+  TextEditingController adminDateController = TextEditingController();
+
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
 
   _Modus modus = _Modus.searching;
-
   Pharmaceutical? selectedPharmaceutical;
   DateTime adminTime = DateTime.now();
 
@@ -46,18 +48,12 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     currentOptions = widget.pharmaController.pharmaceuticals;
-  }
-
-  @override
-  setState(VoidCallback fn) {
-    super.setState(fn);
+    adminDateController.text = adminTime.toString();
   }
 
   void onReset(BuildContext context) {
-    //Navigator.pop(context);
     modus = _Modus.searching;
     searchQueryController.text = "";
     updateQuery("", context);
@@ -80,7 +76,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     if (currentOptions.isEmpty) {
       modus = _Modus.failed;
       onSearchEmpty(context);
-    }else {
+    } else {
       setState(() {});
     }
   }
@@ -89,8 +85,14 @@ class _AddLogEntryState extends State<AddLogEntry> {
     print("Selecting ${p.tradename} ${p.dosage}");
 
     selectedPharmaceutical = p;
-    modus = _Modus.selected;
-    setState((){});
+    modus = _Modus.medication_selected;
+    setState(() {});
+  }
+
+  void unselectPharmaceutical() {
+    modus = _Modus.searching;
+    selectedPharmaceutical = null;
+    setState(() {});
   }
 
   onSearchEmpty(BuildContext context) async {
@@ -139,7 +141,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: TextField(
             controller: searchQueryController,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(), hintText: 'Enter a search term', prefixIcon: Icon(Icons.search)),
+                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
             autocorrect: false,
             onChanged: (value) => updateQuery(value, context),
             onEditingComplete: () => onEditingComplete(context),
@@ -164,29 +166,34 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 
   Widget buildSelectedWidget(BuildContext context) {
-    assert(modus == _Modus.selected);
+    assert(modus == _Modus.medication_selected);
     assert(selectedPharmaceutical != null);
 
-    //TODO: add dismissable
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Card(
-              child: ListTile(
-                title: Text(selectedPharmaceutical!.tradename),
-                subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
-              )
-            )),
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [Text("later"), Text("now")],
-            ))
-      ],
-    );
+    //TODO: add dismissable to swipe on the Card to unselect
+    // the list of items to display
+    var gollum = <Widget>[
+      Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: Card(
+            child: ListTile(
+              title: Text(selectedPharmaceutical!.tradename),
+              subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
+              onLongPress: unselectPharmaceutical,
+            ),
+          )),
+      Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: TextField(
+            controller: adminDateController,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)
+            ),
+            enabled: false,
+            onTap: () => print("tapped on time"),
+          ))
+    ];
+
+    return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
   }
 
   @override
@@ -197,7 +204,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
       case _Modus.searching:
         body = buildSearchWindow(context);
         break;
-      case _Modus.selected:
+      case _Modus.medication_selected:
         body = buildSelectedWidget(context);
         break;
       case _Modus.failed:
@@ -224,4 +231,13 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 }
 
-enum _Modus { searching, selected, failed }
+enum _Modus {
+  /// searching for a medication
+  searching,
+
+  /// selected the medication to log
+  medication_selected,
+
+  /// search for a medication resulted in no found medication
+  failed
+}
