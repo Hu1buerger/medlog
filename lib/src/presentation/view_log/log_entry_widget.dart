@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/administration_log/log_entry.dart';
-import 'package:medlog/src/view_administration/detailed_log_entry_widget.dart';
+import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/presentation/view_log/detailed_log_entry_widget.dart';
 
 class LogEntryWidget extends StatelessWidget {
   final LogEntry item;

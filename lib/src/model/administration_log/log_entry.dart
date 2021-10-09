@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 part 'log_entry.g.dart';
 

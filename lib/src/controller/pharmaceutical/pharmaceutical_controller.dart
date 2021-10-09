@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
-import 'package:medlog/src/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class PharmaceuticalController {
   final Logger _logger = Logger("PharmaceuticalController");

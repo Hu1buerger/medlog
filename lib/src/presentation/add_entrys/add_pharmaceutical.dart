@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class AddPharmaceutical extends StatefulWidget {
   static const String route_name = "Add_Pharmaceutical";

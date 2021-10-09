@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:medlog/src/administration_log/log_service.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/controller/administration_log/log_service.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class PharmaService extends StorageService<Pharmaceutical> {
   static String storageKey = "pharmaceuticals";

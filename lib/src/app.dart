@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:medlog/src/add_entrys/add_log_entry.dart';
-import 'package:medlog/src/add_entrys/add_pharmaceutical.dart';
-import 'package:medlog/src/administration_log/log_controller.dart';
-import 'package:medlog/src/administration_log/log_entry.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/view_administration/detailed_log_entry_widget.dart';
-import 'package:medlog/src/view_administration/log_view.dart';
+import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
+import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/presentation/view_log/detailed_log_entry_widget.dart';
+import 'package:medlog/src/presentation/view_log/log_view.dart';
+
+import 'controller/administration_log/log_controller.dart';
+import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatefulWidget {

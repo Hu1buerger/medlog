@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/administration_log/log_controller.dart';
-import 'package:medlog/src/administration_log/log_service.dart';
-import 'package:medlog/src/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/administration_log/log_controller.dart';
+import 'package:medlog/src/controller/administration_log/log_service.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 
 import 'package:medlog/src/app.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 PharmaceuticalController pc = PharmaceuticalController(PharmaService());
 

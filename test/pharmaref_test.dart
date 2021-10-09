@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 void main() {
   Pharmaceutical a = Pharmaceutical(

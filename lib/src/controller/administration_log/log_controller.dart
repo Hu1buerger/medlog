@@ -2,11 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/administration_log/log_service.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical.dart';
-import 'package:medlog/src/pharmaceutical/pharmaceutical_controller.dart';
-
-import 'log_entry.dart';
+import 'package:medlog/src/controller/administration_log/log_service.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/administration_log/log_entry.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 /// Handles the keeping of records
 class LogController with ChangeNotifier {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:medlog/src/administration_log/log_entry.dart';
+import 'package:medlog/src/model/administration_log/log_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LogService extends StorageService<LogEntry> {
