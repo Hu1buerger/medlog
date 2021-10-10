@@ -2,11 +2,11 @@ import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
 
 class PharmaceuticalController {
   /// uid generator using crypto random number generator;
-  static final Uuid uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG()});
+  //static final Uuid uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG()});
+  static final Uuid uuid = Uuid();
   final Logger _logger = Logger("PharmaceuticalController");
   final PharmaService _pharmaservice;
 
@@ -18,7 +18,8 @@ class PharmaceuticalController {
     return pharmaceuticals.map((e) => e.tradename).toSet().toList();
   }
 
-  List<String> get human_known_names => pharmaceuticals.map((e) => e.human_known_name).toList();
+  List<String> get human_known_names =>
+      pharmaceuticals.map((e) => e.human_known_name).toList();
 
   PharmaceuticalController(this._pharmaservice);
 
@@ -84,7 +85,8 @@ class PharmaceuticalController {
     if (p.id_is_set == false) {
       p = PharmaceuticalRef(p.cloneAndUpdate(id: _createPharmaID()));
     } else {
-      if (pharmaceuticals.any((element) => element.id == p.id)) throw StateError("Id is already taken");
+      if (pharmaceuticals.any((element) => element.id == p.id))
+        throw StateError("Id is already taken");
     }
 
     if (p is PharmaceuticalRef == false) {
@@ -96,12 +98,12 @@ class PharmaceuticalController {
   }
 
   // might use optional instead of nullable type
-  Pharmaceutical? pharmaceuticalByID(String id){
-   assert(_isValidPharmaID(id));
-   var results = pharmaceuticals.where((element) => element.id == id).toList();
-   assert(results.length < 2);
+  Pharmaceutical? pharmaceuticalByID(String id) {
+    assert(_isValidPharmaID(id));
+    var results = pharmaceuticals.where((element) => element.id == id).toList();
+    assert(results.length < 2);
 
-   return results.isEmpty ? null : results.single;
+    return results.isEmpty ? null : results.single;
   }
 
   Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, String dose) {
@@ -117,16 +119,22 @@ class PharmaceuticalController {
 
   List<Pharmaceutical> filter(String query) {
     var filters = [
-      (Pharmaceutical p, String queryString) => p.human_known_name.contains(queryString),
-      (Pharmaceutical p, String queryString) => p.tradename.contains(queryString),
+      (Pharmaceutical p, String queryString) =>
+          p.human_known_name.contains(queryString),
+      (Pharmaceutical p, String queryString) =>
+          p.tradename.contains(queryString),
     ];
 
-    return pharmaceuticals.where((element) => filters.map((e) => e(element, query)).contains(true)).toList();
+    return pharmaceuticals
+        .where(
+            (element) => filters.map((e) => e(element, query)).contains(true))
+        .toList();
   }
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(
+        fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
   String _createPharmaID() {

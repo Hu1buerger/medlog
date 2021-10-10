@@ -19,7 +19,9 @@ class AddLogEntry extends StatefulWidget {
   final PharmaceuticalController pharmaController;
   final LogController logController;
 
-  const AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
+  const AddLogEntry(
+      {Key? key, required this.pharmaController, required this.logController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddLogEntryState();
@@ -97,7 +99,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   onSearchEmpty(BuildContext context) async {
     String result = await showGotoAddPharmaceuticalDialog(context);
-    if (result == DIALOG_ADD_PHARM_OK) Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
+    if (result == DIALOG_ADD_PHARM_OK)
+      Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
   }
 
   onEditingComplete(BuildContext context) {
@@ -115,7 +118,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
             actions: <Widget>[
               TextButton(
                 child: const Text("No"),
-                onPressed: () => Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
+                onPressed: () =>
+                    Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
               ),
               TextButton(
                 child: const Text("Yes"),
@@ -141,7 +145,9 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: TextField(
             controller: searchQueryController,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
+                border: OutlineInputBorder(),
+                hintText: 'Enter a search term:',
+                prefixIcon: Icon(Icons.search)),
             autocorrect: false,
             onChanged: (value) => updateQuery(value, context),
             onEditingComplete: () => onEditingComplete(context),
@@ -177,23 +183,30 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: Card(
             child: ListTile(
               title: Text(selectedPharmaceutical!.tradename),
-              subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
+              subtitle: Text(
+                  "${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
               onLongPress: unselectPharmaceutical,
             ),
           )),
       Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            controller: adminDateController,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)
+          child: GestureDetector(
+            child: TextField(
+              controller: adminDateController,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.schedule)),
+              enabled:
+                  false, // disable the textinput, but also disables the onText
             ),
-            enabled: false,
-            onTap: () => print("tapped on time"),
+            onTap: () => print("tap on the dateField"),
           ))
     ];
 
-    return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
+    return SingleChildScrollView(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: gollum));
   }
 
   @override

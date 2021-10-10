@@ -1,16 +1,18 @@
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:flutter/widgets.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:json_serializable/json_serializable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/model/log_entry/log_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LogService extends StorageService<LogEntry> {
-  LogService() : super("log", JsonConverter(toJson: (t) => t.toJson(), fromJson: (json) => LogEntry.fromJson(json)),
-      Logger("LogService"));
+  LogService()
+      : super(
+            "log",
+            JsonConverter(
+                toJson: (t) => t.toJson(),
+                fromJson: (json) => LogEntry.fromJson(json)),
+            Logger("LogService"));
 }
 
 class StorageService<T> {
@@ -20,7 +22,8 @@ class StorageService<T> {
   final JsonConverter<T> _jsonConverter;
   final String _storageKey;
 
-  StorageService(String storageKey, JsonConverter<T> jsonConverter, Logger logger)
+  StorageService(
+      String storageKey, JsonConverter<T> jsonConverter, Logger logger)
       : _storageKey = storageKey,
         _jsonConverter = jsonConverter,
         _logger = logger;
@@ -39,16 +42,19 @@ class StorageService<T> {
     var listOfJsons = preferences!.getStringList(_storageKey)!;
     if (listOfJsons.isEmpty) return <T>[];
 
-    var obsMaps = listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>);
+    var obsMaps =
+        listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>);
 
     List<T> obs;
     try {
       obs = obsMaps.map((e) => _jsonConverter.fromJson(e)).toList();
-    // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
+      // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
     } on CastError catch (e) {
-      _logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
+      _logger.severe("Error while converting the jsonStrings to objects", e,
+          StackTrace.current);
       //combine all jsonobjects to a jsonList
-      onIllegalDataFormat("$_storageKey: [${listOfJsons.reduce((value, element) => value + ",")}]");
+      onIllegalDataFormat(
+          "$_storageKey: [${listOfJsons.reduce((value, element) => value + ",")}]");
       obs = <T>[];
     }
 
@@ -58,7 +64,8 @@ class StorageService<T> {
   Future<void> store(List<T> list) async {
     await _init();
 
-    var strings = list.map((e) => _jsonConverter.toJson(e)).map((e) => json.encode(e));
+    var strings =
+        list.map((e) => _jsonConverter.toJson(e)).map((e) => json.encode(e));
 
     var writeFut = preferences!.setStringList(_storageKey, strings.toList());
     // ignore: unnecessary_cast
