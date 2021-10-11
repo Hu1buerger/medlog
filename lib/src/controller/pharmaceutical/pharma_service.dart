@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/administration_log/log_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+
+import '../storage_service.dart';
 
 class PharmaService extends StorageService<Pharmaceutical> {
   static String storageKey = "pharmaceuticals";

@@ -52,7 +52,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   void initState() {
     super.initState();
     currentOptions = widget.pharmaController.pharmaceuticals;
-    adminDateController.text = adminTime.toString();
+    setAdministrationDateTime(adminTime);
   }
 
   void onReset(BuildContext context) {
@@ -73,7 +73,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     return list;
   }
 
-  updateQuery(String query, BuildContext context) {
+  void updateQuery(String query, BuildContext context) {
     currentOptions = sortPharmaceuticals(pharmaController.filter(query));
     if (currentOptions.isEmpty) {
       modus = _Modus.failed;
@@ -83,8 +83,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
     }
   }
 
-  selectPharmaceutical(Pharmaceutical p) {
-    print("Selecting ${p.tradename} ${p.dosage}");
+  void setPharmaceutical(Pharmaceutical p) {
+    print("Selecting ${p.id} ${p.displayName}");
 
     selectedPharmaceutical = p;
     modus = _Modus.medication_selected;
@@ -97,18 +97,26 @@ class _AddLogEntryState extends State<AddLogEntry> {
     setState(() {});
   }
 
-  onSearchEmpty(BuildContext context) async {
-    String result = await showGotoAddPharmaceuticalDialog(context);
-    if (result == DIALOG_ADD_PHARM_OK)
-      Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
+  void setAdministrationDateTime(DateTime dateTime){
+    adminTime = dateTime;
+    adminDateController.text = adminTime.toIso8601String();
+    // no need to setState bcs the TextController will update the neccessary widget
   }
 
-  onEditingComplete(BuildContext context) {
+  void onSearchEmpty(BuildContext context) async {
+    String result = await selectAddPharmaceutical(context);
+    if (result == DIALOG_ADD_PHARM_OK) {
+      Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
+    }
+  }
+
+  void onEditingComplete(BuildContext context) {
     print("Editing complete with ${searchQueryController.text}");
     if (modus == _Modus.failed) onSearchEmpty(context);
   }
 
-  Future<String> showGotoAddPharmaceuticalDialog(BuildContext context) async {
+  /// shows the dialog to select whether or not to add a new pharmaceutical
+  Future<String> selectAddPharmaceutical(BuildContext context) async {
     String? selectedOption = await showDialog<String>(
         context: context,
         builder: (BuildContext context) {
@@ -129,9 +137,36 @@ class _AddLogEntryState extends State<AddLogEntry> {
           );
         });
 
-    if (selectedOption == null) // the user seems to have aborted the dialog?
+    if (selectedOption == null) {
+      // the user seems to have aborted the dialog, as for now default should be abort
       return DIALOG_ADD_PHARM_ABORT;
+    }
+
     return selectedOption;
+  }
+
+  /// shows the dialog to select the administrationDateTime
+  void selectAdministrationDateTime(BuildContext context) async {
+    final kindaTomorrow = DateTime.now().add(const Duration(days: 2));
+    final tomorrow = DateTime(kindaTomorrow.year, kindaTomorrow.month, kindaTomorrow.day);
+    final lastYear = DateTime.now().add(const Duration(days: -365));
+
+    DateTime? selectedDate = await showDatePicker(
+        context: context,
+        initialDate: adminTime,
+        firstDate: lastYear,
+        lastDate: tomorrow);
+
+    if(selectedDate == null) return;
+
+    var selectedTime = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(adminTime));
+
+    if(selectedTime == null) return;
+
+    var dateInMicrosecSinceEpoch = selectedDate.microsecondsSinceEpoch + selectedTime.toMicroseconds();
+    var selectedDateTime = DateTime.fromMicrosecondsSinceEpoch(dateInMicrosecSinceEpoch);
+
+    setAdministrationDateTime(selectedDateTime);
   }
 
   Widget buildSearchWindow(BuildContext context) {
@@ -163,7 +198,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
                 return ListTile(
                   title: Text(currentItem.tradename),
                   subtitle: Text(currentItem.dosage),
-                  onTap: () => selectPharmaceutical(currentItem),
+                  onTap: () => setPharmaceutical(currentItem),
                 );
               }),
         )),
@@ -199,7 +234,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
               enabled:
                   false, // disable the textinput, but also disables the onText
             ),
-            onTap: () => print("tap on the dateField"),
+            onTap: () => selectAdministrationDateTime(context),
           ))
     ];
 
@@ -253,4 +288,13 @@ enum _Modus {
 
   /// search for a medication resulted in no found medication
   failed
+}
+
+extension MicrosecondableTimeOfDay on TimeOfDay{
+  static final minuteToMicrosecods = 6 * pow(10,7);
+
+  /// converts timeOfDay to microseconds since
+  int toMicroseconds(){
+    return ((hour * 60 + minute) * minuteToMicrosecods).toInt();
+  }
 }

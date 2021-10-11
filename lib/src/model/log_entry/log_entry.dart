@@ -3,6 +3,7 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 part 'log_entry.g.dart';
 
+//TODO: use id from pharmaceutical to link
 @JsonSerializable()
 class LogEntry{
   int id;

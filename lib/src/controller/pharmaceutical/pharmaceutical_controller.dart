@@ -42,16 +42,16 @@ class PharmaceuticalController {
   }
 
   Pharmaceutical getTrackedInstance(Pharmaceutical p) {
-    assert(p.id_is_set == false);
 
     List<Pharmaceutical> matches;
     // non user_created instances can assure that the id is unique
     if (p.documentState != DocumentState.user_created) {
       // get match by id
       matches = pharmaceuticals.where((element) => element.id == p.id).toList();
-
       assert(matches.length < 2);
     } else {
+      //TODO: matching for retrieval should be firstly done by id and only later by equality.
+      // THis is a result of allowing the condtion of same uuid (even though quite unlikely)
       matches = pharmaceuticals
           .where((element) =>
               element.human_known_name == p.human_known_name &&
@@ -79,6 +79,7 @@ class PharmaceuticalController {
   }
 
   ///
+  /// TODO: make sure that id s are unique. this includes updating user_created uuids if collision is detected.
   /// inserting takes an amortized constant time
   /// if checking for duplicates is necessary the worst case runtime should be O(N) where N is the length of known pharmaceuticals
   void _insert(Pharmaceutical p) {
