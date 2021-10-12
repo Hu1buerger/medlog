@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/administration_log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
@@ -19,9 +20,7 @@ class AddLogEntry extends StatefulWidget {
   final PharmaceuticalController pharmaController;
   final LogController logController;
 
-  const AddLogEntry(
-      {Key? key, required this.pharmaController, required this.logController})
-      : super(key: key);
+  const AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddLogEntryState();
@@ -29,9 +28,10 @@ class AddLogEntry extends StatefulWidget {
 
 class _AddLogEntryState extends State<AddLogEntry> {
   static const String title = "Add medication to log";
-  static const int max_options = 10;
   static const String DIALOG_ADD_PHARM_OK = "Yes";
   static const String DIALOG_ADD_PHARM_ABORT = "No";
+
+  final Logger logger = Logger("AddLogEntryState");
 
   PharmaceuticalController get pharmaController => widget.pharmaController;
 
@@ -51,7 +51,13 @@ class _AddLogEntryState extends State<AddLogEntry> {
   @override
   void initState() {
     super.initState();
-    currentOptions = widget.pharmaController.pharmaceuticals;
+    currentOptions = pharmaController.pharmaceuticals;
+    logger.fine("init ${currentOptions.length}");
+
+    pharmaController.addListener(() {
+      logger.fine("change in pharmacontroller");
+      setState(() {});
+    });
     setAdministrationDateTime(adminTime);
   }
 
@@ -75,12 +81,13 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   void updateQuery(String query, BuildContext context) {
     currentOptions = sortPharmaceuticals(pharmaController.filter(query));
-    if (currentOptions.isEmpty) {
+    logger.fine("updated current options to ${currentOptions.length}");
+
+    setState(() {});
+    /*if (currentOptions.isEmpty) {
       modus = _Modus.failed;
       onSearchEmpty(context);
-    } else {
-      setState(() {});
-    }
+    } else {}*/
   }
 
   void setPharmaceutical(Pharmaceutical p) {
@@ -97,7 +104,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     setState(() {});
   }
 
-  void setAdministrationDateTime(DateTime dateTime){
+  void setAdministrationDateTime(DateTime dateTime) {
     adminTime = dateTime;
     adminDateController.text = adminTime.toIso8601String();
     // no need to setState bcs the TextController will update the neccessary widget
@@ -111,7 +118,12 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 
   void onEditingComplete(BuildContext context) {
-    print("Editing complete with ${searchQueryController.text}");
+    logger.fine("Editing complete with ${searchQueryController.text}");
+
+    if (currentOptions.isEmpty) {
+      modus = _Modus.failed;
+    }
+
     if (modus == _Modus.failed) onSearchEmpty(context);
   }
 
@@ -126,8 +138,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             actions: <Widget>[
               TextButton(
                 child: const Text("No"),
-                onPressed: () =>
-                    Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
+                onPressed: () => Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
               ),
               TextButton(
                 child: const Text("Yes"),
@@ -151,17 +162,14 @@ class _AddLogEntryState extends State<AddLogEntry> {
     final tomorrow = DateTime(kindaTomorrow.year, kindaTomorrow.month, kindaTomorrow.day);
     final lastYear = DateTime.now().add(const Duration(days: -365));
 
-    DateTime? selectedDate = await showDatePicker(
-        context: context,
-        initialDate: adminTime,
-        firstDate: lastYear,
-        lastDate: tomorrow);
+    DateTime? selectedDate =
+        await showDatePicker(context: context, initialDate: adminTime, firstDate: lastYear, lastDate: tomorrow);
 
-    if(selectedDate == null) return;
+    if (selectedDate == null) return;
 
     var selectedTime = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(adminTime));
 
-    if(selectedTime == null) return;
+    if (selectedTime == null) return;
 
     var dateInMicrosecSinceEpoch = selectedDate.microsecondsSinceEpoch + selectedTime.toMicroseconds();
     var selectedDateTime = DateTime.fromMicrosecondsSinceEpoch(dateInMicrosecSinceEpoch);
@@ -180,9 +188,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: TextField(
             controller: searchQueryController,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter a search term:',
-                prefixIcon: Icon(Icons.search)),
+                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
             autocorrect: false,
             onChanged: (value) => updateQuery(value, context),
             onEditingComplete: () => onEditingComplete(context),
@@ -191,13 +197,19 @@ class _AddLogEntryState extends State<AddLogEntry> {
         Expanded(
             child: Card(
           child: ListView.builder(
-              itemCount: min(max_options, currentOptions.length),
+              itemCount: currentOptions.length,
               itemBuilder: (BuildContext context, int index) {
                 var currentItem = currentOptions[index];
 
                 return ListTile(
-                  title: Text(currentItem.tradename),
-                  subtitle: Text(currentItem.dosage),
+                  title: Text(currentItem.displayName),
+                  subtitle: Row(
+                    children: [
+                      Text(currentItem.activeSubstance ?? ""),
+                      const SizedBox(width: 10),
+                      Text(currentItem.dosage)
+                    ],
+                  ),
                   onTap: () => setPharmaceutical(currentItem),
                 );
               }),
@@ -218,8 +230,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: Card(
             child: ListTile(
               title: Text(selectedPharmaceutical!.tradename),
-              subtitle: Text(
-                  "${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
+              subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
               onLongPress: unselectPharmaceutical,
             ),
           )),
@@ -228,26 +239,19 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: GestureDetector(
             child: TextField(
               controller: adminDateController,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.schedule)),
-              enabled:
-                  false, // disable the textinput, but also disables the onText
+              decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)),
+              enabled: false, // disable the textinput, but also disables the onText
             ),
             onTap: () => selectAdministrationDateTime(context),
           ))
     ];
 
-    return SingleChildScrollView(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: gollum));
+    return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
   }
 
   @override
   Widget build(BuildContext context) {
     Widget body;
-
     switch (modus) {
       case _Modus.searching:
         body = buildSearchWindow(context);
@@ -290,11 +294,11 @@ enum _Modus {
   failed
 }
 
-extension MicrosecondableTimeOfDay on TimeOfDay{
-  static final minuteToMicrosecods = 6 * pow(10,7);
+extension MicrosecondableTimeOfDay on TimeOfDay {
+  static final minuteToMicrosecods = 6 * pow(10, 7);
 
   /// converts timeOfDay to microseconds since
-  int toMicroseconds(){
+  int toMicroseconds() {
     return ((hour * 60 + minute) * minuteToMicrosecods).toInt();
   }
 }

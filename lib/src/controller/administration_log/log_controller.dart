@@ -22,12 +22,15 @@ class LogController with ChangeNotifier {
   LogController(this.pharmaController, this.logService);
 
   Future<void> loadLog() async {
-    var logs = await logService.load();
+    logService.loadFromDisk();
+    var logs = await logService.getAll();
+
     if(logs.isNotEmpty){
       for(var e in logs){
         var trackedPharmaceutical = pharmaController.getTrackedInstance(e.pharmaceutical);
         e.pharmaceutical = trackedPharmaceutical;
       }
+
       _log = logs;
       _sortLog();
       _lastID = _log.map((e) => e.id).reduce(max);

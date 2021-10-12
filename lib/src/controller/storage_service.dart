@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -7,16 +8,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 class StorageService<T> {
   static SharedPreferences? preferences;
 
-  late final Logger _logger;
+  late final Logger logger;
   final JsonConverter<T> _jsonConverter;
   final String _storageKey;
 
-  Logger get logger => _logger;
+  List<T>? backLog;
+  late final StreamController<T> _streamController;
 
-  StorageService(String storageKey, JsonConverter<T> jsonConverter, Logger logger)
+  Stream<T> get events => _streamController.stream;
+
+  StorageService(String storageKey, JsonConverter<T> jsonConverter, this.logger)
       : _storageKey = storageKey,
-        _jsonConverter = jsonConverter,
-        _logger = logger;
+        _jsonConverter = jsonConverter {
+    _streamController = initStreamController();
+  }
+
+  /// sets the streamController up that is used for the publish action;
+  StreamController<T> initStreamController() {
+    return StreamController(onListen: () {
+      _publishBackLog();
+    });
+  }
 
   static Future _init() async {
     if (preferences == null) {
@@ -25,37 +37,36 @@ class StorageService<T> {
     }
   }
 
-  List<String> loadRawData() {
-    if (preferences!.containsKey(_storageKey) == false) return [];
-    return preferences!.getStringList(_storageKey)!;
-  }
-
-  List<Map<String, dynamic>> loadJsonObjects() {
-    final listOfJsons = loadRawData();
-
-    return listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>).toList();
-  }
-
-  Future<List<T>> load() async {
+  /// loads the data from the local store.
+  ///
+  Future<void> loadFromDisk() async {
     await _init();
 
     var obsMaps = loadJsonObjects();
-    if (obsMaps.isEmpty) return <T>[];
+    if (obsMaps.isEmpty) return;
 
-    List<T> obs;
+    // convert all objects;
+    List<T> obs = [];
+
     try {
-      obs = obsMaps.map((e) => _jsonConverter.fromJson(e)).toList();
+      obs = obsMaps.map(fromJson).toList();
+
+      for (var e in obs) {
+        publish(e);
+      }
       // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
     } on CastError catch (e) {
-      _logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
+      logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
       //combine all jsonobjects to a jsonList
-      onIllegalDataFormat("$_storageKey: [${obsMaps.map((e) => jsonEncode(e)).reduce((value, element) => value = value + "," + element)}]");
+      onIllegalDataFormat(
+          "$_storageKey: [${obsMaps.map((e) => jsonEncode(e)).reduce((value, element) => value = value + "," + element)}]");
       obs = <T>[];
     }
 
-    return obs;
+    return;
   }
 
+  /// stores the data to the local file
   Future<void> store(List<T> list) async {
     await _init();
 
@@ -65,13 +76,85 @@ class StorageService<T> {
     return writeFut as Future<void>;
   }
 
-  Iterable<Map<String,dynamic>> encodeToMaps(List<T> list){
+  /// cleares the local datarepo
+  Future<void> clear() async {
+    await _init();
+    preferences!.remove(_storageKey);
+  }
+
+  /// turns all elements that were loaded to a list
+  ///
+  /// returns on done.
+  /// EITHER getAll can be called XOR events.listen
+  Future<List<T>> getAll(){
+    assert(_streamController.hasListener == false);
+    return events.toList();
+  }
+
+  void publish(T t) {
+    if (_streamController.isClosed) {
+      logger.severe("streamController is closed but still trying to publish", null, StackTrace.current);
+    }
+
+    if (backLog != null) {
+      if (_streamController.hasListener == false || _streamController.isPaused) {
+        logger.fine("publishing $t to the backlog");
+        backLog?.add(t);
+
+        return;
+      }
+    }
+
+    _streamController.add(t);
+  }
+
+  void _publishBackLog(){
+    assert(backLog == null || (backLog != null && (backLog!.isEmpty || _streamController.isClosed == false)));
+
+    if (backLog != null) {
+      var bLog = backLog!;
+      //disable the backlog for now
+      backLog = null;
+      for(var e in bLog){
+        publish(e);
+      }
+
+      //reenable the backlog
+      backLog = [];
+    }
+  }
+
+  /// signals that no new events will be emitted
+  void signalDone(){
+    if(_streamController.isClosed){
+      logger.finest("signaling done to closed controller");
+      if(backLog?.isNotEmpty ?? false){
+        logger.severe("elements were backlogged but the eventStream was already closed");
+      }
+    }
+
+    _publishBackLog();
+    _streamController.close();
+  }
+
+  /// gathers the objects stored in local file as Maps
+  ///
+  /// only conversion of encoding to Map<String, dynamic> aka jsonish
+  List<Map<String, dynamic>> loadJsonObjects() {
+    if (preferences!.containsKey(_storageKey) == false) return [];
+
+    final listOfJsons = preferences!.getStringList(_storageKey)!;
+
+    return listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>).toList();
+  }
+
+  Iterable<Map<String, dynamic>> encodeToMaps(List<T> list) {
     return list.map((e) => _jsonConverter.toJson(e));
   }
 
-  Iterable<String> stringsEncode(List<T> list){
-    var strings = encodeToMaps(list)
-        .map((e) => json.encode(e));
+  /// encodes the hole list to Strings using the jsonConverter object
+  Iterable<String> stringsEncode(List<T> list) {
+    var strings = encodeToMaps(list).map((e) => json.encode(e));
 
     return strings;
   }
@@ -84,9 +167,12 @@ class StorageService<T> {
     await clear();
   }
 
-  Future<void> clear() async {
-    await _init();
-    preferences!.remove(_storageKey);
+  T fromJson(Map<String, dynamic> json) {
+    return _jsonConverter.fromJson(json);
+  }
+
+  Map<String, dynamic> toJson(T t) {
+    return _jsonConverter.toJson(t);
   }
 }
 

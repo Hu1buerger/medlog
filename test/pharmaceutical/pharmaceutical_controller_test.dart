@@ -4,8 +4,6 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 import 'mock_pharma_service.dart';
 
-PharmaceuticalController pc = PharmaceuticalController(MockPharmaService([]));
-
 /// The pharmaceutical controller is a unit that handles the keeping of records for pharmaceuticals
 ///
 /// Definitions:
@@ -28,35 +26,105 @@ PharmaceuticalController pc = PharmaceuticalController(MockPharmaService([]));
 /// TODO: test only one ref, filtering, file operations,
 void main() async {
   //setup empty
-  pc = PharmaceuticalController(MockPharmaService([]));
-  await pc.load();
 
-  test("test create pharmaceutical", _testCreatePharmaceutical);
-  test("test pharms type post creation", _testPCcontainsOnlyRefs);
+  group("localActions", () {
+    var service = MockPharmaService([]);
+    var controller = PharmaceuticalController(service);
+
+    test("test create pharmaceutical", () => _testCreatePharmaceutical(controller));
+    test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
+  });
+
+  group("test collisionHandling", () {
+    test("insert twice the same", () {
+      var service = MockPharmaService([]);
+      var controller = PharmaceuticalController(service);
+
+      var p = Pharmaceutical(tradename: "idiotin", dosage: "20mg", activeSubstance: "masters");
+
+      controller.createPharmaceutical(p);
+      p = controller.getTrackedInstance(p);
+      expect(() => controller.addPharmaceutical(p), isNot(throwsA(anything)));
+    });
+
+    test("insert different", () {
+      var service = MockPharmaService([]);
+      var controller = PharmaceuticalController(service);
+
+      var p1 = Pharmaceutical(tradename: "a", dosage: "1", activeSubstance: "a");
+      var p2 = Pharmaceutical(tradename: "b", dosage: "1", activeSubstance: "a");
+
+      controller.createPharmaceutical(p1);
+      controller.createPharmaceutical(p2);
+
+      expect(controller.pharmaceuticals.length, 2);
+    });
+
+    test("insert a authored version", () {
+      var service = MockPharmaService([]);
+      var controller = PharmaceuticalController(service);
+
+      var p = Pharmaceutical(tradename: "idiotin", dosage: "20mg", activeSubstance: "masters");
+
+      controller.createPharmaceutical(p);
+      p = controller.getTrackedInstance(p);
+
+      var p2 = Pharmaceutical(
+          id: p.id,
+          tradename: p.tradename,
+          dosage: p.dosage,
+          activeSubstance: "otherSubstance",
+          documentState: DocumentState.in_review);
+      controller.addPharmaceutical(p2);
+
+      var result = controller.pharmaceuticalByID(p2.id)!;
+      testEquals(result, p2);
+    });
+
+    test("reject downgrade", () {
+      var service = MockPharmaService([]);
+      var controller = PharmaceuticalController(service);
+
+      controller.addPharmaceutical(Pharmaceutical(
+          id: PharmaceuticalController.uuid.v4(),
+          tradename: "name",
+          dosage: "1",
+          activeSubstance: "goFuckyourSelf",
+          documentState: DocumentState.in_review));
+      var p = controller.pharmaceuticals.first;
+
+      var p2 = PharmaceuticalRef.toRef(
+          (p as PharmaceuticalRef).ref.cloneAndUpdate(documentState: DocumentState.user_created));
+      controller.addPharmaceutical(p2);
+
+      expect(controller.pharmaceuticals.length, 1);
+      expect(controller.pharmaceuticals.first.documentState, p.documentState);
+    });
+  });
 }
 
-void testEquals(Pharmaceutical a, Pharmaceutical b){
-  expect(a.id, b.id);
-  expect(a.human_known_name, b.human_known_name);
-  expect(a.displayName, b.displayName);
-  expect(a.activeSubstance, b.activeSubstance);
-  expect(a.dosage, b.dosage);
-  expect(a.tradename, b.tradename);
-  expect(a.documentState, b.documentState);
+void testEquals(Pharmaceutical actual, Pharmaceutical expected) {
+  expect(actual.id, expected.id);
+  expect(actual.human_known_name, expected.human_known_name);
+  expect(actual.displayName, expected.displayName);
+  expect(actual.activeSubstance, expected.activeSubstance);
+  expect(actual.dosage, expected.dosage);
+  expect(actual.tradename, expected.tradename);
+  expect(actual.documentState, expected.documentState);
 }
 
 /// tests that all stored entrys are Refs to ensure updatablility
-void _testPCcontainsOnlyRefs() {
-  for (var p in pc.pharmaceuticals) {
+void _testPCcontainsOnlyRefs(PharmaceuticalController c) {
+  for (var p in c.pharmaceuticals) {
     expect(PharmaceuticalRef, p.runtimeType);
   }
 }
 
-void _testCreatePharmaceutical(){
+void _testCreatePharmaceutical(PharmaceuticalController c) {
   var pharma = Pharmaceutical(
       human_known_name: "RETARDIN AL 25mg", tradename: "RETARDIN", dosage: "25mg", activeSubstance: "Homopathie");
-  pc.createPharmaceutical(pharma);
-  var retrieved = pc.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", "25mg");
+  c.createPharmaceutical(pharma);
+  var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", "25mg");
 
   expect(retrieved != null, isTrue);
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour

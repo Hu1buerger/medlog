@@ -20,6 +20,7 @@ class Pharmaceutical {
   final String? activeSubstance;
 
   String get displayName => human_known_name;
+
   bool get id_is_set => id.isNotEmpty;
 
   /// dont call me directly
@@ -29,7 +30,7 @@ class Pharmaceutical {
       required this.activeSubstance,
       String? human_known_name,
       this.documentState = DocumentState.user_created,
-        // dont use emptyID here bcs JsonSerializable cannot handle it rn see https://github.com/google/json_serializable.dart/issues/994
+      // dont use emptyID here bcs JsonSerializable cannot handle it rn see https://github.com/google/json_serializable.dart/issues/994
       this.id = ""})
       : human_known_name = human_known_name ?? tradename;
 
@@ -67,6 +68,13 @@ enum DocumentState {
   admin_reviewed,
 }
 
+extension ComparableDocumentState on DocumentState {
+  //indicates that other has more administrative power to override the this
+  bool isHeavier(DocumentState other) {
+    return index > other.index;
+  }
+}
+
 class PharmaceuticalRef implements Pharmaceutical {
   bool registered = false;
   Pharmaceutical ref;
@@ -101,7 +109,9 @@ class PharmaceuticalRef implements Pharmaceutical {
   @override
   Map<String, dynamic> toJson() => ref.toJson();
 
-  PharmaceuticalRef(this.ref);
+  PharmaceuticalRef(this.ref) {
+    if (ref is PharmaceuticalRef) throw ArgumentError();
+  }
 
   @override
   Pharmaceutical cloneAndUpdate(
@@ -112,6 +122,23 @@ class PharmaceuticalRef implements Pharmaceutical {
       String? pzn,
       DocumentState? documentState,
       String? id}) {
-    throw UnimplementedError();
+    ref = ref.cloneAndUpdate(
+        humanName: humanName,
+        tradename: tradename,
+        dosage: dosage,
+        activeSubstance: activeSubstance,
+        pzn: pzn,
+        documentState: documentState,
+        id: id);
+
+    return this;
+  }
+
+  static PharmaceuticalRef toRef(Pharmaceutical p) {
+    if (p is Pharmaceutical) {
+      assert(p is PharmaceuticalRef == false);
+      return PharmaceuticalRef(p);
+    }
+    return p as PharmaceuticalRef;
   }
 }

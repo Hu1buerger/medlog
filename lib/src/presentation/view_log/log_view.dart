@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/administration_log/log_controller.dart';
 import 'package:medlog/src/model/log_entry/log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
+import 'package:medlog/src/presentation/settings/settings.dart';
 import 'package:medlog/src/presentation/view_log/log_entry_widget.dart';
 
 class LogView extends StatelessWidget {
@@ -24,23 +25,23 @@ class LogView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Navigate to the settings page. If the user leaves and returns
-              // to the app after it has been killed while running in the
-              // background, the navigation stack is restored.
-              Navigator.restorablePushNamed(context, AddLogEntry.routeName);
+              Navigator.pushNamed(context, Settings.route_name);
             },
           ),
         ],
       ),
-
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.create),
+        backgroundColor: Colors.green,
+        onPressed: (){
+          Navigator.pushNamed(context, AddLogEntry.routeName);
+        },
+      ),
       body: AnimatedBuilder(
         animation: logController,
         builder: (BuildContext context, Widget? child) {
           //lazy build the list items
           return ListView.builder(
-            // Providing a restorationId allows the ListView to restore the
-            // scroll position when a user leaves and returns to the app after it
-            // has been killed while running in the background.
             restorationId: 'administrationLogListView',
             itemCount: items.length,
             itemBuilder: (BuildContext context, int index) {

@@ -11,4 +11,9 @@ class LogService extends StorageService<LogEntry> {
                 toJson: (t) => t.toJson(),
                 fromJson: (json) => LogEntry.fromJson(json)),
             Logger("LogService"));
+
+  Future<void> loadFromDisk() async {
+    await super.loadFromDisk();
+    signalDone();
+  }
 }
