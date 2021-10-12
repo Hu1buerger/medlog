@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
@@ -15,25 +16,30 @@ class AddPharmaceutical extends StatefulWidget {
 class _AddPharmaceuticalState extends State<AddPharmaceutical> {
   static const String title = "Add pharmaceutical";
 
+  final Logger logger = Logger("AddPharmaceuticalState");
+
   final _formKey = GlobalKey<FormState>();
 
-  var tradenameCrtl = TextEditingController();
+  var medicationNameCrtl = TextEditingController();
   var dosageCrtl = TextEditingController();
   var activeSubstCrtl = TextEditingController();
 
   void onSubmit(BuildContext context){
     if(_formKey.currentState!.validate() == false) return;
 
-    var humanKnownName = tradenameCrtl.text;
+    var humanKnownName = medicationNameCrtl.text;
     var dosage = dosageCrtl.text;
     var tradeName = humanKnownName.split(dosage).first;
-    widget.pharmController.createPharmaceutical(
-        Pharmaceutical(
-          human_known_name: humanKnownName,
-          tradename: tradeName,
-          activeSubstance: activeSubstCrtl.text,
-          dosage: dosage,
-        ));
+
+    var p = Pharmaceutical(
+      human_known_name: humanKnownName,
+      tradename: tradeName,
+      activeSubstance: activeSubstCrtl.text,
+      dosage: dosage,
+    );
+
+    logger.info("submitting $p");
+    widget.pharmController.createPharmaceutical(p);
 
     Navigator.pop(context);
   }
@@ -80,10 +86,19 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                     child: Column(
                       children: [
                         TextFormField(
-                          controller: tradenameCrtl,
+                          controller: medicationNameCrtl,
                           decoration: const InputDecoration(
                             hintText: "Medicationname:",
                             border: OutlineInputBorder(),
+                          ),
+                          validator: medNameValidator,
+                        ),
+                        const SizedBox(height: 10,),
+                        TextFormField(
+                          controller: activeSubstCrtl,
+                          decoration: const InputDecoration(
+                              hintText: "Activesubstance:",
+                              border: OutlineInputBorder()
                           ),
                           validator: medNameValidator,
                         ),
@@ -95,15 +110,6 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                               border: OutlineInputBorder()
                           ),
                           validator: dosageValidator,
-                        ),
-                        const SizedBox(height: 10,),
-                        TextFormField(
-                          controller: activeSubstCrtl,
-                          decoration: const InputDecoration(
-                              hintText: "Activesubstance:",
-                              border: OutlineInputBorder()
-                          ),
-                          validator: medNameValidator,
                         ),
                         const SizedBox(height: 10,),
                         Row(

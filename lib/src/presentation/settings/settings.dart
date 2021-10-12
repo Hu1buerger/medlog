@@ -38,6 +38,13 @@ class _SettingsState extends State<Settings> {
             },
             child: Text("writeToDisk"),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              pharmController.pharmaceuticals.clear();
+              pharmController.notifyListeners();
+            },
+            child: Text("cleanAll"),
+          ),
         ],
       )
     );

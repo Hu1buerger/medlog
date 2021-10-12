@@ -54,17 +54,25 @@ class _AddLogEntryState extends State<AddLogEntry> {
     currentOptions = pharmaController.pharmaceuticals;
     logger.fine("init ${currentOptions.length}");
 
-    pharmaController.addListener(() {
-      logger.fine("change in pharmacontroller");
-      setState(() {});
-    });
+    pharmaController.addListener(onPharmaControllerChange);
     setAdministrationDateTime(adminTime);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    pharmaController.removeListener(onPharmaControllerChange);
+  }
+
+  void onPharmaControllerChange(){
+    logger.fine("change in pharmaController");
+    updateQuery(searchQueryController.text);
   }
 
   void onReset(BuildContext context) {
     modus = _Modus.searching;
     searchQueryController.text = "";
-    updateQuery("", context);
+    updateQuery("");
   }
 
   void onDone(BuildContext context) {
@@ -79,7 +87,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     return list;
   }
 
-  void updateQuery(String query, BuildContext context) {
+  void updateQuery(String query) {
     currentOptions = sortPharmaceuticals(pharmaController.filter(query));
     logger.fine("updated current options to ${currentOptions.length}");
 
@@ -190,7 +198,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             decoration: const InputDecoration(
                 border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
             autocorrect: false,
-            onChanged: (value) => updateQuery(value, context),
+            onChanged: (value) => updateQuery(value),
             onEditingComplete: () => onEditingComplete(context),
           ),
         ),

@@ -10,6 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   _initializeLogger();
+  Logger.root.info("starting the app");
 
   final pharmController = PharmaceuticalController(PharmaService());
   await pharmController.load();
@@ -40,6 +41,4 @@ void _initializeLogger() {
     // ignore: avoid_print
     print('${record.level.name.characters.first}/${record.loggerName}: ${record.message}');
   });
-
-  Logger.root.severe("starting to log");
 }
