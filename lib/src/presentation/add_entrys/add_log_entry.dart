@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/administration_log/log_controller.dart';
@@ -51,8 +52,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
   @override
   void initState() {
     super.initState();
-    currentOptions = pharmaController.pharmaceuticals;
-    logger.fine("init ${currentOptions.length}");
+    setOptions(pharmaController.pharmaceuticals);
+    logger.fine("initializing with options ${currentOptions.length}");
 
     pharmaController.addListener(onPharmaControllerChange);
     setAdministrationDateTime(adminTime);
@@ -64,7 +65,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     pharmaController.removeListener(onPharmaControllerChange);
   }
 
-  void onPharmaControllerChange(){
+  void onPharmaControllerChange() {
     logger.fine("change in pharmaController");
     updateQuery(searchQueryController.text);
   }
@@ -88,18 +89,19 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 
   void updateQuery(String query) {
-    currentOptions = sortPharmaceuticals(pharmaController.filter(query));
-    logger.fine("updated current options to ${currentOptions.length}");
+    var options = pharmaController.filter(query);
+    logger.fine("updated current options to ${options.length}");
 
+    setOptions(options);
+  }
+
+  void setOptions(List<Pharmaceutical> options) {
+    currentOptions = sortPharmaceuticals(options);
     setState(() {});
-    /*if (currentOptions.isEmpty) {
-      modus = _Modus.failed;
-      onSearchEmpty(context);
-    } else {}*/
   }
 
   void setPharmaceutical(Pharmaceutical p) {
-    print("Selecting ${p.id} ${p.displayName}");
+    logger.fine("Selecting ${p.id} ${p.displayName}");
 
     selectedPharmaceutical = p;
     modus = _Modus.medication_selected;
@@ -107,6 +109,13 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 
   void unselectPharmaceutical() {
+    if (selectedPharmaceutical == null) {
+      logger.severe(
+          "unselectPharmaceutical called even though no pharmaceutical was set and modus is ${describeEnum(modus)}");
+      return;
+    }
+
+    logger.fine("Deselecting ${selectedPharmaceutical!.id} ${selectedPharmaceutical!.displayName}");
     modus = _Modus.searching;
     selectedPharmaceutical = null;
     setState(() {});

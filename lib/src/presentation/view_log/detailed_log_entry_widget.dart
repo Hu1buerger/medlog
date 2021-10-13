@@ -14,6 +14,9 @@ class DetailedLogEntryWidget extends StatelessWidget {
 
   const DetailedLogEntryWidget({Key? key, required this.entry, required this.logController}) : super(key: key);
 
+  /// builds a widget with title and value
+  ///
+  /// displays title and value as a pair
   Widget buildTitleValue(String title, String value) {
     return TextField(
       controller: TextEditingController(text: "  $value"),

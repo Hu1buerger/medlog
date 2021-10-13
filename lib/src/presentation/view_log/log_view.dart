@@ -33,7 +33,7 @@ class LogView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.create),
         backgroundColor: Colors.green,
-        onPressed: (){
+        onPressed: () {
           Navigator.pushNamed(context, AddLogEntry.routeName);
         },
       ),
@@ -42,12 +42,12 @@ class LogView extends StatelessWidget {
         builder: (BuildContext context, Widget? child) {
           //lazy build the list items
           return ListView.builder(
-            restorationId: 'administrationLogListView',
-            itemCount: items.length,
-            itemBuilder: (BuildContext context, int index) {
-              final item = items[index];
-              return LogEntryWidget(item: item);
-            });
+              restorationId: 'administrationLogListView',
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                final item = items[index];
+                return LogEntryWidget(item: item);
+              });
         },
       ),
     );

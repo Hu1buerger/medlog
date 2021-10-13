@@ -40,6 +40,7 @@ class _SettingsState extends State<Settings> {
           ),
           ElevatedButton(
             onPressed: () async {
+              // quick fix for removing user defined pharmaceuticals
               pharmController.pharmaceuticals.clear();
               pharmController.notifyListeners();
             },
