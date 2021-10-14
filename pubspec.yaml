@@ -20,6 +20,7 @@ dependencies:
   http: ^0.13.4
   json_annotation: ^4.1.0
   logging: ^1.0.2
+  logging_to_logcat: ^0.0.4
   path_provider: ^2.0.5
   shared_preferences: ^2.0.8
   uuid: ^3.0.5

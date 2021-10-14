@@ -14,15 +14,13 @@ class PharmaService extends StorageService<Pharmaceutical> {
   static JsonConverter<Pharmaceutical> jsonConverter = JsonConverter(
       toJson: (t) => t.toJson(), fromJson: (json) => Pharmaceutical.fromJson(json));
 
-  //static const String updateURL = "https://drive.google.com/uc?export=download&id=1ebw63LfYNd6RVPJUxtfyYSMx13fkIEsr";
   static const String updateURL = "https://gist.githubusercontent.com/Hu1buerger/3a92d33965db9e299f8077fe6feb5f97/raw/pharmaceuticals.json";
 
   late Timer onlineFetcher;
 
-  PharmaService() : super(storageKey, jsonConverter, Logger("PharmaService"));
+  PharmaService() : super(storageKey,  Logger("PharmaService"), jsonConverter: jsonConverter);
 
-  startup(){
-    loadFromDisk();
+  void startRemoteFetch(){
     _fetchRemote();
     onlineFetcher = Timer.periodic(const Duration(minutes: 15), (timer){
       logger.info("starting periodic fetch");
@@ -63,7 +61,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
         publish(p);
       }
 
-      logger.fine("recieved ${pharmaceuticals.length} pharmaceuticals");
+      logger.fine("recieved ${pharmaceuticals.length} pharmaceuticals from ${updateURL}");
     });
   }
 }

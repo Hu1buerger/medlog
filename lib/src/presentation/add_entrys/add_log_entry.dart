@@ -1,13 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/administration_log/log_controller.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/util/date_time_extension.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -79,7 +78,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   void onDone(BuildContext context) {
     if (selectedPharmaceutical == null) return;
 
-    logController.addLogEntry(selectedPharmaceutical!, adminTime);
+    logController.addMedicationIntake(selectedPharmaceutical!, adminTime);
     Navigator.pop(context);
   }
 
@@ -309,13 +308,4 @@ enum _Modus {
 
   /// search for a medication resulted in no found medication
   failed
-}
-
-extension MicrosecondableTimeOfDay on TimeOfDay {
-  static final minuteToMicrosecods = 6 * pow(10, 7);
-
-  /// converts timeOfDay to microseconds since
-  int toMicroseconds() {
-    return ((hour * 60 + minute) * minuteToMicrosecods).toInt();
-  }
 }

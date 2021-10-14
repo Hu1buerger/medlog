@@ -10,6 +10,8 @@ class PharmaceuticalController with ChangeNotifier{
   /// uid generator using crypto random number generator;
   static const Uuid uuid = Uuid();
 
+  PharmaceuticalController(this.pharmaservice);
+
   final Logger _logger = Logger("PharmaceuticalController");
   final PharmaService pharmaservice;
 
@@ -26,13 +28,24 @@ class PharmaceuticalController with ChangeNotifier{
   List<String> get human_known_names =>
       pharmaceuticals.map((e) => e.human_known_name).toList();
 
-  PharmaceuticalController(this.pharmaservice);
-
+  /// loads all data from disk and restores the _pharmastore
   Future<void> load() async {
-    pharmaservice.startup();
+    pharmaservice.enableBacklog();
+
+    var items = await pharmaservice.loadFromDisk();
+    items.forEach(addPharmaceutical);
+
+    pharmaservice.clearBacklog();
+    pharmaservice.disableBacklog();
+
+    // enable the subscription
     eventsSubscription = pharmaservice.events.listen((event) {
       addPharmaceutical(event);
     });
+
+    pharmaservice.startRemoteFetch();
+    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
+    return;
   }
 
   Future<void> store() async {

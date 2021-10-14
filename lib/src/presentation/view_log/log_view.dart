@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/controller/administration_log/log_controller.dart';
-import 'package:medlog/src/model/log_entry/log_entry.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/model/log_entry/log_event.dart';
+import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
+import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
-import 'package:medlog/src/presentation/view_log/log_entry_widget.dart';
+import 'package:medlog/src/presentation/view_log/log_entry_widgets.dart';
 
 class LogView extends StatelessWidget {
   static const String title = "Log";
@@ -14,7 +16,13 @@ class LogView extends StatelessWidget {
 
   final LogController logController;
 
-  List<LogEntry> get items => logController.log;
+  List<LogEvent> get items => logController.log;
+
+  Widget buildListItem(LogEvent e, bool showDateChip) {
+    if (e is MedicationIntakeEvent) return MedicationLogWidget(item: e, showDateChip: showDateChip);
+    if (e is StockEvent) return StockEventWidget(item: e, showDate: showDateChip,);
+    throw Error();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +54,18 @@ class LogView extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {
                 final item = items[index];
-                return LogEntryWidget(item: item);
+
+                bool showDateChip = false;
+                if (index == 0) {
+                  showDateChip = true;
+                } else {
+                  var previous = items[index - 1];
+
+                  showDateChip = previous.eventTime.day != item.eventTime.day ||
+                      previous.eventTime.difference(item.eventTime).inDays > 0;
+                }
+
+                return buildListItem(item, showDateChip);
               });
         },
       ),

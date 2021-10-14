@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:logging_to_logcat/logging_to_logcat.dart';
 import 'package:medlog/src/app.dart';
-import 'package:medlog/src/controller/administration_log/log_controller.dart';
-import 'package:medlog/src/controller/administration_log/log_service.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/controller/log/log_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 
@@ -28,7 +29,7 @@ void main() async {
 
 void _initializeLogger() {
   Logger.root.level = Level.ALL; // defaults to Level.INFO
-  Logger.root.onRecord.listen((record) {
+  /*Logger.root.onRecord.listen((record) {
     /*log(record.message,
         time: record.time,
         sequenceNumber: record.sequenceNumber,
@@ -39,6 +40,13 @@ void _initializeLogger() {
         stackTrace: record.stackTrace);*/
 
     // ignore: avoid_print
-    print('${record.level.name.characters.first}/${record.loggerName}: ${record.message}');
-  });
+    //print('${record.level.name.characters.first}/${record.loggerName}: ${record.message}');
+  });*/
+
+  Logger.root.activateLogcat();
+  Logger.root.info("""
+  
+  
+  Starting medlog...
+  """);
 }

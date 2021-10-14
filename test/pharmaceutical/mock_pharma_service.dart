@@ -8,9 +8,10 @@ class MockPharmaService extends PharmaService{
   MockPharmaService(this.data);
 
   @override
-  Future<void> loadFromDisk() async{
+  Future<List<Pharmaceutical>> loadFromDisk() async{
     data.forEach(publish);
     signalDone();
+    return data;
   }
 
   @override

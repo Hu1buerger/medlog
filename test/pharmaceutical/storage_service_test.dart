@@ -81,11 +81,12 @@ class MockStorageService extends StorageService<String> {
 
   MockStorageService(this.data)
       : super(
-      "mock", JsonConverter(toJson: (s) => {s: s}, fromJson: (m) => m.keys.first), Logger("MockStorageService"));
+      "mock", Logger("MockStorageService"), jsonConverter: JsonConverter(toJson: (s) => {s: s}, fromJson: (m) => m.keys.first));
 
   @override
-  Future<void> loadFromDisk() async {
+  Future<List<String>> loadFromDisk() async {
     data.forEach(publish);
+    return data;
   }
 
   @override

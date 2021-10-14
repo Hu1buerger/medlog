@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 
 class Settings extends StatefulWidget {
   static const String route_name = "/settings";
 
   final PharmaceuticalController pharmaceuticalController;
+  final LogController logController;
 
-  const Settings({Key? key, required this.pharmaceuticalController}) : super(key: key);
+  const Settings({Key? key, required this.pharmaceuticalController, required this.logController}) : super(key: key);
 
   @override
   _SettingsState createState() => _SettingsState();
@@ -16,6 +18,7 @@ class _SettingsState extends State<Settings> {
   static String title = "Settings";
 
   PharmaceuticalController get pharmController => widget.pharmaceuticalController;
+  LogController get logController => widget.logController;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +49,12 @@ class _SettingsState extends State<Settings> {
             },
             child: Text("cleanAll"),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              logController.addStockEvent(pharmController.pharmaceuticals.first, 10, DateTime.now());
+            },
+            child: Text("add mocked StockEvent")
+          )
         ],
       )
     );

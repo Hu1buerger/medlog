@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:medlog/src/model/log_entry/log_entry.dart';
+import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
-import 'package:medlog/src/presentation/view_log/detailed_log_entry_widget.dart';
+import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/view_log/log_view.dart';
 
-import 'controller/administration_log/log_controller.dart';
+import 'controller/log/log_controller.dart';
 import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
@@ -87,13 +87,13 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
                 );
               case AddPharmaceutical.route_name:
                 return AddPharmaceutical(pharmController: widget.pharmaController);
-              case DetailedLogEntryWidget.routeName:
-                return DetailedLogEntryWidget(
-                  entry: routeSettings.arguments! as LogEntry,
+              case MedicationIntakeDetails.routeName:
+                return MedicationIntakeDetails(
+                  entry: routeSettings.arguments! as MedicationIntakeEvent,
                   logController: widget.logController,
                 );
               case Settings.route_name:
-                return Settings(pharmaceuticalController: widget.pharmaController,);
+                return Settings(pharmaceuticalController: widget.pharmaController, logController: widget.logController,);
               default:
                 return Text("ILLEGAL ROUTE ${routeSettings.name}");
             }
