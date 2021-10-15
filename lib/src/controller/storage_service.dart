@@ -9,7 +9,7 @@ class StorageService<T> {
   static SharedPreferences? preferences;
 
   late final Logger logger;
-  JsonConverter<T>? _jsonConverter;
+  final JsonConverter<T>? _jsonConverter;
   final String _storageKey;
 
   List<T>? backLog;

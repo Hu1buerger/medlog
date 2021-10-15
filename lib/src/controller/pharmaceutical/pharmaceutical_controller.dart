@@ -10,7 +10,7 @@ class PharmaceuticalController with ChangeNotifier{
   /// uid generator using crypto random number generator;
   static const Uuid uuid = Uuid();
 
-  PharmaceuticalController(this.pharmaservice);
+  PharmaceuticalController(this.pharmaservice, {this.fetchEnabled = true});
 
   final Logger _logger = Logger("PharmaceuticalController");
   final PharmaService pharmaservice;
@@ -18,6 +18,8 @@ class PharmaceuticalController with ChangeNotifier{
   late final StreamSubscription<Pharmaceutical> eventsSubscription;
 
   final List<PharmaceuticalRef> _pharmStore = [];
+
+  final bool fetchEnabled;
 
   List<Pharmaceutical> get pharmaceuticals => _pharmStore;
 
@@ -38,12 +40,14 @@ class PharmaceuticalController with ChangeNotifier{
     pharmaservice.clearBacklog();
     pharmaservice.disableBacklog();
 
+    _logger.fine("finished adding all ${items.length}");
     // enable the subscription
     eventsSubscription = pharmaservice.events.listen((event) {
       addPharmaceutical(event);
     });
 
-    pharmaservice.startRemoteFetch();
+    if(fetchEnabled) pharmaservice.startRemoteFetch();
+
     _logger.fine("finished loading all pharmaceuticals with #${items.length}");
     return;
   }

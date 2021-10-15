@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import 'mock_pharma_service.dart';
 
@@ -130,4 +133,42 @@ void _testCreatePharmaceutical(PharmaceuticalController c) {
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour
   retrieved!.id = pharma.id;
   testEquals(pharma, retrieved);
+}
+
+Future<PharmaceuticalController> createPharmaController(
+    {int items = 0, bool fetchEnabled = false, bool mockedService = false}) async {
+  // all items are fully configured
+  var service;
+
+  if (mockedService) {
+    service = MockPharmaService([]);
+  } else {
+    print("CAUTION writing to the production data is possible, using production pharmaservice");
+    service = PharmaService();
+  }
+
+  var controller = PharmaceuticalController(service, fetchEnabled: fetchEnabled);
+  await controller.load();
+
+  if (items > 0) {
+    var testData = testPharmaceuticals(count: items);
+    testData.forEach(controller.createPharmaceutical);
+  }
+
+  return controller;
+}
+
+void populatePC(PharmaceuticalController pc) {
+  if (pc.pharmaceuticals.isEmpty) {
+    pc.createPharmaceutical(
+        Pharmaceutical(tradename: "TestPharamceutical", dosage: "10mg", activeSubstance: "TestSusbstance"));
+  }
+}
+
+List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
+  var uuid = const Uuid();
+  return List.generate(
+      count,
+      (index) =>
+          Pharmaceutical(tradename: "Tradename-$index", dosage: "$index-mg", activeSubstance: "Substance-$index"));
 }

@@ -1,42 +1,52 @@
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 part 'stock_entry.g.dart';
 
 /// Represents the current stock state
-@JsonSerializable()
-class StockEntry{
+@JsonSerializable(ignoreUnannotated: true)
+class StockItem {
+  static const String emptyID = "";
+
+  @JsonKey()
+  String id;
 
   /// the id of the parmaceutical that is logged as stock
+  @JsonKey()
   String pharmaceuticalID;
 
-  late PharmaceuticalRef _pharmaceutical;
+  Pharmaceutical? _pharmaceutical;
 
-  Pharmaceutical get pharmaceutical => _pharmaceutical;
-  set pharmaceutical(Pharmaceutical p){
-    if(p.id_is_set == false || p.id != pharmaceuticalID) throw ArgumentError("wrong phramaceutical");
-    _pharmaceutical = _pharmaceutical;
+  Pharmaceutical get pharmaceutical => _pharmaceutical!;
+
+  set pharmaceutical(Pharmaceutical p) {
+    if (p.id_is_set == false || p.id != pharmaceuticalID) throw ArgumentError("wrong phramaceutical");
+    _pharmaceutical = p;
   }
 
   ///the amount of medication still available in this unit
+  @JsonKey()
   int amount;
 
   /// denotes wheter or not this unit is started or still closed
+  @JsonKey()
   StockState state;
 
+  @JsonKey()
   DateTime expiryDate;
-  
-  StockEntry(this.pharmaceuticalID, this.amount, this.state, this.expiryDate){
-    if(amount <= 0) throw ArgumentError.value(amount, "amount", "amount violates the constraints [1,...]");
+
+  StockItem(this.id, this.pharmaceuticalID, this.amount, this.state, this.expiryDate) {
+    if (amount <= 0) throw ArgumentError.value(amount, "amount", "amount violates the constraints [1,...]");
   }
 
-  factory StockEntry.fromJson(Map<String, dynamic> json) => _$StockEntryFromJson(json);
+  factory StockItem.create(Pharmaceutical pharmaceutical, int amount, StockState itemState, DateTime expiryDate) {
+    return StockItem(emptyID, pharmaceutical.id, amount, itemState, expiryDate)
+      ..pharmaceutical = pharmaceutical;
+  }
 
-  Map<String,dynamic> toJson() => _$StockEntryToJson(this);
+  factory StockItem.fromJson(Map<String, dynamic> json) => _$StockItemFromJson(json);
+
+  Map<String, dynamic> toJson() => _$StockItemToJson(this);
 }
 
-enum StockState{
-  close,
-  open
-}
+enum StockState { close, open }

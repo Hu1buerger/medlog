@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
+import 'package:medlog/src/presentation/stock/view_stock.dart';
 import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/view_log/log_view.dart';
 
@@ -14,10 +16,11 @@ import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key, required this.logController, required this.pharmaController}) : super(key: key);
+  const MyApp({Key? key, required this.logController, required this.pharmaController, required this.stockController}) : super(key: key);
 
   final LogController logController;
   final PharmaceuticalController pharmaController;
+  final StockController stockController;
 
   @override
   State<StatefulWidget> createState() => _AppState();
@@ -45,6 +48,7 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
         widget.logController.storeLog();
         widget.pharmaController.store();
+        widget.stockController.store();
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -80,6 +84,8 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
               case "/":
               case LogView.routeName:
                 return LogView(logController: widget.logController);
+              case ViewStock.routeName:
+                return ViewStock(stockController: widget.stockController);
               case AddLogEntry.routeName:
                 return AddLogEntry(
                   logController: widget.logController,

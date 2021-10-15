@@ -1,10 +1,15 @@
+import 'package:flutter/material.dart';
 
-import 'package:flutter/widgets.dart';
+class AddStock extends StatefulWidget {
+  const AddStock({Key? key}) : super(key: key);
 
-class AddStock extends StatelessWidget{
+  @override
+  _AddStockState createState() => _AddStockState();
+}
+
+class _AddStockState extends State<AddStock> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Container();
   }
 }

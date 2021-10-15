@@ -6,18 +6,17 @@ part of 'stock_entry.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-StockEntry _$StockEntryFromJson(Map<String, dynamic> json) => StockEntry(
+StockItem _$StockItemFromJson(Map<String, dynamic> json) => StockItem(
+      json['id'] as String,
       json['pharmaceuticalID'] as String,
       json['amount'] as int,
       _$enumDecode(_$StockStateEnumMap, json['state']),
       DateTime.parse(json['expiryDate'] as String),
-    )..pharmaceutical =
-        Pharmaceutical.fromJson(json['pharmaceutical'] as Map<String, dynamic>);
+    );
 
-Map<String, dynamic> _$StockEntryToJson(StockEntry instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$StockItemToJson(StockItem instance) => <String, dynamic>{
+      'id': instance.id,
       'pharmaceuticalID': instance.pharmaceuticalID,
-      'pharmaceutical': instance.pharmaceutical,
       'amount': instance.amount,
       'state': _$StockStateEnumMap[instance.state],
       'expiryDate': instance.expiryDate.toIso8601String(),
