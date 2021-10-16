@@ -37,54 +37,61 @@ class _ViewStockState extends State<ViewStock> {
     widget.stockController.removeListener(stockChanged);
   }
 
-  void stockChanged(){
+  void stockChanged() {
     _logger.fine("stock changed");
 
     stock = widget.stockController.stock;
-    setState((){});
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    var body;
-    if(stock.isEmpty){
-      widget.stockController.createStockItem(StockItem.create(widget.stockController.pharmaController.pharmaceuticals.first, 10, StockState.open, DateTime.now()));
+    Widget body;
+    if (stock.isEmpty) {
       body = Text("such empty");
-    }else{
+    } else {
       body = ListView.builder(
         itemCount: widget.stockController.stock.length,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           var stockItem = widget.stockController.stock[index];
 
+          ///TODO: show all relevant details onClick
+          /// for now
+          ///
+          /// Garbled: remaining days til spoiled DateTime.now().difference(stockItem.expiryDate).inDays.toString()
           return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Text(stockItem.state == StockState.open ? "O" : "C"),
+            ),
             title: Text(stockItem.pharmaceutical.displayName),
-            subtitle: Text("${stockItem.amount.toString()} ${describeEnum(stockItem.state)}"),
-            trailing: Text(DateTime.now().difference(stockItem.expiryDate).inDays.toString()),
+            subtitle: Text(describeEnum(stockItem.state)),
+            trailing: Text(stockItem.amount.toString()),
           );
         },
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(ViewStock.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.pushNamed(context, Settings.route_name);
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.create),
-        backgroundColor: Colors.green,
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddStock()));
-        },
-      ),
-      body: body
-    );
+        appBar: AppBar(
+          title: const Text(ViewStock.title),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.pushNamed(context, Settings.route_name);
+              },
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.create),
+          backgroundColor: Colors.green,
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => AddStock()));
+          },
+        ),
+        body: body);
   }
 }

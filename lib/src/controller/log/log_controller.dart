@@ -23,8 +23,8 @@ class LogController with ChangeNotifier {
 
   List<LogEvent> _itemsInNeedToRehydrate = [];
 
-  LogController(this.pharmaController, this.logService){
-    pharmaController.addListener(tryRehydrate);
+  LogController(this.pharmaController, this.logService) {
+    pharmaController.addListener(_tryRehydrate);
   }
 
   Future<void> loadLog() async {
@@ -36,7 +36,7 @@ class LogController with ChangeNotifier {
     if (logs.isNotEmpty) {
       _itemsInNeedToRehydrate = logs;
       _lastID = logs.map((e) => e.id).reduce(max);
-      tryRehydrate();
+      _tryRehydrate();
     } else {
       _log = [];
       _lastID = 0;
@@ -46,17 +46,18 @@ class LogController with ChangeNotifier {
     return;
   }
 
-  tryRehydrate(){
-    for(int i = _itemsInNeedToRehydrate.length - 1 ; i >= 0; i--){
+  _tryRehydrate() {
+    for (int i = _itemsInNeedToRehydrate.length - 1; i >= 0; i--) {
       var e = _itemsInNeedToRehydrate[i];
 
       // rehydrating all items.
       bool success = e.rehydrate(pharmaController);
-      if(success){
+      if (success) {
         _logger.fine("rehydrated ${e.id}");
         _itemsInNeedToRehydrate.removeAt(i);
         _insert(e);
-      }else _logger.fine("failed to rehydrate ${e.id}");
+      } else
+        _logger.fine("failed to rehydrate ${e.id}");
     }
   }
 
@@ -69,6 +70,7 @@ class LogController with ChangeNotifier {
   }
 
   /// adds an event that changes the stock
+  /// TODO: use StockItem as argument.... like yeah
   void addStockEvent(Pharmaceutical p, int amount, DateTime eventTime) {
     assert(p is PharmaceuticalRef);
 
@@ -80,7 +82,8 @@ class LogController with ChangeNotifier {
   void addMedicationIntake(Pharmaceutical pharmaceutical, DateTime adminTime) {
     assert(pharmaceutical is PharmaceuticalRef);
 
-    var logEntry = MedicationIntakeEvent.create(++_lastID, adminTime, pharmaceutical, 1);
+    var logEntry =
+        MedicationIntakeEvent.create(++_lastID, adminTime, pharmaceutical, 1);
 
     _insert(logEntry);
   }

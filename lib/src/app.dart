@@ -8,15 +8,20 @@ import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
 import 'package:medlog/src/presentation/stock/view_stock.dart';
-import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/view_log/log_view.dart';
+import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
 
 import 'controller/log/log_controller.dart';
 import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key, required this.logController, required this.pharmaController, required this.stockController}) : super(key: key);
+  const MyApp(
+      {Key? key,
+      required this.logController,
+      required this.pharmaController,
+      required this.stockController})
+      : super(key: key);
 
   final LogController logController;
   final PharmaceuticalController pharmaController;
@@ -71,7 +76,8 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
         Locale('en', ''), // English, no country code
       ],
 
-      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (BuildContext context) =>
+          AppLocalizations.of(context)!.appTitle,
       theme: ThemeData.dark(),
 
       // Define a function to handle named routes in order to support
@@ -92,14 +98,19 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
                   pharmaController: widget.pharmaController,
                 );
               case AddPharmaceutical.route_name:
-                return AddPharmaceutical(pharmController: widget.pharmaController);
+                return AddPharmaceutical(
+                    pharmController: widget.pharmaController);
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
                   entry: routeSettings.arguments! as MedicationIntakeEvent,
                   logController: widget.logController,
                 );
               case Settings.route_name:
-                return Settings(pharmaceuticalController: widget.pharmaController, logController: widget.logController,);
+                return Settings(
+                  pharmaceuticalController: widget.pharmaController,
+                  logController: widget.logController,
+                  stockController: widget.stockController,
+                );
               default:
                 return Text("ILLEGAL ROUTE ${routeSettings.name}");
             }
