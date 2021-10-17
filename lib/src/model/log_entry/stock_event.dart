@@ -28,12 +28,12 @@ class StockEvent extends LogEvent{
 
   @JsonKey()
   /// the delta of stockChanges
-  int amount;
+  double amount;
 
   StockEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount) : super(id, eventTime);
 
-  factory StockEvent.create(int id, DateTime eventTime, Pharmaceutical p, int amount){
-    return StockEvent(id, eventTime, p.id, amount)
+  factory StockEvent.create(DateTime eventTime, Pharmaceutical p, double amount){
+    return StockEvent(LogEvent.unsetID, eventTime, p.id, amount)
         ..pharmaceutical = p;
   }
 

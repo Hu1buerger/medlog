@@ -8,25 +8,17 @@ part 'stock_entry.g.dart';
 class StockItem {
   static const String emptyID = "";
 
+  /// the id of this stockItem
   @JsonKey()
   String id;
 
-  /// the id of the parmaceutical that is logged as stock
+  /// the id of the pharmaceutical that is logged as stock
   @JsonKey()
   String pharmaceuticalID;
 
-  Pharmaceutical? _pharmaceutical;
-
-  Pharmaceutical get pharmaceutical => _pharmaceutical!;
-
-  set pharmaceutical(Pharmaceutical p) {
-    if (p.id_is_set == false || p.id != pharmaceuticalID) throw ArgumentError("wrong phramaceutical");
-    _pharmaceutical = p;
-  }
-
   ///the amount of medication still available in this unit
   @JsonKey()
-  int amount;
+  double amount;
 
   /// denotes wheter or not this unit is started or still closed
   @JsonKey()
@@ -35,13 +27,23 @@ class StockItem {
   @JsonKey()
   DateTime expiryDate;
 
+  Pharmaceutical? _pharmaceutical;
+
+  Pharmaceutical get pharmaceutical => _pharmaceutical!;
+
+  set pharmaceutical(Pharmaceutical p) {
+    if (p.id_is_set == false || (pharmaceuticalID != Pharmaceutical.emptyID && p.id != pharmaceuticalID)) {
+      throw ArgumentError("wrong phramaceutical");
+    }
+    _pharmaceutical = p;
+  }
+
   StockItem(this.id, this.pharmaceuticalID, this.amount, this.state, this.expiryDate) {
     if (amount <= 0) throw ArgumentError.value(amount, "amount", "amount violates the constraints [1,...]");
   }
 
-  factory StockItem.create(Pharmaceutical pharmaceutical, int amount, StockState itemState, DateTime expiryDate) {
-    return StockItem(emptyID, pharmaceutical.id, amount, itemState, expiryDate)
-      ..pharmaceutical = pharmaceutical;
+  factory StockItem.create(Pharmaceutical pharmaceutical, double amount, StockState itemState, DateTime expiryDate) {
+    return StockItem(emptyID, pharmaceutical.id, amount, itemState, expiryDate)..pharmaceutical = pharmaceutical;
   }
 
   factory StockItem.fromJson(Map<String, dynamic> json) => _$StockItemFromJson(json);
@@ -49,4 +51,4 @@ class StockItem {
   Map<String, dynamic> toJson() => _$StockItemToJson(this);
 }
 
-enum StockState { close, open }
+enum StockState { closed, open }

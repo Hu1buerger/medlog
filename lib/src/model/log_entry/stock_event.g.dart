@@ -10,7 +10,7 @@ StockEvent _$StockEventFromJson(Map<String, dynamic> json) => StockEvent(
       json['id'] as int,
       DateTime.parse(json['eventTime'] as String),
       json['pharmaceuticalID'] as String,
-      json['amount'] as int,
+      (json['amount'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$StockEventToJson(StockEvent instance) =>

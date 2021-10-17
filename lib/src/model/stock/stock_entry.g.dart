@@ -9,7 +9,7 @@ part of 'stock_entry.dart';
 StockItem _$StockItemFromJson(Map<String, dynamic> json) => StockItem(
       json['id'] as String,
       json['pharmaceuticalID'] as String,
-      json['amount'] as int,
+      (json['amount'] as num).toDouble(),
       _$enumDecode(_$StockStateEnumMap, json['state']),
       DateTime.parse(json['expiryDate'] as String),
     );
@@ -49,6 +49,6 @@ K _$enumDecode<K, V>(
 }
 
 const _$StockStateEnumMap = {
-  StockState.close: 'close',
+  StockState.closed: 'closed',
   StockState.open: 'open',
 };

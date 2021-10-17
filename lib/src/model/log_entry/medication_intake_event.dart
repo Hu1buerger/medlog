@@ -16,11 +16,14 @@ class MedicationIntakeEvent extends LogEvent {
   @JsonKey()
   double amount;
 
-  MedicationIntakeEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount) : super(id, eventTime);
+  /// Wheter the pharmaceutical has been taken from the stock
+  @JsonKey()
+  PharmaceuticalSource source;
 
-  factory MedicationIntakeEvent.create(int id, DateTime eventTime, Pharmaceutical p, double amount){
-    return MedicationIntakeEvent(id, eventTime, p.id, amount)
-    ..pharmaceutical = p;
+  MedicationIntakeEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount, {this.source = PharmaceuticalSource.other}) : super(id, eventTime);
+
+  factory MedicationIntakeEvent.create(Pharmaceutical p, DateTime eventTime, double amount) {
+    return MedicationIntakeEvent(LogEvent.unsetID, eventTime, p.id, amount, source: PharmaceuticalSource.other)..pharmaceutical = p;
   }
 
   Pharmaceutical get pharmaceutical {
@@ -46,9 +49,10 @@ class MedicationIntakeEvent extends LogEvent {
     return _$MedicationIntakeEventToJson(this);
   }
 
-  bool rehydrate(PharmaceuticalController p){
+  @override
+  bool rehydrate(PharmaceuticalController p) {
     var pharmaceutical = p.pharmaceuticalByID(pharmaceuticalID);
-    if(pharmaceutical == null) {
+    if (pharmaceutical == null) {
       //throw StateError("couldnt rehydrate bcs the pharmaceutical with id couldnt be found");
       return false;
     }
@@ -56,4 +60,9 @@ class MedicationIntakeEvent extends LogEvent {
     this.pharmaceutical = pharmaceutical;
     return true;
   }
+}
+
+enum PharmaceuticalSource{
+  stock,
+  other
 }

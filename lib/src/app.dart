@@ -96,6 +96,7 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
                 return AddLogEntry(
                   logController: widget.logController,
                   pharmaController: widget.pharmaController,
+                  stockController: widget.stockController
                 );
               case AddPharmaceutical.route_name:
                 return AddPharmaceutical(

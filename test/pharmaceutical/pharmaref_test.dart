@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 
 import 'pharmaceutical_controller_test.dart' show testEquals;
 

@@ -4,15 +4,17 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:uuid/uuid.dart';
 
-class PharmaceuticalController with ChangeNotifier{
+class PharmaceuticalController with ChangeNotifier {
   /// uid generator using crypto random number generator;
   static const Uuid uuid = Uuid();
 
   PharmaceuticalController(this.pharmaservice, {this.fetchEnabled = true});
 
   final Logger _logger = Logger("PharmaceuticalController");
+  @visibleForTesting
   final PharmaService pharmaservice;
 
   late final StreamSubscription<Pharmaceutical> eventsSubscription;
@@ -27,34 +29,7 @@ class PharmaceuticalController with ChangeNotifier{
     return pharmaceuticals.map((e) => e.tradename).toSet().toList();
   }
 
-  List<String> get human_known_names =>
-      pharmaceuticals.map((e) => e.human_known_name).toList();
-
-  /// loads all data from disk and restores the _pharmastore
-  Future<void> load() async {
-    pharmaservice.enableBacklog();
-
-    var items = await pharmaservice.loadFromDisk();
-    items.forEach(addPharmaceutical);
-
-    pharmaservice.clearBacklog();
-    pharmaservice.disableBacklog();
-
-    _logger.fine("finished adding all ${items.length}");
-    // enable the subscription
-    eventsSubscription = pharmaservice.events.listen((event) {
-      addPharmaceutical(event);
-    });
-
-    if(fetchEnabled) pharmaservice.startRemoteFetch();
-
-    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
-    return;
-  }
-
-  Future<void> store() async {
-    pharmaservice.store(pharmaceuticals);
-  }
+  List<String> get human_known_names => pharmaceuticals.map((e) => e.human_known_name).toList();
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
   ///
@@ -79,10 +54,10 @@ class PharmaceuticalController with ChangeNotifier{
       // THis is a result of allowing the condtion of same uuid (even though quite unlikely)
       matches = pharmaceuticals
           .where((element) =>
-      element.human_known_name == p.human_known_name &&
-          element.dosage == p.dosage &&
-          element.tradename == p.tradename &&
-          element.activeSubstance == p.activeSubstance)
+              element.human_known_name == p.human_known_name &&
+              element.dosage == p.dosage &&
+              element.tradename == p.tradename &&
+              element.activeSubstance == p.activeSubstance)
           .toList();
     }
 
@@ -92,8 +67,13 @@ class PharmaceuticalController with ChangeNotifier{
     return matches.single;
   }
 
-  /// adds
+  /// adds a already known pharmaceutical back to the store
+  ///
   /// TODO: make sure that id s are unique. this includes updating user_created uuids if collision is detected.
+  ///     even though this is unlikely
+  ///
+  /// TODO: some duplicates not detected
+  ///
   /// inserting takes an amortized constant time
   /// if checking for duplicates is necessary the worst case runtime should be O(N) where N is the length of known pharmaceuticals
   @visibleForTesting
@@ -104,9 +84,15 @@ class PharmaceuticalController with ChangeNotifier{
       pharmaceutical = PharmaceuticalRef.toRef(pharmaceutical);
     }
 
+    if(pharmaceutical.activeSubstance == "Naproxen"){
+      print("updating naproxen to 0.5");
+      pharmaceutical.cloneAndUpdate(smallestPartialUnit: 0.5);
+    }
+
     var toInsert = pharmaceutical as PharmaceuticalRef;
 
     // the id is set so it is either already tracked or from the server
+    // TODO: this dosnt handle if toInsert is a change from remote with a different id (duplication)
     var other = pharmaceuticalByID(toInsert.id);
 
     if (other != null) {
@@ -139,7 +125,7 @@ class PharmaceuticalController with ChangeNotifier{
       //assert(toInsert.documentState != DocumentState.user_created && other.documentState != DocumentState.user_created);
       //no easy fix is possible
 
-      if(toInsert.documentState.isHeavier(other.documentState)){
+      if (toInsert.documentState.isHeavier(other.documentState)) {
         //toInsert is has more authority, so it will be the data
         (other as PharmaceuticalRef).ref = toInsert.ref;
         notifyListeners();
@@ -158,14 +144,6 @@ class PharmaceuticalController with ChangeNotifier{
     } else {
       _insert(toInsert);
     }
-  }
-
-  _insert(PharmaceuticalRef p){
-    _pharmStore.add(p);
-    p.registered = true;
-
-    _logger.fine("inserted ${p.id} ${p.displayName}");
-    notifyListeners();
   }
 
   // might use optional instead of nullable type
@@ -190,25 +168,53 @@ class PharmaceuticalController with ChangeNotifier{
 
   List<Pharmaceutical> filter(String query) {
     var filters = [
-          (Pharmaceutical p, String queryString) =>
-          p.human_known_name.contains(queryString),
-          (Pharmaceutical p, String queryString) =>
-          p.tradename.contains(queryString),
+      (Pharmaceutical p, String queryString) => p.human_known_name.contains(queryString),
+      (Pharmaceutical p, String queryString) => p.tradename.contains(queryString),
     ];
 
-    return pharmaceuticals
-        .where(
-            (element) => filters.map((e) => e(element, query)).contains(true))
-        .toList();
+    return pharmaceuticals.where((element) => filters.map((e) => e(element, query)).contains(true)).toList();
   }
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(
-        fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
   String _createPharmaID() {
     return uuid.v4();
+  }
+
+  _insert(PharmaceuticalRef p) {
+    _pharmStore.add(p);
+    p.registered = true;
+
+    _logger.fine("inserted ${p.id} ${p.displayName}");
+    notifyListeners();
+  }
+
+  /// loads all data from disk and restores the _pharmastore
+  Future<void> load() async {
+    pharmaservice.enableBacklog();
+
+    var items = await pharmaservice.loadFromDisk();
+    items.forEach(addPharmaceutical);
+
+    pharmaservice.clearBacklog();
+    pharmaservice.disableBacklog();
+
+    _logger.fine("finished adding all ${items.length}");
+    // enable the subscription
+    eventsSubscription = pharmaservice.events.listen((event) {
+      addPharmaceutical(event);
+    });
+
+    if (fetchEnabled) pharmaservice.startRemoteFetch();
+
+    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
+    return;
+  }
+
+  Future<void> store() async {
+    pharmaservice.store(pharmaceuticals);
   }
 }

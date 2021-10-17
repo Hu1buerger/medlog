@@ -104,7 +104,7 @@ Future<Tuple3<PharmaceuticalController, List<StockItem>, StockController>> setup
   var pharmaceuticals = pharmaController.pharmaceuticals;
 
   var testStock = List.generate(10, (index) =>
-      StockItem.create(pharmaceuticals[index % pharmaceuticals.length], index + 1, StockState.close, futureTime()));
+      StockItem.create(pharmaceuticals[index % pharmaceuticals.length], index + 1, StockState.closed, futureTime()));
 
   var stockService = StockService();
   var stockController = StockController(stockService, pharmaController);

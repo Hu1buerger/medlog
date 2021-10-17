@@ -51,22 +51,24 @@ class _ViewStockState extends State<ViewStock> {
       body = Text("such empty");
     } else {
       body = ListView.builder(
-        itemCount: widget.stockController.stock.length,
+        itemCount: stock.length,
         itemBuilder: (BuildContext context, int index) {
-          var stockItem = widget.stockController.stock[index];
+          var stockItem = stock[index];
 
           ///TODO: show all relevant details onClick
           /// for now
           ///
-          /// Garbled: remaining days til spoiled DateTime.now().difference(stockItem.expiryDate).inDays.toString()
+          /// remaining days til spoiled stockItem.expiryDate.difference(DateTime.now()).inDays.toString()
           return ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.grey,
               child: Text(stockItem.state == StockState.open ? "O" : "C"),
             ),
             title: Text(stockItem.pharmaceutical.displayName),
-            subtitle: Text(describeEnum(stockItem.state)),
             trailing: Text(stockItem.amount.toString()),
+            onLongPress: (){
+              widget.stockController.openItem(stockItem);
+            },
           );
         },
       );

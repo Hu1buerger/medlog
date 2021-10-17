@@ -15,7 +15,9 @@ Pharmaceutical _$PharmaceuticalFromJson(Map<String, dynamic> json) =>
       documentState:
           _$enumDecodeNullable(_$DocumentStateEnumMap, json['documentState']) ??
               DocumentState.user_created,
-      id: json['id'] as String? ?? "",
+      id: json['id'] as String? ?? Pharmaceutical.emptyID,
+      smallestConsumableUnit:
+          (json['smallestConsumableUnit'] as num?)?.toDouble() ?? 1,
     );
 
 Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
@@ -26,6 +28,7 @@ Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
       'tradename': instance.tradename,
       'dosage': instance.dosage,
       'activeSubstance': instance.activeSubstance,
+      'smallestConsumableUnit': instance.smallestConsumableUnit,
     };
 
 K _$enumDecode<K, V>(

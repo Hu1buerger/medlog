@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
@@ -19,8 +22,11 @@ class AddLogEntry extends StatefulWidget {
 
   final PharmaceuticalController pharmaController;
   final LogController logController;
+  final StockController stockController;
 
-  const AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
+  const AddLogEntry(
+      {Key? key, required this.pharmaController, required this.logController, required this.stockController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddLogEntryState();
@@ -37,6 +43,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   LogController get logController => widget.logController;
 
+  StockController get stockController => widget.stockController;
+
   TextEditingController searchQueryController = TextEditingController();
   TextEditingController adminDateController = TextEditingController();
 
@@ -45,6 +53,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   _Modus modus = _Modus.searching;
   Pharmaceutical? selectedPharmaceutical;
   DateTime adminTime = DateTime.now();
+  double selectedUnits = 1;
 
   _AddLogEntryState();
 
@@ -75,11 +84,79 @@ class _AddLogEntryState extends State<AddLogEntry> {
     updateQuery("");
   }
 
-  void onDone(BuildContext context) {
+  void onCommitIntake(BuildContext context) {
     if (selectedPharmaceutical == null) return;
 
-    logController.addMedicationIntake(selectedPharmaceutical!, adminTime);
+    commitIntake(context);
+  }
+
+  commitIntake(BuildContext context) async {
+    assert(selectedPharmaceutical != null);
+
+    if (selectedUnits % selectedPharmaceutical!.smallestConsumableUnit != 0) {
+      logger.info("selected unit is not safely supported");
+    }
+
+    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime, selectedUnits);
+
+    if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
+      logger.severe(
+          "to little stock to log the event and insure that the stock remains in a valid state aka contains no negative items");
+      return false;
+    }
+
+    double remainingUnits = intakeEvent.amount;
+
+    while (remainingUnits > 0) {
+      var stockItems = stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
+      var openItems = stockItems.where((element) => element.state == StockState.open);
+
+      StockItem? stockItemToTakeFrom;
+
+      if (openItems.length != 1) {
+        logger.severe("no open items to take from");
+        await showDialog(
+            context: context,
+            builder: (context) {
+              var options = List.generate(stockItems.length, (index) {
+                var stockItem = stockItems[index];
+                return SimpleDialogOption(
+                    onPressed: () {
+                      if(stockItem.state == StockState.closed){
+                        stockController.openItem(stockItem);
+                      }
+                      stockItemToTakeFrom = stockItem;
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                        "${describeEnum(stockItem.state)[0]} ${stockItem.pharmaceutical.displayName} spoils on ${stockItem.expiryDate.toString()}"),
+                );
+              });
+
+              return SimpleDialog(
+                title: Text("select item to take from"),
+                children: [...options],
+              );
+            });
+      }else{
+        stockItemToTakeFrom = openItems.single;
+      }
+
+      assert(stockItemToTakeFrom!.pharmaceutical == intakeEvent.pharmaceutical);
+
+      if (stockItemToTakeFrom!.amount < intakeEvent.amount) {
+        logger.severe("unhandled the stock has to little units available to handle this shit");
+      }
+
+      remainingUnits = stockController.takeFromStockItem(stockItemToTakeFrom!, intakeEvent.amount);
+    }
+
+    // as for now set source to stock.
+    intakeEvent.source = PharmaceuticalSource.stock;
+    logController.addMedicationIntake(intakeEvent);
+
     Navigator.pop(context);
+    return true;
   }
 
   List<Pharmaceutical> sortPharmaceuticals(List<Pharmaceutical> list) {
@@ -124,6 +201,14 @@ class _AddLogEntryState extends State<AddLogEntry> {
     adminTime = dateTime;
     adminDateController.text = adminTime.toIso8601String();
     // no need to setState bcs the TextController will update the neccessary widget
+  }
+
+  void onSelectUnits(double units) {
+    if (selectedUnits != units) {
+      logger.finest("updating the selectedUnits to $units");
+      selectedUnits = units;
+      setState(() {});
+    }
   }
 
   void onSearchEmpty(BuildContext context) async {
@@ -211,8 +296,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
           ),
         ),
         Expanded(
-            child: Card(
-          child: ListView.builder(
+          child: Card(
+            child: ListView.builder(
               itemCount: currentOptions.length,
               itemBuilder: (BuildContext context, int index) {
                 var currentItem = currentOptions[index];
@@ -228,8 +313,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
                   ),
                   onTap: () => setPharmaceutical(currentItem),
                 );
-              }),
-        )),
+              },
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -237,6 +324,15 @@ class _AddLogEntryState extends State<AddLogEntry> {
   Widget buildSelectedWidget(BuildContext context) {
     assert(modus == _Modus.medication_selected);
     assert(selectedPharmaceutical != null);
+
+    var unitOptions = List<Option<double>>.generate(5, (index) {
+      double unitOption = selectedPharmaceutical!.smallestConsumableUnit * (index + 1);
+
+      return Option(
+        value: unitOption,
+        selected: selectedUnits == unitOption,
+      );
+    });
 
     //TODO: add dismissable to swipe on the Card to unselect
     // the list of items to display
@@ -246,7 +342,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: Card(
             child: ListTile(
               title: Text(selectedPharmaceutical!.tradename),
-              subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
+              subtitle:
+                  Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage} * $selectedUnits"),
               onLongPress: unselectPharmaceutical,
             ),
           )),
@@ -259,7 +356,11 @@ class _AddLogEntryState extends State<AddLogEntry> {
               enabled: false, // disable the textinput, but also disables the onText
             ),
             onTap: () => selectAdministrationDateTime(context),
-          ))
+          )),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: OptionSelecter(options: [...unitOptions], onSelect: (o, i) => onSelectUnits(o.value)),
+      )
     ];
 
     return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
@@ -291,7 +392,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             ),
             IconButton(
               icon: const Icon(Icons.done),
-              onPressed: () => onDone(context),
+              onPressed: () => onCommitIntake(context),
             ),
           ],
         ),
@@ -308,4 +409,133 @@ enum _Modus {
 
   /// search for a medication resulted in no found medication
   failed
+}
+
+class OptionSelecter extends StatefulWidget {
+  List<Option> options;
+  void Function(Option selected, int index) onSelect;
+  late int selectedIndex;
+
+  OptionSelecter({Key? key, required this.options, required this.onSelect, int? selectedIndex}) : super(key: key) {
+    if (options.isEmpty) ArgumentError.value(options, "options", "Options shall not be empty");
+
+    if (selectedIndex != null && selectedIndex != -1) {
+      if (0 <= selectedIndex && selectedIndex < options.length) {
+        ArgumentError.value(selectedIndex, "selectedIndex", "isnt a valid index in options");
+      }
+      this.selectedIndex = selectedIndex;
+    } else {
+      selectedIndex = options.indexWhere((element) => element.selected == true);
+    }
+
+    if (selectedIndex == -1)
+      this.selectedIndex = 0;
+    else
+      this.selectedIndex = selectedIndex;
+  }
+
+  @override
+  State<StatefulWidget> createState() => _OptionSelectorState();
+}
+
+class _OptionSelectorState extends State<OptionSelecter> {
+  int selectedOption = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    selectedOption = widget.selectedIndex;
+
+    for (var option in widget.options) {
+      option.onPressed = onPressOnOption;
+    }
+
+    selectOption(selectedOption);
+  }
+
+  /// the option o has been pressed on and informs about it being selected
+  void onPressOnOption(Option o) {
+    assert(widget.options.contains(o));
+
+    int indexOfO = widget.options.indexOf(o);
+    bool change = selectOption(indexOfO);
+
+    if (change) {
+      selectedOption = indexOfO;
+      widget.onSelect(o, selectedOption);
+      setState(() {});
+      return;
+    }
+
+    assert(indexOfO == selectedOption);
+  }
+
+  bool selectOption(int i) {
+    var o = widget.options[i];
+
+    bool change = false;
+
+    for (int i = 0; i < widget.options.length; i++) {
+      var o1 = widget.options[i];
+
+      // the option that has been pressed on should be selected
+      bool shouldBeSelected = o1 == o;
+      change |= _setOption(o1, shouldBeSelected);
+    }
+
+    return change;
+  }
+
+  bool _setOption(Option o, bool selected) {
+    if (o.selected == selected) return false;
+
+    int index = widget.options.indexOf(o);
+    assert(0 <= index && index < widget.options.length);
+
+    var onew = Option(
+      key: o.key,
+      value: o.value,
+      selected: selected,
+    );
+    onew.onPressed = o.onPressed;
+
+    widget.options[index] = onew;
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        children: widget.options,
+      ),
+    );
+  }
+}
+
+///TODO: let a option show a slider to select variable option
+class Option<T> extends StatelessWidget {
+  final bool selected;
+  T value;
+
+  // callback to inform the OptionSelecter that this item has been pressed on
+  late final void Function(Option option) onPressed;
+
+  Option({Key? key, required this.value, this.selected = false}) : super(key: key);
+
+  void _onPressed(BuildContext context) {
+    onPressed(this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    InputChip chip = InputChip(
+      label: Text(value.toString()),
+      onPressed: () => _onPressed(context),
+      selected: selected,
+    );
+
+    return chip;
+  }
 }

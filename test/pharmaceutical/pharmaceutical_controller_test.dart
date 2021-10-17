@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:uuid/uuid.dart';
 
 import 'mock_pharma_service.dart';
@@ -166,7 +166,6 @@ void populatePC(PharmaceuticalController pc) {
 }
 
 List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
-  var uuid = const Uuid();
   return List.generate(
       count,
       (index) =>

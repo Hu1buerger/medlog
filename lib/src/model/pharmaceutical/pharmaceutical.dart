@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'pharmaceutical.g.dart';
 
+/// TODO: turn dosage into object for scaling and other manipulations
 ///   Pharmaceutical
 ///     - It contains a substance that is causing the treatment effect (including homeopathics)
 ///     - It is identified by an id. This can either be created on the client device and is denoted by the [DocumentState.user_created]
@@ -19,32 +20,38 @@ class Pharmaceutical {
   final String dosage;
   final String? activeSubstance;
 
+  /// the smallest unit one can take
+  ///
+  /// this would be = 0.5 if this pharmaceutical is halfable
+  final double smallestConsumableUnit;
+
   String get displayName => human_known_name;
 
   bool get id_is_set => id.isNotEmpty;
 
+
   /// dont call me directly
-  Pharmaceutical(
-      {required this.tradename,
-      required this.dosage,
-      required this.activeSubstance,
-      String? human_known_name,
-      this.documentState = DocumentState.user_created,
-      // dont use emptyID here bcs JsonSerializable cannot handle it rn see https://github.com/google/json_serializable.dart/issues/994
-      this.id = ""})
+  Pharmaceutical({required this.tradename,
+    required this.dosage,
+    required this.activeSubstance,
+    String? human_known_name,
+    this.documentState = DocumentState.user_created,
+    // dont use emptyID here bcs JsonSerializable cannot handle it rn see https://github.com/google/json_serializable.dart/issues/994
+    this.id = Pharmaceutical.emptyID,
+    this.smallestConsumableUnit = 1})
       : human_known_name = human_known_name ?? tradename;
 
   factory Pharmaceutical.fromJson(Map<String, dynamic> json) => _$PharmaceuticalFromJson(json);
 
   /// consider carefully if changing a value is a good idea
-  Pharmaceutical cloneAndUpdate(
-      {String? humanName,
-      String? tradename,
-      String? dosage,
-      String? activeSubstance,
-      String? pzn,
-      DocumentState? documentState,
-      String? id}) {
+  Pharmaceutical cloneAndUpdate({String? humanName,
+    String? tradename,
+    String? dosage,
+    String? activeSubstance,
+    String? pzn,
+    DocumentState? documentState,
+    String? id,
+    double? smallestPartialUnit}) {
     return Pharmaceutical(
         tradename: tradename ?? this.tradename,
         dosage: dosage ?? this.dosage,
@@ -52,7 +59,8 @@ class Pharmaceutical {
         // ignore: unnecessary_this
         human_known_name: humanName ?? this.human_known_name,
         documentState: documentState ?? this.documentState,
-        id: id ?? this.id);
+        id: id ?? this.id,
+        smallestConsumableUnit: smallestPartialUnit ?? smallestConsumableUnit);
   }
 
   Map<String, dynamic> toJson() {
@@ -72,73 +80,5 @@ extension ComparableDocumentState on DocumentState {
   //indicates that other has more administrative power to override the this
   bool isHeavier(DocumentState other) {
     return index > other.index;
-  }
-}
-
-class PharmaceuticalRef implements Pharmaceutical {
-  bool registered = false;
-  Pharmaceutical ref;
-
-  @override
-  String get id => ref.id;
-
-  @override
-  set id(value) => ref.id = value;
-
-  @override
-  bool get id_is_set => ref.id_is_set;
-
-  @override
-  DocumentState get documentState => ref.documentState;
-
-  @override
-  String? get activeSubstance => ref.activeSubstance;
-
-  @override
-  String get dosage => ref.dosage;
-
-  @override
-  String get human_known_name => ref.human_known_name;
-
-  @override
-  String get tradename => ref.tradename;
-
-  @override
-  String get displayName => ref.displayName;
-
-  @override
-  Map<String, dynamic> toJson() => ref.toJson();
-
-  PharmaceuticalRef(this.ref) {
-    if (ref is PharmaceuticalRef) throw ArgumentError();
-  }
-
-  @override
-  Pharmaceutical cloneAndUpdate(
-      {String? humanName,
-      String? tradename,
-      String? dosage,
-      String? activeSubstance,
-      String? pzn,
-      DocumentState? documentState,
-      String? id}) {
-    ref = ref.cloneAndUpdate(
-        humanName: humanName,
-        tradename: tradename,
-        dosage: dosage,
-        activeSubstance: activeSubstance,
-        pzn: pzn,
-        documentState: documentState,
-        id: id);
-
-    return this;
-  }
-
-  static PharmaceuticalRef toRef(Pharmaceutical p) {
-    if (p is Pharmaceutical) {
-      assert(p is PharmaceuticalRef == false);
-      return PharmaceuticalRef(p);
-    }
-    return p as PharmaceuticalRef;
   }
 }
