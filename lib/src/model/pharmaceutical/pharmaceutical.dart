@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'dosage.dart';
+
 part 'pharmaceutical.g.dart';
 
 /// TODO: turn dosage into object for scaling and other manipulations
@@ -7,6 +9,7 @@ part 'pharmaceutical.g.dart';
 ///     - It contains a substance that is causing the treatment effect (including homeopathics)
 ///     - It is identified by an id. This can either be created on the client device and is denoted by the [DocumentState.user_created]
 @JsonSerializable()
+@DosageJsonConverter()
 class Pharmaceutical {
   static const String emptyID = "";
 
@@ -17,7 +20,7 @@ class Pharmaceutical {
   // ignore: non_constant_identifier_names
   final String human_known_name;
   final String tradename;
-  final String dosage;
+  final Dosage dosage;
   final String? activeSubstance;
 
   /// the smallest unit one can take
@@ -46,7 +49,7 @@ class Pharmaceutical {
   /// consider carefully if changing a value is a good idea
   Pharmaceutical cloneAndUpdate({String? humanName,
     String? tradename,
-    String? dosage,
+    Dosage? dosage,
     String? activeSubstance,
     String? pzn,
     DocumentState? documentState,
@@ -67,6 +70,16 @@ class Pharmaceutical {
     assert(id_is_set);
     return _$PharmaceuticalToJson(this);
   }
+}
+
+class DosageJsonConverter extends JsonConverter<Dosage, String>{
+  const DosageJsonConverter();
+
+  @override
+  Dosage fromJson(String json) => Dosage.parse(json);
+
+  @override
+  String toJson(Dosage object) => object.toString();
 }
 
 enum DocumentState {

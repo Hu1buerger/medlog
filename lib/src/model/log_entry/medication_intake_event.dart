@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
+import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 part 'medication_intake_event.g.dart';
@@ -37,7 +38,7 @@ class MedicationIntakeEvent extends LogEvent {
 
   String get displayName => pharmaceutical.displayName;
 
-  String get dosage => pharmaceutical.dosage;
+  Dosage get dosage => pharmaceutical.dosage;
 
   String get activeSubstance => pharmaceutical.activeSubstance ?? "Unassigned";
 

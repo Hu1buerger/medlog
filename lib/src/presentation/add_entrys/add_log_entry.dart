@@ -308,7 +308,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
                     children: [
                       Text(currentItem.activeSubstance ?? ""),
                       const SizedBox(width: 10),
-                      Text(currentItem.dosage)
+                      Text(currentItem.dosage.toString())
                     ],
                   ),
                   onTap: () => setPharmaceutical(currentItem),

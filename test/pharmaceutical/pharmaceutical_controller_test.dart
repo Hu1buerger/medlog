@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
-import 'package:uuid/uuid.dart';
 
 import 'mock_pharma_service.dart';
 
@@ -43,7 +43,7 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalController(service);
 
-      var p = Pharmaceutical(tradename: "idiotin", dosage: "20mg", activeSubstance: "masters");
+      var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -54,8 +54,8 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalController(service);
 
-      var p1 = Pharmaceutical(tradename: "a", dosage: "1", activeSubstance: "a");
-      var p2 = Pharmaceutical(tradename: "b", dosage: "1", activeSubstance: "a");
+      var p1 = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p2 = Pharmaceutical(tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p1);
       controller.createPharmaceutical(p2);
@@ -67,7 +67,7 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalController(service);
 
-      var p = Pharmaceutical(tradename: "idiotin", dosage: "20mg", activeSubstance: "masters");
+      var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -91,7 +91,7 @@ void main() async {
       controller.addPharmaceutical(Pharmaceutical(
           id: PharmaceuticalController.uuid.v4(),
           tradename: "name",
-          dosage: "1",
+          dosage: Dosage.parse("1g"),
           activeSubstance: "goFuckyourSelf",
           documentState: DocumentState.in_review));
       var p = controller.pharmaceuticals.first;
@@ -125,7 +125,7 @@ void _testPCcontainsOnlyRefs(PharmaceuticalController c) {
 
 void _testCreatePharmaceutical(PharmaceuticalController c) {
   var pharma = Pharmaceutical(
-      human_known_name: "RETARDIN AL 25mg", tradename: "RETARDIN", dosage: "25mg", activeSubstance: "Homopathie");
+      human_known_name: "RETARDIN AL 25mg", tradename: "RETARDIN", dosage: Dosage.parse("25mg"), activeSubstance: "Homopathie");
   c.createPharmaceutical(pharma);
   var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", "25mg");
 
@@ -161,7 +161,7 @@ Future<PharmaceuticalController> createPharmaController(
 void populatePC(PharmaceuticalController pc) {
   if (pc.pharmaceuticals.isEmpty) {
     pc.createPharmaceutical(
-        Pharmaceutical(tradename: "TestPharamceutical", dosage: "10mg", activeSubstance: "TestSusbstance"));
+        Pharmaceutical(tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));
   }
 }
 
@@ -169,5 +169,5 @@ List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
   return List.generate(
       count,
       (index) =>
-          Pharmaceutical(tradename: "Tradename-$index", dosage: "$index-mg", activeSubstance: "Substance-$index"));
+          Pharmaceutical(tradename: "Tradename-$index", dosage: Dosage.parse("$index-mg"), activeSubstance: "Substance-$index"));
 }

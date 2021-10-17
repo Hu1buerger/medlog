@@ -42,6 +42,8 @@ class StorageService<T> {
   /// loads the data from the local store.
   ///
   Future<List<T>> loadFromDisk() async {
+    //assert(_streamController.hasListener == false);
+
     await _init();
 
     logger.finest("starting to load from disk");
@@ -69,6 +71,7 @@ class StorageService<T> {
     }
 
     logger.finest("finishing load with ${obs.length} items");
+    //assert(_streamController.hasListener == false);
     return obs;
   }
 

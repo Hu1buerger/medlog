@@ -1,5 +1,7 @@
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
+import 'dosage.dart';
+
 class PharmaceuticalRef implements Pharmaceutical {
   bool registered = false;
   Pharmaceutical ref;
@@ -20,7 +22,7 @@ class PharmaceuticalRef implements Pharmaceutical {
   String? get activeSubstance => ref.activeSubstance;
 
   @override
-  String get dosage => ref.dosage;
+  Dosage get dosage => ref.dosage;
 
   @override
   double get smallestConsumableUnit => ref.smallestConsumableUnit;
@@ -44,7 +46,7 @@ class PharmaceuticalRef implements Pharmaceutical {
   @override
   Pharmaceutical cloneAndUpdate({String? humanName,
     String? tradename,
-    String? dosage,
+    Dosage? dosage,
     String? activeSubstance,
     String? pzn,
     DocumentState? documentState,

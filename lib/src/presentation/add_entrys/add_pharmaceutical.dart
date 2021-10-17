@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class AddPharmaceutical extends StatefulWidget {
@@ -28,8 +29,8 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
     if(_formKey.currentState!.validate() == false) return;
 
     var humanKnownName = medicationNameCrtl.text;
-    var dosage = dosageCrtl.text;
-    var tradeName = humanKnownName.split(dosage).first;
+    var dosage = Dosage.parse(dosageCrtl.text);
+    var tradeName = humanKnownName.split(dosageCrtl.text).first;
 
     var p = Pharmaceutical(
       human_known_name: humanKnownName,

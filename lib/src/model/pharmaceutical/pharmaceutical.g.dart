@@ -9,7 +9,7 @@ part of 'pharmaceutical.dart';
 Pharmaceutical _$PharmaceuticalFromJson(Map<String, dynamic> json) =>
     Pharmaceutical(
       tradename: json['tradename'] as String,
-      dosage: json['dosage'] as String,
+      dosage: const DosageJsonConverter().fromJson(json['dosage'] as String),
       activeSubstance: json['activeSubstance'] as String?,
       human_known_name: json['human_known_name'] as String?,
       documentState:
@@ -26,7 +26,7 @@ Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
       'documentState': _$DocumentStateEnumMap[instance.documentState],
       'human_known_name': instance.human_known_name,
       'tradename': instance.tradename,
-      'dosage': instance.dosage,
+      'dosage': const DosageJsonConverter().toJson(instance.dosage),
       'activeSubstance': instance.activeSubstance,
       'smallestConsumableUnit': instance.smallestConsumableUnit,
     };

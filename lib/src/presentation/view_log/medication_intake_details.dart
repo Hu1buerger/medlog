@@ -49,7 +49,7 @@ class MedicationIntakeDetails extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               buildTitleValue("Tradename:", entry.displayName),
-              buildTitleValue("Dosage:", entry.dosage),
+              buildTitleValue("Dosage:", entry.dosage.toString()),
               buildTitleValue("Active substance:", entry.activeSubstance),
               buildTitleValue("Date:", entry.eventTime.toString()),
               const SizedBox(height: 20),

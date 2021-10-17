@@ -22,7 +22,7 @@ class MedicationLogWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     var logEntry = ListTile(
       title: Text(item.displayName),
-      subtitle: Text(item.dosage),
+      subtitle: Text(item.dosage.toString()),
       trailing: Text(item.eventTime.toTimeOfDay().format(context)),
       onTap: () => onTap(context),
     );
