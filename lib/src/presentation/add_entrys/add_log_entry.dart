@@ -102,7 +102,14 @@ class _AddLogEntryState extends State<AddLogEntry> {
     if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
       logger.severe(
           "to little stock to log the event and insure that the stock remains in a valid state aka contains no negative items");
-      return false;
+      // as for now set source to stock.
+      intakeEvent.source = PharmaceuticalSource.other;
+
+      //TODO: inform the user
+      logController.addMedicationIntake(intakeEvent);
+
+      Navigator.pop(context);
+      return;
     }
 
     double remainingUnits = intakeEvent.amount;
