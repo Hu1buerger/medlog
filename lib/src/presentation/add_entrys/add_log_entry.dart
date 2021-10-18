@@ -9,6 +9,7 @@ import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/presentation/add_entrys/option_selector.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 /// Supports adding a logentry to the log
@@ -128,15 +129,15 @@ class _AddLogEntryState extends State<AddLogEntry> {
               var options = List.generate(stockItems.length, (index) {
                 var stockItem = stockItems[index];
                 return SimpleDialogOption(
-                    onPressed: () {
-                      if(stockItem.state == StockState.closed){
-                        stockController.openItem(stockItem);
-                      }
-                      stockItemToTakeFrom = stockItem;
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                        "${describeEnum(stockItem.state)[0]} ${stockItem.pharmaceutical.displayName} spoils on ${stockItem.expiryDate.toString()}"),
+                  onPressed: () {
+                    if (stockItem.state == StockState.closed) {
+                      stockController.openItem(stockItem);
+                    }
+                    stockItemToTakeFrom = stockItem;
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                      "${describeEnum(stockItem.state)[0]} ${stockItem.pharmaceutical.displayName} spoils on ${stockItem.expiryDate.toString()}"),
                 );
               });
 
@@ -145,7 +146,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
                 children: [...options],
               );
             });
-      }else{
+      } else {
         stockItemToTakeFrom = openItems.single;
       }
 
@@ -337,7 +338,6 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
       return Option(
         value: unitOption,
-        selected: selectedUnits == unitOption,
       );
     });
 
@@ -350,7 +350,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             child: ListTile(
               title: Text(selectedPharmaceutical!.tradename),
               subtitle:
-                  Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage} * $selectedUnits"),
+                  Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage.scale(selectedUnits)}"),
               onLongPress: unselectPharmaceutical,
             ),
           )),
@@ -366,7 +366,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
           )),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-        child: OptionSelecter(options: [...unitOptions], onSelect: (o, i) => onSelectUnits(o.value)),
+        child: OptionSelector<double>(options: [...unitOptions], onSelectValue: (double value) => onSelectUnits(value),),
       )
     ];
 
@@ -416,133 +416,4 @@ enum _Modus {
 
   /// search for a medication resulted in no found medication
   failed
-}
-
-class OptionSelecter extends StatefulWidget {
-  List<Option> options;
-  void Function(Option selected, int index) onSelect;
-  late int selectedIndex;
-
-  OptionSelecter({Key? key, required this.options, required this.onSelect, int? selectedIndex}) : super(key: key) {
-    if (options.isEmpty) ArgumentError.value(options, "options", "Options shall not be empty");
-
-    if (selectedIndex != null && selectedIndex != -1) {
-      if (0 <= selectedIndex && selectedIndex < options.length) {
-        ArgumentError.value(selectedIndex, "selectedIndex", "isnt a valid index in options");
-      }
-      this.selectedIndex = selectedIndex;
-    } else {
-      selectedIndex = options.indexWhere((element) => element.selected == true);
-    }
-
-    if (selectedIndex == -1)
-      this.selectedIndex = 0;
-    else
-      this.selectedIndex = selectedIndex;
-  }
-
-  @override
-  State<StatefulWidget> createState() => _OptionSelectorState();
-}
-
-class _OptionSelectorState extends State<OptionSelecter> {
-  int selectedOption = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    selectedOption = widget.selectedIndex;
-
-    for (var option in widget.options) {
-      option.onPressed = onPressOnOption;
-    }
-
-    selectOption(selectedOption);
-  }
-
-  /// the option o has been pressed on and informs about it being selected
-  void onPressOnOption(Option o) {
-    assert(widget.options.contains(o));
-
-    int indexOfO = widget.options.indexOf(o);
-    bool change = selectOption(indexOfO);
-
-    if (change) {
-      selectedOption = indexOfO;
-      widget.onSelect(o, selectedOption);
-      setState(() {});
-      return;
-    }
-
-    assert(indexOfO == selectedOption);
-  }
-
-  bool selectOption(int i) {
-    var o = widget.options[i];
-
-    bool change = false;
-
-    for (int i = 0; i < widget.options.length; i++) {
-      var o1 = widget.options[i];
-
-      // the option that has been pressed on should be selected
-      bool shouldBeSelected = o1 == o;
-      change |= _setOption(o1, shouldBeSelected);
-    }
-
-    return change;
-  }
-
-  bool _setOption(Option o, bool selected) {
-    if (o.selected == selected) return false;
-
-    int index = widget.options.indexOf(o);
-    assert(0 <= index && index < widget.options.length);
-
-    var onew = Option(
-      key: o.key,
-      value: o.value,
-      selected: selected,
-    );
-    onew.onPressed = o.onPressed;
-
-    widget.options[index] = onew;
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        children: widget.options,
-      ),
-    );
-  }
-}
-
-///TODO: let a option show a slider to select variable option
-class Option<T> extends StatelessWidget {
-  final bool selected;
-  T value;
-
-  // callback to inform the OptionSelecter that this item has been pressed on
-  late final void Function(Option option) onPressed;
-
-  Option({Key? key, required this.value, this.selected = false}) : super(key: key);
-
-  void _onPressed(BuildContext context) {
-    onPressed(this);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    InputChip chip = InputChip(
-      label: Text(value.toString()),
-      onPressed: () => _onPressed(context),
-      selected: selected,
-    );
-
-    return chip;
-  }
 }

@@ -36,4 +36,11 @@ class Dosage{
 
     return Dosage(value, unit);
   }
+
+  /// scales the current instance
+  Dosage scale(double factor){
+    if(factor <= 0) throw ArgumentError.value(factor);
+
+    return Dosage(value * factor, unit);
+  }
 }
