@@ -30,12 +30,22 @@ jobs:
     #- run: flutter analyze .
     #- run: flutter test
     - run: flutter build apk
-    - name: Get the version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    - uses: little-core-labs/get-git-tag@v3.0.1
+      id: tagName
+      # ${{ steps.tagName.outputs.tag }}
+    - run: echo ${{ steps.tagName.outputs.tag }}
+    - name: rename     
+      run: |
+        mv build/app/outputs/apk/release/app-release.apk app-release.apk
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: medlog.apk
+        path: app-release.apk 
     - uses: "marvinpinto/action-automatic-releases@latest"
+      if: ${{ steps.tagName.outputs.tag }} != ''
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: true
         files: |
-            build/app/outputs/apk/release/app-release.apk
+            app-release.apk
