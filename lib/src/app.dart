@@ -6,6 +6,7 @@ import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
 import 'package:medlog/src/presentation/stock/view_stock.dart';
 import 'package:medlog/src/presentation/view_log/log_view.dart';
@@ -88,10 +89,8 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
           builder: (BuildContext context) {
             switch (routeSettings.name) {
               case "/":
-              case LogView.routeName:
-                return LogView(logController: widget.logController);
-              case ViewStock.routeName:
-                return ViewStock(stockController: widget.stockController);
+              case HomePage.route:
+                return HomePage(logController: widget.logController, stockController: widget.stockController,);
               case AddLogEntry.routeName:
                 return AddLogEntry(
                   logController: widget.logController,

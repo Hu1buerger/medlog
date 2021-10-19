@@ -4,21 +4,54 @@ import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_stock.dart';
+import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
 
-class ViewStock extends StatefulWidget {
+class StockView extends StatefulWidget with HomePagePage {
   static const String routeName = "/viewStock";
   static const String title = "Stock";
 
   final StockController stockController;
 
-  const ViewStock({Key? key, required this.stockController}) : super(key: key);
+  const StockView({Key? key, required this.stockController}) : super(key: key);
 
   @override
-  State<ViewStock> createState() => _ViewStockState();
+  State<StockView> createState() => _StockViewState();
+
+  @override
+  String? tabtitle() {
+    return title;
+  }
+
+  @override
+  PreferredSizeWidget? appBar(BuildContext context) {
+    return AppBar(
+      title: const Text(StockView.title),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.pushNamed(context, Settings.route_name);
+          },
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget? floatingActionButton(BuildContext context) {
+    return  FloatingActionButton(
+      child: const Icon(Icons.create),
+      backgroundColor: Colors.green,
+      onPressed: () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => AddStock()));
+      },
+    );
+  }
 }
 
-class _ViewStockState extends State<ViewStock> {
+class _StockViewState extends State<StockView> {
   static final Logger _logger = Logger("ViewStock");
 
   late List<StockItem> stock;
@@ -48,7 +81,7 @@ class _ViewStockState extends State<ViewStock> {
   Widget build(BuildContext context) {
     Widget body;
     if (stock.isEmpty) {
-      body = Text("such empty");
+      body = const Center(child: Text("such empty"));
     } else {
       body = ListView.builder(
         itemCount: stock.length,
@@ -66,7 +99,7 @@ class _ViewStockState extends State<ViewStock> {
             ),
             title: Text(stockItem.pharmaceutical.displayName),
             trailing: Text(stockItem.amount.toString()),
-            onLongPress: (){
+            onLongPress: () {
               widget.stockController.openItem(stockItem);
             },
           );
@@ -74,26 +107,6 @@ class _ViewStockState extends State<ViewStock> {
       );
     }
 
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text(ViewStock.title),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.pushNamed(context, Settings.route_name);
-              },
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.create),
-          backgroundColor: Colors.green,
-          onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => AddStock()));
-          },
-        ),
-        body: body);
+    return body;
   }
 }

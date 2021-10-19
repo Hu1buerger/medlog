@@ -19,6 +19,8 @@ class AddStock extends StatefulWidget {
 class _AddStockState extends State<AddStock> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Center(
+      child: Text("AddStock: Not implemented rn")
+    );
   }
 }

@@ -4,6 +4,7 @@ import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.d
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
+import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/stock/view_stock.dart';
 
 class Settings extends StatefulWidget {
@@ -85,11 +86,9 @@ class _SettingsState extends State<Settings> {
                 stockController.createStockItem(stockItem);
               }
             }, child: Text("fill stock for all")),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, ViewStock.routeName);
-                },
-                child: Text("goto stockview"))
+            ElevatedButton(onPressed: (){
+              Navigator.popAndPushNamed(context, HomePage.route);
+            }, child: Text("goto homepage"))
           ],
         ));
   }
