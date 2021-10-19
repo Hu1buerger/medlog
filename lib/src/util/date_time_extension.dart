@@ -11,13 +11,17 @@ extension MicrosecondableTimeOfDay on TimeOfDay {
   }
 }
 
-extension DateTimeExtension on DateTime{
-
-  TimeOfDay toTimeOfDay(){
+extension DateTimeExtension on DateTime {
+  TimeOfDay toTimeOfDay() {
     return TimeOfDay.fromDateTime(this);
   }
 
-  String toHumanString(){
+  String toHumanString() {
     return "$year-$month-$day";
+  }
+
+  bool isSameDay(DateTime other) {
+    // match day first bcs it is most likely to change
+    return day == other.day && month == other.month && year == other.year;
   }
 }

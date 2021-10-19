@@ -2,14 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
-import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
-import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
 import 'package:medlog/src/presentation/view_log/log_entry_widgets.dart';
 
-class LogView extends StatelessWidget with HomePagePage{
+class LogView extends StatelessWidget with HomePagePage {
   static const String title = "Log";
   static const String routeName = "/logview";
 
@@ -50,12 +48,6 @@ class LogView extends StatelessWidget with HomePagePage{
     );
   }
 
-  Widget buildListItem(LogEvent e, bool showDateChip) {
-    if (e is MedicationIntakeEvent) return MedicationLogWidget(item: e, showDateChip: showDateChip);
-    if (e is StockEvent) return StockEventWidget(item: e, showDate: showDateChip,);
-    throw Error();
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -78,7 +70,11 @@ class LogView extends StatelessWidget with HomePagePage{
                     previous.eventTime.difference(item.eventTime).inDays > 0;
               }
 
-              return buildListItem(item, showDateChip);
+              return LogEventWidget.build(
+                key: ObjectKey(item),
+                item: item,
+                showDate: showDateChip,
+              );
             });
       },
     );

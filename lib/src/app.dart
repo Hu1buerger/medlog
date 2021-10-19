@@ -8,8 +8,6 @@ import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
-import 'package:medlog/src/presentation/stock/view_stock.dart';
-import 'package:medlog/src/presentation/view_log/log_view.dart';
 import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
 
 import 'controller/log/log_controller.dart';
@@ -17,11 +15,7 @@ import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatefulWidget {
-  const MyApp(
-      {Key? key,
-      required this.logController,
-      required this.pharmaController,
-      required this.stockController})
+  const MyApp({Key? key, required this.logController, required this.pharmaController, required this.stockController})
       : super(key: key);
 
   final LogController logController;
@@ -42,24 +36,13 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
-  }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print(state);
-    switch (state) {
-      case AppLifecycleState.resumed:
-        break;
-      case AppLifecycleState.inactive:
-        widget.logController.storeLog();
-        widget.pharmaController.store();
-        widget.stockController.store();
-        break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-        break;
-    }
+    // store all data once the app gets disposed of
+    widget.logController.storeLog();
+    widget.pharmaController.store();
+    widget.stockController.store();
+
+    super.dispose();
   }
 
   @override
@@ -77,8 +60,7 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
         Locale('en', ''), // English, no country code
       ],
 
-      onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
       theme: ThemeData.dark(),
 
       // Define a function to handle named routes in order to support
@@ -90,16 +72,17 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
             switch (routeSettings.name) {
               case "/":
               case HomePage.route:
-                return HomePage(logController: widget.logController, stockController: widget.stockController,);
+                return HomePage(
+                  logController: widget.logController,
+                  stockController: widget.stockController,
+                );
               case AddLogEntry.routeName:
                 return AddLogEntry(
-                  logController: widget.logController,
-                  pharmaController: widget.pharmaController,
-                  stockController: widget.stockController
-                );
+                    logController: widget.logController,
+                    pharmaController: widget.pharmaController,
+                    stockController: widget.stockController);
               case AddPharmaceutical.route_name:
-                return AddPharmaceutical(
-                    pharmController: widget.pharmaController);
+                return AddPharmaceutical(pharmController: widget.pharmaController);
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
                   entry: routeSettings.arguments! as MedicationIntakeEvent,
