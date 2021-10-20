@@ -262,7 +262,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
       );
     });
 
-    unitOptions.add(VariableOption(value: 1, title: "custom", min: unitSize, max: 100 * unitSize, step: unitSize));
+    //TODO: do some elaborate shit to define minUnitSize and more
+    unitOptions.add(VariableOption(value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
 
     //TODO: add dismissable to swipe on the Card to unselect
     // the list of items to display

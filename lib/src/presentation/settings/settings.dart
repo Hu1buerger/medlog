@@ -5,6 +5,7 @@ import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class Settings extends StatefulWidget {
   static const String route_name = "/settings";
@@ -40,7 +41,14 @@ class _SettingsState extends State<Settings> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("v1.0.1+3"),
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (bc, asyncSnapshot) {
+                if (asyncSnapshot.hasData == false) return const Text("versionNumber");
+                var packageInfo = asyncSnapshot.data!;
+
+                return Text("${packageInfo.version}+${packageInfo.buildNumber}");
+              }),
             ElevatedButton(
               onPressed: () async {
                 try {
@@ -76,18 +84,22 @@ class _SettingsState extends State<Settings> {
                   logController.addStockEvent(stockEvent);
                 },
                 child: Text("add mocked stock")),
-            ElevatedButton(onPressed: (){
-              stockController.stock.clear();
+            ElevatedButton(
+                onPressed: () {
+                  stockController.stock.clear();
 
-              for(var p in pharmController.pharmaceuticals){
-                var stockItem = StockItem.create(p, 20, StockState.closed, DateTime.now().add(Duration(days: 187)));
+                  for (var p in pharmController.pharmaceuticals) {
+                    var stockItem = StockItem.create(p, 20, StockState.closed, DateTime.now().add(Duration(days: 187)));
 
-                stockController.createStockItem(stockItem);
-              }
-            }, child: Text("fill stock for all")),
-            ElevatedButton(onPressed: (){
-              Navigator.popAndPushNamed(context, HomePage.route);
-            }, child: Text("goto homepage"))
+                    stockController.createStockItem(stockItem);
+                  }
+                },
+                child: Text("fill stock for all")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.popAndPushNamed(context, HomePage.route);
+                },
+                child: Text("goto homepage"))
           ],
         ));
   }

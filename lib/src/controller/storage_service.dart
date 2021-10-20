@@ -45,7 +45,7 @@ class StorageService<T> {
     //assert(_streamController.hasListener == false);
 
     await _init();
-
+    await preferences!.reload();
     logger.finest("starting to load from disk");
 
     var obsMaps = loadJsonObjects();
