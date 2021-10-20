@@ -178,7 +178,7 @@ class StorageService<T> {
   /// only conversion of encoding to Map<String, dynamic> aka jsonish
   List<Map<String, dynamic>> loadJsonObjects() {
     if (preferences!.containsKey(_storageKey) == false) {
-      logger.finest("storageKey: ${_storageKey} not known");
+      logger.finest("storageKey: {$_storageKey} not known");
       return [];
     }
 

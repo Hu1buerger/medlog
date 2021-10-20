@@ -10,6 +10,7 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/option_selector.dart';
+import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 /// Supports adding a logentry to the log
@@ -46,7 +47,6 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   StockController get stockController => widget.stockController;
 
-  TextEditingController searchQueryController = TextEditingController();
   TextEditingController adminDateController = TextEditingController();
 
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
@@ -61,28 +61,18 @@ class _AddLogEntryState extends State<AddLogEntry> {
   @override
   void initState() {
     super.initState();
-    setOptions(pharmaController.pharmaceuticals);
     logger.fine("initializing with options ${currentOptions.length}");
 
-    pharmaController.addListener(onPharmaControllerChange);
     setAdministrationDateTime(adminTime);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    pharmaController.removeListener(onPharmaControllerChange);
-  }
-
-  void onPharmaControllerChange() {
-    logger.fine("change in pharmaController");
-    updateQuery(searchQueryController.text);
   }
 
   void onReset(BuildContext context) {
     modus = _Modus.searching;
-    searchQueryController.text = "";
-    updateQuery("");
+
+    //TODO persist query;
+
+    //searchQueryController.text = "";
+    //updateQuery("");
   }
 
   void onCommitIntake(BuildContext context) {
@@ -106,7 +96,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
       // as for now set source to stock.
       intakeEvent.source = PharmaceuticalSource.other;
 
-      //TODO: inform the user
+      //TODO: inform the user that we he tries to perform non-stock-backed operation
       logController.addMedicationIntake(intakeEvent);
 
       Navigator.pop(context);
@@ -167,44 +157,6 @@ class _AddLogEntryState extends State<AddLogEntry> {
     return true;
   }
 
-  List<Pharmaceutical> sortPharmaceuticals(List<Pharmaceutical> list) {
-    list.sort((a, b) => a.displayName.compareTo(b.displayName));
-    return list;
-  }
-
-  void updateQuery(String query) {
-    var options = pharmaController.filter(query);
-    logger.fine("updated current options to ${options.length}");
-
-    setOptions(options);
-  }
-
-  void setOptions(List<Pharmaceutical> options) {
-    currentOptions = sortPharmaceuticals(options);
-    setState(() {});
-  }
-
-  void setPharmaceutical(Pharmaceutical p) {
-    logger.fine("Selecting ${p.id} ${p.displayName}");
-
-    selectedPharmaceutical = p;
-    modus = _Modus.medication_selected;
-    setState(() {});
-  }
-
-  void unselectPharmaceutical() {
-    if (selectedPharmaceutical == null) {
-      logger.severe(
-          "unselectPharmaceutical called even though no pharmaceutical was set and modus is ${describeEnum(modus)}");
-      return;
-    }
-
-    logger.fine("Deselecting ${selectedPharmaceutical!.id} ${selectedPharmaceutical!.displayName}");
-    modus = _Modus.searching;
-    selectedPharmaceutical = null;
-    setState(() {});
-  }
-
   void setAdministrationDateTime(DateTime dateTime) {
     adminTime = dateTime;
     adminDateController.text = adminTime.toIso8601String();
@@ -224,16 +176,6 @@ class _AddLogEntryState extends State<AddLogEntry> {
     if (result == DIALOG_ADD_PHARM_OK) {
       Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
     }
-  }
-
-  void onEditingComplete(BuildContext context) {
-    logger.fine("Editing complete with ${searchQueryController.text}");
-
-    if (currentOptions.isEmpty) {
-      modus = _Modus.failed;
-    }
-
-    if (modus == _Modus.failed) onSearchEmpty(context);
   }
 
   /// shows the dialog to select whether or not to add a new pharmaceutical
@@ -289,44 +231,18 @@ class _AddLogEntryState extends State<AddLogEntry> {
   Widget buildSearchWindow(BuildContext context) {
     assert(modus == _Modus.searching);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            controller: searchQueryController,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
-            autocorrect: false,
-            onChanged: (value) => updateQuery(value),
-            onEditingComplete: () => onEditingComplete(context),
-          ),
-        ),
-        Expanded(
-          child: Card(
-            child: ListView.builder(
-              itemCount: currentOptions.length,
-              itemBuilder: (BuildContext context, int index) {
-                var currentItem = currentOptions[index];
+    //TODO: maybe use GLobalKey to get info about the state.
+    // maybe the pharmaceuticalSelector should handle empty options or callback onOptionsEmpty and/or callback the query
+    return PharmaceuticalSelector(
+        pharmaceuticalController: pharmaController,
+        onSelectionChange: (Pharmaceutical? p) {
+          if (selectedPharmaceutical == p) return;
 
-                return ListTile(
-                  title: Text(currentItem.displayName),
-                  subtitle: Row(
-                    children: [
-                      Text(currentItem.activeSubstance ?? ""),
-                      const SizedBox(width: 10),
-                      Text(currentItem.dosage.toString())
-                    ],
-                  ),
-                  onTap: () => setPharmaceutical(currentItem),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
+          if (p == null) modus = _Modus.searching;
+          if (p != null) modus = _Modus.medication_selected;
+
+          selectedPharmaceutical = p;
+        });
   }
 
   Widget buildSelectedWidget(BuildContext context) {
@@ -352,9 +268,17 @@ class _AddLogEntryState extends State<AddLogEntry> {
           child: Card(
             child: ListTile(
               title: Text(selectedPharmaceutical!.tradename),
-              subtitle:
-                  Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage.scale(selectedUnits)}"),
-              onLongPress: unselectPharmaceutical,
+              subtitle: Text(
+                  "${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage.scale(selectedUnits)}"),
+              onLongPress: () {
+                assert(selectedPharmaceutical != null);
+                assert(modus != _Modus.searching);
+
+                selectedPharmaceutical = null;
+                modus = _Modus.searching;
+
+                setState(() {});
+              },
             ),
           )),
       Padding(
@@ -369,7 +293,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
           )),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-        child: OptionSelector<num>(options: [...unitOptions], onSelectValue: (num value) => onSelectUnits(value.toDouble()),),
+        child: OptionSelector<num>(
+          options: [...unitOptions],
+          onSelectValue: (num value) => onSelectUnits(value.toDouble()),
+        ),
       )
     ];
 

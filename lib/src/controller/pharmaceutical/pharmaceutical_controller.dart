@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:uuid/uuid.dart';
@@ -29,7 +30,7 @@ class PharmaceuticalController with ChangeNotifier {
     return pharmaceuticals.map((e) => e.tradename).toSet().toList();
   }
 
-  List<String> get human_known_names => pharmaceuticals.map((e) => e.human_known_name).toList();
+  List<String> get humanKnownNames => pharmaceuticals.map((e) => e.human_known_name).toList();
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
   ///
@@ -85,6 +86,7 @@ class PharmaceuticalController with ChangeNotifier {
     }
 
     if(pharmaceutical.activeSubstance == "Naproxen"){
+      //TODO: update on remote and remove. THis is only for testing...
       print("updating naproxen to 0.5");
       pharmaceutical.cloneAndUpdate(smallestPartialUnit: 0.5);
     }
@@ -155,7 +157,7 @@ class PharmaceuticalController with ChangeNotifier {
     return results.isEmpty ? null : results.single;
   }
 
-  Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, String dose) {
+  Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, Dosage dose) {
     var p = pharmaceuticals
         .where((element) => element.human_known_name.startsWith(tradename))
         .where((element) => element.dosage == dose)

@@ -50,8 +50,9 @@ class PharmaService extends StorageService<Pharmaceutical> {
     logger.fine("starting remote pharmaceutical load");
     var updateURI = Uri.parse(updateURL);
     http.get(updateURI).then((response) {
-      if (response.statusCode != 200)
+      if (response.statusCode != 200) {
         return;
+      }
       var remoteUpdate = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       var pharmaceuticals = remoteUpdate[storageKey] as List;
 
@@ -61,7 +62,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
         publish(p);
       }
 
-      logger.fine("recieved ${pharmaceuticals.length} pharmaceuticals from ${updateURL}");
+      logger.fine("recieved ${pharmaceuticals.length} pharmaceuticals from $updateURL");
     });
   }
 }

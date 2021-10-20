@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
 
 /// Modifiying the stock is what happpens often.
 ///
@@ -10,17 +13,53 @@ import 'package:flutter/material.dart';
 /// The user received an item from the pharmacy and is now
 /// wanting to track these
 class AddStock extends StatefulWidget {
-  const AddStock({Key? key}) : super(key: key);
+  static const String routeName = "/addStock";
+  final String title = "Edit stock";
+
+  final PharmaceuticalController pharmaceuticalController;
+
+  const AddStock({Key? key, required this.pharmaceuticalController}) : super(key: key);
 
   @override
   _AddStockState createState() => _AddStockState();
 }
 
 class _AddStockState extends State<AddStock> {
+  Pharmaceutical? pharmaceutical;
+  double? selectedQuantity;
+
+  // uncertain when the expiration actually sets in.
+  // - on the end of the day
+  // - or as soon as the day starts...
+  DateTime? selectedExpiryDate;
+
+  buildSelectPharmaceutical(BuildContext context) {
+    return PharmaceuticalSelector(
+      pharmaceuticalController: widget.pharmaceuticalController,
+      onSelectionChange: (Pharmaceutical? p) => print(p?.displayName ?? "unselected"),
+    );
+  }
+
+  buildSelectQuantity(BuildContext context){
+    return Center(child: Text("TODO add select quantity"));
+  }
+
+  buildSelectExpiryDate(BuildContext context){
+    return Center(child: Text("Unimplemented select expiry Date"),);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("AddStock: Not implemented rn")
-    );
+    var body = const Center(child: Text("AddStock: Not implemented rn"));
+
+    if(pharmaceutical == null) body = buildSelectPharmaceutical(context);
+    if(selectedQuantity == null) body = buildSelectQuantity(context);
+    if(selectedExpiryDate == null) body = buildSelectExpiryDate(context);
+
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: body);
   }
 }

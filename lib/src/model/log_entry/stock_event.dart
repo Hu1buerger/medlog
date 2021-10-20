@@ -46,8 +46,8 @@ class StockEvent extends LogEvent{
   }
 
   @override
-  bool rehydrate(PharmaceuticalController p){
-    var pharmaceutical = p.pharmaceuticalByID(pharmaceuticalID);
+  bool rehydrate(PharmaceuticalController pc){
+    var pharmaceutical = pc.pharmaceuticalByID(pharmaceuticalID);
     if(pharmaceutical == null) {
       //throw StateError("couldnt rehydrate bcs the pharmaceutical with id couldnt be found");
       return false;

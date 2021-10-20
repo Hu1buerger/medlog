@@ -40,13 +40,10 @@ class StockView extends StatefulWidget with HomePagePage {
 
   @override
   Widget? floatingActionButton(BuildContext context) {
-    return  FloatingActionButton(
+    return FloatingActionButton(
       child: const Icon(Icons.create),
       backgroundColor: Colors.green,
-      onPressed: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => AddStock()));
-      },
+      onPressed: () => Navigator.pushNamed(context, AddStock.routeName),
     );
   }
 }

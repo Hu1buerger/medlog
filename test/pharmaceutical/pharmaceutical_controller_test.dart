@@ -127,7 +127,7 @@ void _testCreatePharmaceutical(PharmaceuticalController c) {
   var pharma = Pharmaceutical(
       human_known_name: "RETARDIN AL 25mg", tradename: "RETARDIN", dosage: Dosage.parse("25mg"), activeSubstance: "Homopathie");
   c.createPharmaceutical(pharma);
-  var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", "25mg");
+  var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", Dosage.parse("25mg"));
 
   expect(retrieved != null, isTrue);
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour

@@ -1,9 +1,9 @@
-import 'package:logging/src/logger.dart';
+import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/storage_service.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 
 class StockService extends StorageService<StockItem>{
-  static Logger _logger = Logger("StockService");
+  static final Logger _logger = Logger("StockService");
   static const String key = "stock";
 
   StockService() : super(key, _logger);
