@@ -5,7 +5,6 @@ import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
-import 'package:medlog/src/presentation/stock/view_stock.dart';
 
 class Settings extends StatefulWidget {
   static const String route_name = "/settings";
@@ -41,7 +40,7 @@ class _SettingsState extends State<Settings> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("v1.0.1"),
+            const Text("v1.0.1+2"),
             ElevatedButton(
               onPressed: () async {
                 try {

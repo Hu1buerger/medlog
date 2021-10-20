@@ -174,7 +174,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   void onSearchEmpty(BuildContext context) async {
     String result = await selectAddPharmaceutical(context);
     if (result == DIALOG_ADD_PHARM_OK) {
-      Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
+      Navigator.of(context).popAndPushNamed(AddPharmaceutical.routeName);
     }
   }
 
@@ -234,15 +234,18 @@ class _AddLogEntryState extends State<AddLogEntry> {
     //TODO: maybe use GLobalKey to get info about the state.
     // maybe the pharmaceuticalSelector should handle empty options or callback onOptionsEmpty and/or callback the query
     return PharmaceuticalSelector(
-        pharmaceuticalController: pharmaController,
-        onSelectionChange: (Pharmaceutical? p) {
-          if (selectedPharmaceutical == p) return;
+      pharmaceuticalController: pharmaController,
+      onSelectionChange: (Pharmaceutical? p) {
+        if (selectedPharmaceutical == p) return;
 
-          if (p == null) modus = _Modus.searching;
-          if (p != null) modus = _Modus.medication_selected;
+        if (p == null) modus = _Modus.searching;
+        if (p != null) modus = _Modus.medication_selected;
 
-          selectedPharmaceutical = p;
-        });
+        selectedPharmaceutical = p;
+        setState(() {});
+      },
+      onSelectionFailed: (query) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
+    );
   }
 
   Widget buildSelectedWidget(BuildContext context) {

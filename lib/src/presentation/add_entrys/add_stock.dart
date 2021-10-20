@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
 
 /// Modifiying the stock is what happpens often.
@@ -36,7 +37,11 @@ class _AddStockState extends State<AddStock> {
   buildSelectPharmaceutical(BuildContext context) {
     return PharmaceuticalSelector(
       pharmaceuticalController: widget.pharmaceuticalController,
-      onSelectionChange: (Pharmaceutical? p) => print(p?.displayName ?? "unselected"),
+      onSelectionChange: (Pharmaceutical? p) {
+        print(p?.displayName ?? "unselected");
+        pharmaceutical = p;
+      },
+      onSelectionFailed: (q) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 

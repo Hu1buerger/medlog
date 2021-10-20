@@ -5,11 +5,18 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class PharmaceuticalSelector extends StatefulWidget {
   final PharmaceuticalController pharmaceuticalController;
-  final void Function(Pharmaceutical?) onSelectionChange;
+
   final String initialQuery;
 
+  final void Function(Pharmaceutical?) onSelectionChange;
+  final void Function(String query) onSelectionFailed;
+
   const PharmaceuticalSelector(
-      {Key? key, required this.pharmaceuticalController, required this.onSelectionChange, this.initialQuery = ""})
+      {Key? key,
+      required this.pharmaceuticalController,
+      required this.onSelectionChange,
+      required this.onSelectionFailed,
+      this.initialQuery = ""})
       : super(key: key);
 
   @override
@@ -60,35 +67,52 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
   }
 
   void setOptions(List<Pharmaceutical> options) {
-    options = sortPharmaceuticals(options);
+    this.options = sortPharmaceuticals(options);
     setState(() {});
   }
 
+  /// callback to the textField
+  ///
+  /// These cases arent handled in setOption bcs the user should be able to fully type the query
+  /// Pressing ok on the keyboard (editing complete) is okaying
+  ///
+  /// This handles
+  ///  - no remaining options => search failed
+  ///  - 1 remaining option => handle as if the user selected this option
+  ///  - > 1 remaining options => just update the options
   void onEditingComplete(BuildContext context) {
-    logger.fine("Editing complete with ${searchQueryController.text}");
-
-    if (options.length == 1) {
-      setPharmaceutical(options.single);
+    if(options.isEmpty){
+      logger.fine("Editing complete with query ${searchQueryController.text} and no remaining options");
+      widget.onSelectionFailed(searchQueryController.text);
+      return;
     }
-    //TODO: respond with selected = 0 incase options.isEmpty
+
+    var state = "";
+    if (options.length == 1) {
+      state = "found and selected the last remaining option";
+      setPharmaceutical(options.single);
+    }else if(options.isNotEmpty){
+      state = "and #${options.length} options remain";
+    }
+
+    logger.fine("Editing complete with query ${searchQueryController.text} $state");
   }
 
   void setPharmaceutical(Pharmaceutical p) {
     logger.fine("Selecting ${p.id} ${p.displayName}");
 
-    selectedPharmaceutical = p;
-    setState(() {});
+    _updatePharmaceutical(p);
   }
 
-  void unselectPharmaceutical() {
-    if (selectedPharmaceutical == null) {
-      logger.severe("unselectPharmaceutical called even though no pharmaceutical was set}");
-      return;
+  void _updatePharmaceutical(Pharmaceutical? p) {
+    if (selectedPharmaceutical == p) {
+      logger.finest("updating the phramaceutical selection: but selected and new are ==");
     }
 
-    logger.fine("Deselecting ${selectedPharmaceutical!.id} ${selectedPharmaceutical!.displayName}");
-    selectedPharmaceutical = null;
-    setState(() {});
+    logger.fine("updating to pharma ${p?.displayName ?? "null"}");
+
+    setState(() => selectedPharmaceutical = p);
+    widget.onSelectionChange(selectedPharmaceutical);
   }
 
   @override

@@ -29,20 +29,30 @@ class MyApp extends StatefulWidget {
 class _AppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
+    print("init");
     WidgetsBinding.instance!.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
+    print("dispose");
+
     WidgetsBinding.instance!.removeObserver(this);
-
-    // store all data once the app gets disposed of
-    widget.logController.storeLog();
-    widget.pharmaController.store();
-    widget.stockController.store();
-
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    print("state: $state");
+    if(state == AppLifecycleState.paused){
+      // store all data once the app gets disposed of
+      widget.logController.storeLog();
+      widget.pharmaController.store();
+      widget.stockController.store();
+    }
   }
 
   @override
@@ -81,7 +91,7 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
                     logController: widget.logController,
                     pharmaController: widget.pharmaController,
                     stockController: widget.stockController);
-              case AddPharmaceutical.route_name:
+              case AddPharmaceutical.routeName:
                 return AddPharmaceutical(pharmController: widget.pharmaController);
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
