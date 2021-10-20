@@ -40,7 +40,7 @@ class _SettingsState extends State<Settings> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("v1.0.1+2"),
+            const Text("v1.0.1+3"),
             ElevatedButton(
               onPressed: () async {
                 try {

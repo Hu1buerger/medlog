@@ -23,7 +23,7 @@ class VariableOption extends Option<num> {
   double max;
   double step;
 
-  VariableOption({required value, title, leading, this.min = 0, this.max = 1, this.step = 0.1})
+  VariableOption({required value, String? title, String? leading, this.min = 0, this.max = 1, this.step = 0.1})
       : super(value: value, title: title, leading: leading);
 }
 

@@ -11,6 +11,7 @@ import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/option_selector.dart';
 import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
+import 'package:medlog/src/presentation/pharmaceutical_card.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 /// Supports adding a logentry to the log
@@ -266,24 +267,19 @@ class _AddLogEntryState extends State<AddLogEntry> {
     //TODO: add dismissable to swipe on the Card to unselect
     // the list of items to display
     var gollum = <Widget>[
-      Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: Card(
-            child: ListTile(
-              title: Text(selectedPharmaceutical!.tradename),
-              subtitle: Text(
-                  "${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage.scale(selectedUnits)}"),
-              onLongPress: () {
-                assert(selectedPharmaceutical != null);
-                assert(modus != _Modus.searching);
+      PharmaceuticalCard(
+        pharmaceutical: selectedPharmaceutical!,
+        units: selectedUnits,
+        onLongPress: () {
+          assert(selectedPharmaceutical != null);
+          assert(modus != _Modus.searching);
 
-                selectedPharmaceutical = null;
-                modus = _Modus.searching;
+          selectedPharmaceutical = null;
+          modus = _Modus.searching;
 
-                setState(() {});
-              },
-            ),
-          )),
+          setState(() {});
+        },
+      ),
       Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: GestureDetector(
