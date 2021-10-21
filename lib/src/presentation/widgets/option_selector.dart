@@ -15,7 +15,7 @@ class Option<T> {
   }
 }
 
-class VariableOption extends Option<num> {
+class VariableOption<T extends num> extends Option<T> {
   @override
   bool get fixedValue => false;
 

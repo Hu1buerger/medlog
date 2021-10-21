@@ -106,7 +106,8 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
 
   void _updatePharmaceutical(Pharmaceutical? p) {
     if (selectedPharmaceutical == p) {
-      logger.finest("updating the phramaceutical selection: but selected and new are ==");
+      logger.finest("updating the pharmaceutical selection: but selected and new are ==");
+      return;
     }
 
     logger.fine("updating to pharma ${p?.displayName ?? "null"}");

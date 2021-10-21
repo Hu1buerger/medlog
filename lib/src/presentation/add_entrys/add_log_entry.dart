@@ -9,10 +9,10 @@ import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
-import 'package:medlog/src/presentation/add_entrys/option_selector.dart';
-import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
-import 'package:medlog/src/presentation/pharmaceutical_card.dart';
-import 'package:medlog/src/util/date_time_extension.dart';
+import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
+import 'package:medlog/src/presentation/widgets/option_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -71,9 +71,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     modus = _Modus.searching;
 
     //TODO persist query;
-
-    //searchQueryController.text = "";
-    //updateQuery("");
+    //TODO: reset all items.
   }
 
   void onCommitIntake(BuildContext context) {
@@ -160,8 +158,6 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   void setAdministrationDateTime(DateTime dateTime) {
     adminTime = dateTime;
-    adminDateController.text = adminTime.toIso8601String();
-    // no need to setState bcs the TextController will update the neccessary widget
   }
 
   void onSelectUnits(double units) {
@@ -208,31 +204,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
     return selectedOption;
   }
 
-  /// shows the dialog to select the administrationDateTime
-  void selectAdministrationDateTime(BuildContext context) async {
-    final kindaTomorrow = DateTime.now().add(const Duration(days: 2));
-    final tomorrow = DateTime(kindaTomorrow.year, kindaTomorrow.month, kindaTomorrow.day);
-    final lastYear = DateTime.now().add(const Duration(days: -365));
-
-    DateTime? selectedDate =
-        await showDatePicker(context: context, initialDate: adminTime, firstDate: lastYear, lastDate: tomorrow);
-
-    if (selectedDate == null) return;
-
-    var selectedTime = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(adminTime));
-
-    if (selectedTime == null) return;
-
-    var dateInMicrosecSinceEpoch = selectedDate.microsecondsSinceEpoch + selectedTime.toMicroseconds();
-    var selectedDateTime = DateTime.fromMicrosecondsSinceEpoch(dateInMicrosecSinceEpoch);
-
-    setAdministrationDateTime(selectedDateTime);
-  }
-
   Widget buildSearchWindow(BuildContext context) {
     assert(modus == _Modus.searching);
 
-    //TODO: maybe use GLobalKey to get info about the state.
+    // maybe use GLobalKey to get info about the state. (why would we?)
     // maybe the pharmaceuticalSelector should handle empty options or callback onOptionsEmpty and/or callback the query
     return PharmaceuticalSelector(
       pharmaceuticalController: pharmaController,
@@ -262,11 +237,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
       );
     });
 
-    //TODO: do some elaborate shit to define minUnitSize and more
+    // TODO: do some elaborate shit to define minUnitSize and more
     unitOptions.add(VariableOption(value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
 
-    //TODO: add dismissable to swipe on the Card to unselect
-    // the list of items to display
+    // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
       PharmaceuticalCard(
         pharmaceutical: selectedPharmaceutical!,
@@ -282,15 +256,11 @@ class _AddLogEntryState extends State<AddLogEntry> {
         },
       ),
       Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: GestureDetector(
-            child: TextField(
-              controller: adminDateController,
-              decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)),
-              enabled: false, // disable the textinput, but also disables the onText
-            ),
-            onTap: () => selectAdministrationDateTime(context),
-          )),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: DateTimePicker(
+          onSelected: setAdministrationDateTime,
+        ),
+      ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: OptionSelector<num>(

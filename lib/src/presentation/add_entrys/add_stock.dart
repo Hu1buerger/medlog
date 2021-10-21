@@ -3,9 +3,9 @@ import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
-import 'package:medlog/src/presentation/add_entrys/option_selector.dart';
-import 'package:medlog/src/presentation/add_entrys/pharmaceutical_selector.dart';
-import 'package:medlog/src/presentation/pharmaceutical_card.dart';
+import 'package:medlog/src/presentation/widgets/option_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
 
 /// Modifiying the stock is what happpens often.
 ///
@@ -39,6 +39,15 @@ class _AddStockState extends State<AddStock> {
   // - or as soon as the day starts...
   DateTime? selectedExpiryDate;
 
+  void setQuantity(num units){
+    if(selectedQuantity != null && selectedQuantity! == units){
+      //log
+      return;
+    }
+
+    setState(() => selectedQuantity = units.toDouble());
+  }
+
   buildSelectPharmaceutical(BuildContext context) {
     logger.fine("building stage 1");
 
@@ -57,13 +66,13 @@ class _AddStockState extends State<AddStock> {
     logger.fine("building stage 2");
     assert(pharmaceutical != null);
 
-    var options = List.generate(9, (index) => Option<num>(value: (index + 1) * 5));
-    options.add(VariableOption(value: 5, min: 1, max: 100, step: 1.0));
+    var options = List.generate(5, (index) => Option<int>(value: (index + 1) * 5));
+    options.add(VariableOption<int>(value: 5, min: 1, max: 100, step: 1.0));
 
     return Column(
         children: [
           PharmaceuticalCard(pharmaceutical: pharmaceutical!, onLongPress: () => setState(() => pharmaceutical = null),),
-          OptionSelector(options: options, onSelectValue: (suntis) => print(suntis)),
+          OptionSelector<num>(options: options, onSelectValue: setQuantity),
         ],
     );
   }

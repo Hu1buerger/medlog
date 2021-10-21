@@ -16,8 +16,16 @@ extension DateTimeExtension on DateTime {
     return TimeOfDay.fromDateTime(this);
   }
 
-  String toHumanString() {
+  String dateString(){
     return "$year-$month-$day";
+  }
+
+  String timeString(){
+    return "$hour:$minute";
+  }
+
+  String dateTimeString() {
+    return "${dateString()} ${timeString()}";
   }
 
   bool isSameDay(DateTime other) {

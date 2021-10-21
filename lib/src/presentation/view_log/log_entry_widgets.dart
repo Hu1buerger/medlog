@@ -106,7 +106,7 @@ class DateChipSmusher extends StatelessWidget {
       return "yesterday";
     }
 
-    return dateTime!.toHumanString();
+    return dateTime!.dateString();
   }
 
   @override
