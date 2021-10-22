@@ -48,7 +48,7 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     print("state: $state");
-    if(state == AppLifecycleState.paused){
+    if (state == AppLifecycleState.paused) {
       // store all data once the app gets disposed of
       widget.logController.storeLog();
       widget.pharmaController.store();
@@ -95,7 +95,11 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
               case AddPharmaceutical.routeName:
                 return AddPharmaceutical(pharmController: widget.pharmaController);
               case AddStock.routeName:
-                return AddStock(pharmaceuticalController: widget.pharmaController);
+                return AddStock(
+                  pharmaceuticalController: widget.pharmaController,
+                  stockController: widget.stockController,
+                  logController: widget.logController,
+                );
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
                   entry: routeSettings.arguments! as MedicationIntakeEvent,

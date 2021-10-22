@@ -6,7 +6,7 @@ part of 'stock_entry.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-StockItem _$StockItemFromJson(Map<String, dynamic> json) => StockItem(
+StockItem _$StockItemFromJson(Map<String, dynamic> json) => StockItem._(
       json['id'] as String,
       json['pharmaceuticalID'] as String,
       (json['amount'] as num).toDouble(),

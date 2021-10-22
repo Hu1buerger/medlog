@@ -32,15 +32,15 @@ class StockController with ChangeNotifier {
     return stockOfP.isEmpty ? 0 : stockOfP.map((e) => e.amount).reduce((value, element) => value += element);
   }
 
-  void createStockItem(StockItem item) {
+  void addStockItem(StockItem item) {
     assert(item.id == "");
     item.id = uuid.v4();
 
-    addStockItem(item);
+    insertStockItem(item);
   }
 
   @visibleForTesting
-  void addStockItem(StockItem item) {
+  void insertStockItem(StockItem item) {
     assert(item.id != "");
 
     if (stock.contains(item)) {

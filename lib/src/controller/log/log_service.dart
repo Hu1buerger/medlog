@@ -30,6 +30,7 @@ class LogService extends StorageService<LogEvent> {
     if(json.containsKey(typeKey) == false){
       logger.fine("hit an old log entry");
       // this is for keeping old logs intact
+      //TODO: the pharamceutical will be of Pharmaceutical Map but should be pharmaceuticalID = json["pharmaceutical"]["pharamceuticalID"]
       var jsonBody = json;
       json = {};
       json[typeKey] = medicationIntakaeEventID;

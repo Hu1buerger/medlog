@@ -74,11 +74,11 @@ class _SettingsState extends State<Settings> {
                       DateTime.now().add(Duration(days: 187)));
 
                   // maybe the stockController should add the logEntry
-                  stockController.createStockItem(stockItem);
+                  stockController.addStockItem(stockItem);
 
                   var stockItem2 = StockItem.create(pharmController.pharmaceuticals.last, 7, StockState.closed,
                       DateTime.now().add(Duration(days: 187)));
-                  stockController.createStockItem(stockItem2);
+                  stockController.addStockItem(stockItem2);
 
                   var stockEvent = StockEvent.create(DateTime.now(), stockItem.pharmaceutical, stockItem.amount);
                   logController.addStockEvent(stockEvent);
@@ -91,7 +91,7 @@ class _SettingsState extends State<Settings> {
                   for (var p in pharmController.pharmaceuticals) {
                     var stockItem = StockItem.create(p, 20, StockState.closed, DateTime.now().add(Duration(days: 187)));
 
-                    stockController.createStockItem(stockItem);
+                    stockController.addStockItem(stockItem);
                   }
                 },
                 child: Text("fill stock for all")),

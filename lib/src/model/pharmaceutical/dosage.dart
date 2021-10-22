@@ -10,7 +10,14 @@ class Dosage{
 
   @override
   String toString(){
-    return "${value.toString()} $unit";
+    String valString;
+    if(value.toInt() == value){
+      valString = value.toInt().toString();
+    }else{
+      valString = value.toString();
+    }
+
+    return "$valString $unit";
   }
 
   static Dosage parse(String s){

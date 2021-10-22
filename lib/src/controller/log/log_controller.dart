@@ -33,13 +33,18 @@ class LogController with ChangeNotifier {
   void addStockEvent(StockEvent event) {
     assert(event.pharmaceutical is PharmaceuticalRef);
 
-    event.id = ++_lastID;
-    _insert(event);
+    addLogEvent(event);
   }
 
   /// logs the intake of medication
   void addMedicationIntake(MedicationIntakeEvent event) {
     assert(event.pharmaceutical is PharmaceuticalRef);
+
+    addLogEvent(event);
+  }
+
+  void addLogEvent(LogEvent event){
+    assert(log.contains(event) == false);
 
     event.id = ++_lastID;
     _insert(event);

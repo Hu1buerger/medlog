@@ -38,7 +38,6 @@ main() {
     });
 
     var tuple = await setupStockController();
-    var pharmaController = tuple.item1;
     var testStock = tuple.item2;
     var stockController = tuple.item3;
 
@@ -51,7 +50,6 @@ main() {
     SharedPreferences.setMockInitialValues({});
 
     var tuple = await setupStockController();
-    var pharmaController = tuple.item1;
     var testStock = tuple.item2;
     var stockController = tuple.item3;
 
@@ -74,7 +72,6 @@ main() {
 
     var tuple = await setupStockController();
     var pharmaController = tuple.item1;
-    var testStock = tuple.item2;
     var stockController = tuple.item3;
 
     // generate the data;
@@ -108,7 +105,7 @@ Future<Tuple3<PharmaceuticalController, List<StockItem>, StockController>> setup
 
   var stockService = StockService();
   var stockController = StockController(stockService, pharmaController);
-  testStock.forEach(stockController.createStockItem);
+  testStock.forEach(stockController.addStockItem);
 
   return Tuple3<PharmaceuticalController, List<StockItem>, StockController>(pharmaController, testStock, stockController);
 }

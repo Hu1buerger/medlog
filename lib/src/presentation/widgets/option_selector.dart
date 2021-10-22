@@ -19,12 +19,15 @@ class VariableOption<T extends num> extends Option<T> {
   @override
   bool get fixedValue => false;
 
-  double min;
-  double max;
-  double step;
+  T min;
+  T max;
+  T step;
 
-  VariableOption({required value, String? title, String? leading, this.min = 0, this.max = 1, this.step = 0.1})
-      : super(value: value, title: title, leading: leading);
+  VariableOption({required value, String? title = "custom", String? leading, num min = 0, num max = 1, num step = 1})
+      : min = min as T,
+        max = max as T,
+        step = step as T,
+        super(value: value, title: title, leading: leading);
 }
 
 class OptionSelector<T> extends StatefulWidget {
@@ -34,8 +37,9 @@ class OptionSelector<T> extends StatefulWidget {
 
   final List<Option<T>> options;
   final void Function(T value) onSelectValue;
+  final int selected;
 
-  const OptionSelector({Key? key, required this.options, required this.onSelectValue}) : super(key: key);
+  const OptionSelector({Key? key, required this.options, required this.onSelectValue, this.selected = -1}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _OptionSelectorState<T>();
@@ -43,6 +47,12 @@ class OptionSelector<T> extends StatefulWidget {
 
 class _OptionSelectorState<T> extends State<OptionSelector<T>> {
   int selected = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = widget.selected;
+  }
 
   void onClickOnItem(int i) {
     assert(i >= 0);
@@ -153,8 +163,8 @@ class FixedOptionWidget<S, T extends Option<S>> extends StatelessWidget {
   }
 }
 
-class VariableOptionWidget extends StatefulWidget {
-  final VariableOption option;
+class VariableOptionWidget<T extends num, S extends VariableOption<T>> extends StatefulWidget {
+  final S option;
   final bool selected;
   final void Function()? onPressed;
   final void Function()? onValueChange;
@@ -164,20 +174,32 @@ class VariableOptionWidget extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _VariableOptionWidgetState();
+  State<StatefulWidget> createState() => _VariableOptionWidgetState<T, S>();
 }
 
-class _VariableOptionWidgetState extends State<VariableOptionWidget> {
-  VariableOption get option => widget.option;
+class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> extends State<VariableOptionWidget<T,S>> {
+  VariableOption<T> get option => widget.option;
 
   bool get selected => widget.selected;
 
-  late num value;
+  late T value;
 
   @override
   void initState() {
     super.initState();
     value = option.value;
+  }
+
+  void setOptionValue(num value){
+    assert(option.value is T);
+
+    if(option.value is int){
+      option.value = value.toInt() as T;
+    }
+
+    if(option.value is double){
+      option.value = value.toDouble() as T;
+    }
   }
 
   void onValue(num value) {
@@ -200,15 +222,15 @@ class _VariableOptionWidgetState extends State<VariableOptionWidget> {
           Text("Units: $value"),
           Slider(
             value: value.toDouble(),
-            min: option.min,
-            max: option.max,
+            min: option.min.toDouble(),
+            max: option.max.toDouble(),
             onChanged: (val) {
-              value = val - (val % option.step);
+              value = (val - (val % option.step)) as T;
               setState(() {});
             },
             onChangeEnd: (val) {
-              option.value = value;
-              onValue(val);
+              setOptionValue(value);
+              onValue(value);
             },
           )
         ],
