@@ -49,7 +49,7 @@ class StorageService<T> {
     logger.finest("starting to load from disk");
 
     var obsMaps = loadJsonObjects();
-    if (obsMaps.isEmpty){
+    if (obsMaps.isEmpty) {
       return <T>[];
     }
 
@@ -142,19 +142,19 @@ class StorageService<T> {
     }
   }
 
-  void enableBacklog(){
+  void enableBacklog() {
     backLog ??= [];
   }
 
-  void disableBacklog(){
-    if(backLog != null){
+  void disableBacklog() {
+    if (backLog != null) {
       _publishBackLog();
       backLog = null;
     }
   }
 
-  void clearBacklog(){
-    if(backLog != null){
+  void clearBacklog() {
+    if (backLog != null) {
       backLog = [];
     }
   }

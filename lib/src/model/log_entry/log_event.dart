@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 
-abstract class LogEvent{
+abstract class LogEvent {
   static const unsetID = -1;
 
   /// the id of the event

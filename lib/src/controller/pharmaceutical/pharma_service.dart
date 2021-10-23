@@ -11,18 +11,19 @@ import '../storage_service.dart';
 
 class PharmaService extends StorageService<Pharmaceutical> {
   static String storageKey = "pharmaceuticals";
-  static JsonConverter<Pharmaceutical> jsonConverter = JsonConverter(
-      toJson: (t) => t.toJson(), fromJson: (json) => Pharmaceutical.fromJson(json));
+  static JsonConverter<Pharmaceutical> jsonConverter =
+      JsonConverter(toJson: (t) => t.toJson(), fromJson: (json) => Pharmaceutical.fromJson(json));
 
-  static const String updateURL = "https://gist.githubusercontent.com/Hu1buerger/3a92d33965db9e299f8077fe6feb5f97/raw/pharmaceuticals.json";
+  static const String updateURL =
+      "https://gist.githubusercontent.com/Hu1buerger/3a92d33965db9e299f8077fe6feb5f97/raw/pharmaceuticals.json";
 
   late Timer onlineFetcher;
 
-  PharmaService() : super(storageKey,  Logger("PharmaService"), jsonConverter: jsonConverter);
+  PharmaService() : super(storageKey, Logger("PharmaService"), jsonConverter: jsonConverter);
 
-  void startRemoteFetch(){
+  void startRemoteFetch() {
     _fetchRemote();
-    onlineFetcher = Timer.periodic(const Duration(minutes: 15), (timer){
+    onlineFetcher = Timer.periodic(const Duration(minutes: 15), (timer) {
       logger.info("starting periodic fetch");
       _fetchRemote();
     });
@@ -30,16 +31,14 @@ class PharmaService extends StorageService<Pharmaceutical> {
 
   Future<bool> storeToExternal(List<Pharmaceutical> list) async {
     var externDir = await path_provider.getExternalStorageDirectory();
-    if(externDir == null || externDir.existsSync() == false) throw StateError("couldnt create outputdir");
+    if (externDir == null || externDir.existsSync() == false) throw StateError("couldnt create outputdir");
 
     var dir = await Directory("${externDir.path}/medlog").create(recursive: true);
     var exportFile = File("${dir.path}/pharmaceuticals-export-${DateTime.now().toIso8601String()}.json");
 
     // encode data to the right format.
     var pharms = encodeToMaps(list).toList();
-    var data = jsonEncode({
-      storageKey: pharms
-    });
+    var data = jsonEncode({storageKey: pharms});
 
     await exportFile.writeAsString(data);
     logger.info("written data to ${exportFile.path}");

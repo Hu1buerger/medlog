@@ -43,7 +43,7 @@ class LogController with ChangeNotifier {
     addLogEvent(event);
   }
 
-  void addLogEvent(LogEvent event){
+  void addLogEvent(LogEvent event) {
     assert(log.contains(event) == false);
 
     event.id = ++_lastID;

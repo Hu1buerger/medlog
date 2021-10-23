@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/presentation/home_page/view_stock.dart';
 import 'package:medlog/src/presentation/home_page/log_view.dart';
+import 'package:medlog/src/presentation/home_page/view_stock.dart';
 
 class HomePage extends StatefulWidget {
   static const String route = "/home";
@@ -10,7 +10,8 @@ class HomePage extends StatefulWidget {
   final LogController logController;
   final StockController stockController;
 
-  const HomePage({Key? key, required this.logController, required this.stockController, int? selectPage = 0}) : super(key: key);
+  const HomePage({Key? key, required this.logController, required this.stockController, int? selectPage = 0})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -23,26 +24,28 @@ class _HomePageState extends State<HomePage> {
   int selectedPage = 0;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     pages = [
       LogView(logController: widget.logController),
-      StockView(stockController: widget.stockController,)
+      StockView(
+        stockController: widget.stockController,
+      )
     ];
   }
 
-  void selectPage(int i){
-    if(selectedPage == i) return;
+  void selectPage(int i) {
+    if (selectedPage == i) return;
 
-    setState((){
+    setState(() {
       selectedPage = i;
     });
   }
 
   Widget buildNavBar() {
     return BottomNavigationBar(
-      currentIndex: selectedPage,
+        currentIndex: selectedPage,
         onTap: selectPage,
         items: List.generate(pages.length, (i) {
           var page = pages[i];
@@ -65,8 +68,10 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-mixin HomePagePage on Widget{
+mixin HomePagePage on Widget {
   String? tabtitle();
+
   Widget? floatingActionButton(BuildContext context);
+
   PreferredSizeWidget? appBar(BuildContext context);
 }

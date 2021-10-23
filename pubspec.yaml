@@ -16,7 +16,6 @@ dependencies:
     sdk: flutter
 
   intl: ^0.17.0
-
   http: ^0.13.4
   json_annotation: ^4.1.0
   logging: ^1.0.2

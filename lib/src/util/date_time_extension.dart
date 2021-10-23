@@ -12,20 +12,19 @@ extension MicrosecondableTimeOfDay on TimeOfDay {
 }
 
 extension DateTimeExtension on DateTime {
-
   TimeOfDay toTimeOfDay() {
     return TimeOfDay.fromDateTime(this);
   }
 
-  DateTime toDate(){
+  DateTime toDate() {
     return DateTime(year, month, day);
   }
 
-  String dateString(){
+  String dateString() {
     return "$year-$month-$day";
   }
 
-  String timeString(){
+  String timeString() {
     return "$hour:$minute";
   }
 

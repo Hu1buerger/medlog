@@ -3,12 +3,12 @@ import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
-class StockItemCard extends StatelessWidget{
-
+class StockItemCard extends StatelessWidget {
   final StockItem stockItem;
+
   const StockItemCard({Key? key, required this.stockItem}) : super(key: key);
 
-  Widget buildState(BuildContext context){
+  Widget buildState(BuildContext context) {
     return CircleAvatar(
       backgroundColor: Colors.grey,
       child: Text(stockItem.state == StockState.open ? "O" : "C"),

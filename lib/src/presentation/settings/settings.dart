@@ -42,13 +42,13 @@ class _SettingsState extends State<Settings> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (bc, asyncSnapshot) {
-                if (asyncSnapshot.hasData == false) return const Text("versionNumber");
-                var packageInfo = asyncSnapshot.data!;
+                future: PackageInfo.fromPlatform(),
+                builder: (bc, asyncSnapshot) {
+                  if (asyncSnapshot.hasData == false) return const Text("versionNumber");
+                  var packageInfo = asyncSnapshot.data!;
 
-                return Text("${packageInfo.version}+${packageInfo.buildNumber}");
-              }),
+                  return Text("${packageInfo.version}+${packageInfo.buildNumber}");
+                }),
             ElevatedButton(
               onPressed: () async {
                 try {

@@ -11,8 +11,8 @@ import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
-import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
 
 /// Supports adding a logentry to the log
 ///

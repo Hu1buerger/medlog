@@ -25,7 +25,7 @@ class MedicationIntakeDetails extends StatelessWidget {
     );
   }
 
-  void onDelete(BuildContext context){
+  void onDelete(BuildContext context) {
     _logger.fine("onDelete for $entry");
     logController.delete(entry);
     Navigator.of(context).pop();

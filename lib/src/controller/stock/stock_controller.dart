@@ -26,7 +26,7 @@ class StockController with ChangeNotifier {
     return stock.where((element) => element.expiryDate.isAfter(date)).toList();
   }
 
-  double remainingUnits(Pharmaceutical p){
+  double remainingUnits(Pharmaceutical p) {
     var stockOfP = stockItemByPharmaceutical(p);
 
     return stockOfP.isEmpty ? 0 : stockOfP.map((e) => e.amount).reduce((value, element) => value += element);
@@ -59,15 +59,16 @@ class StockController with ChangeNotifier {
   }
 
   /// takes amount * units from the stockItem and returns how many couldn't be satisfied
-  double takeFromStockItem(StockItem item, double amount){
+  double takeFromStockItem(StockItem item, double amount) {
     assert(stock.contains(item));
 
-    logger.finest("taking $amount from ${item.id} ${item.pharmaceutical.displayName} which has ${item.amount} units remaining");
+    logger.finest(
+        "taking $amount from ${item.id} ${item.pharmaceutical.displayName} which has ${item.amount} units remaining");
 
     double remainingAmount = 0;
-    if(item.amount >= amount){
+    if (item.amount >= amount) {
       item.amount -= amount;
-    }else{
+    } else {
       remainingAmount = amount - item.amount;
       item.amount = 0;
     }
@@ -76,15 +77,15 @@ class StockController with ChangeNotifier {
     return remainingAmount;
   }
 
-  void _updateItem(StockItem item){
+  void _updateItem(StockItem item) {
     assert(stock.contains(item));
     assert(item.amount >= 0);
 
-    if(item.amount < 0){
+    if (item.amount < 0) {
       logger.severe("items {${item.id} ${item.pharmaceutical.displayName}} amount is less than 0.", item.toJson());
     }
 
-    if(item.amount == 0){
+    if (item.amount == 0) {
       stock.remove(item);
     }
 
@@ -95,8 +96,7 @@ class StockController with ChangeNotifier {
     var items = await service.loadFromDisk();
 
     for (var i in items) {
-      var pharmaceutical =
-          pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
+      var pharmaceutical = pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
       if (pharmaceutical == null) logger.severe("cannot rehydrate for ${i.id}");
       i.pharmaceutical = pharmaceutical!;
     }
@@ -109,7 +109,7 @@ class StockController with ChangeNotifier {
   }
 
   void openItem(StockItem stockItem) {
-    if(stockItem.state == StockState.closed){
+    if (stockItem.state == StockState.closed) {
       stockItem.state = StockState.open;
       logger.fine("opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
       notifyListeners();
