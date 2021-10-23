@@ -13,12 +13,18 @@ part 'pharmaceutical.g.dart';
 class Pharmaceutical {
   static const String emptyID = "";
 
+  /// the id of this pharmaceutical
+  @JsonKey(name: "id")
   String id;
 
   final DocumentState documentState;
 
+  /// the name under which humans buy / know this medication
   // ignore: non_constant_identifier_names
-  final String human_known_name;
+  final String? human_known_name;
+
+  /// the name under which the pharmaceutical gets marketed
+  /// I.e. Ibuflam 400mg where "Ibuflam" is the tradename and "Ibuflam 400mg" is the name that humans use
   final String tradename;
   final Dosage dosage;
   final String? activeSubstance;
@@ -28,33 +34,53 @@ class Pharmaceutical {
   /// this would be = 0.5 if this pharmaceutical is halfable
   final double smallestConsumableUnit;
 
-  String get displayName => human_known_name;
+  /// the string to display for the user
+  String get displayName => human_known_name ?? tradename;
 
-  bool get id_is_set => id.isNotEmpty;
-
+  /// marks that this item has a id. this shall be valid
+  bool get isIded => id.isNotEmpty;
 
   /// dont call me directly
-  Pharmaceutical({required this.tradename,
-    required this.dosage,
-    required this.activeSubstance,
-    String? human_known_name,
-    this.documentState = DocumentState.user_created,
-    // dont use emptyID here bcs JsonSerializable cannot handle it rn see https://github.com/google/json_serializable.dart/issues/994
-    this.id = Pharmaceutical.emptyID,
-    this.smallestConsumableUnit = 1})
-      : human_known_name = human_known_name ?? tradename;
+  Pharmaceutical(
+      {required this.tradename,
+      required this.dosage,
+      required this.activeSubstance,
+      this.human_known_name,
+      this.documentState = DocumentState.user_created,
+      this.id = Pharmaceutical.emptyID,
+      this.smallestConsumableUnit = 1});
 
   factory Pharmaceutical.fromJson(Map<String, dynamic> json) => _$PharmaceuticalFromJson(json);
 
+  Map<String, dynamic> _convertV1Json(Map<String, dynamic> json) {
+    /* As to v1.0.1+5 this was the jsonFormat
+        {
+        "id": "97a724a1-d6e5-4722-bce1-14bd08c2d521",
+        "documentState": "in_review",
+        "human_known_name": "Naproxen 500mg",
+        "tradename": "Naproxen",
+        "dosage": "500mg",
+        "activeSubstance": "Naproxen"
+        },
+     */
+
+    int version = 0;
+    Map<String, dynamic> newJson = {"id": json["id"], "version": version};
+
+    throw UnimplementedError();
+    return newJson;
+  }
+
   /// consider carefully if changing a value is a good idea
-  Pharmaceutical cloneAndUpdate({String? humanName,
-    String? tradename,
-    Dosage? dosage,
-    String? activeSubstance,
-    String? pzn,
-    DocumentState? documentState,
-    String? id,
-    double? smallestPartialUnit}) {
+  Pharmaceutical cloneAndUpdate(
+      {String? humanName,
+      String? tradename,
+      Dosage? dosage,
+      String? activeSubstance,
+      String? pzn,
+      DocumentState? documentState,
+      String? id,
+      double? smallestPartialUnit}) {
     return Pharmaceutical(
         tradename: tradename ?? this.tradename,
         dosage: dosage ?? this.dosage,
@@ -67,12 +93,12 @@ class Pharmaceutical {
   }
 
   Map<String, dynamic> toJson() {
-    assert(id_is_set);
+    assert(isIded);
     return _$PharmaceuticalToJson(this);
   }
 }
 
-class DosageJsonConverter extends JsonConverter<Dosage, String>{
+class DosageJsonConverter extends JsonConverter<Dosage, String> {
   const DosageJsonConverter();
 
   @override

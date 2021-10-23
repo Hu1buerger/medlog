@@ -13,7 +13,7 @@ class PharmaceuticalRef implements Pharmaceutical {
   set id(value) => ref.id = value;
 
   @override
-  bool get id_is_set => ref.id_is_set;
+  bool get isIded => ref.isIded;
 
   @override
   DocumentState get documentState => ref.documentState;
@@ -28,7 +28,7 @@ class PharmaceuticalRef implements Pharmaceutical {
   double get smallestConsumableUnit => ref.smallestConsumableUnit;
 
   @override
-  String get human_known_name => ref.human_known_name;
+  String? get human_known_name => ref.human_known_name;
 
   @override
   String get tradename => ref.tradename;
@@ -44,14 +44,15 @@ class PharmaceuticalRef implements Pharmaceutical {
   }
 
   @override
-  Pharmaceutical cloneAndUpdate({String? humanName,
-    String? tradename,
-    Dosage? dosage,
-    String? activeSubstance,
-    String? pzn,
-    DocumentState? documentState,
-    String? id,
-    double? smallestPartialUnit}) {
+  Pharmaceutical cloneAndUpdate(
+      {String? humanName,
+      String? tradename,
+      Dosage? dosage,
+      String? activeSubstance,
+      String? pzn,
+      DocumentState? documentState,
+      String? id,
+      double? smallestPartialUnit}) {
     ref = ref.cloneAndUpdate(
         humanName: humanName,
         tradename: tradename,

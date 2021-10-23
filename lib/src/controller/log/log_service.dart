@@ -12,8 +12,7 @@ class LogService extends StorageService<LogEvent> {
   static const String stockEventID = "SE";
   static const String medicationIntakaeEventID = "ME";
 
-  LogService()
-      : super("log", Logger("LogService"));
+  LogService() : super("log", Logger("LogService"));
 
   @override
   Future<List<LogEvent>> loadFromDisk() async {
@@ -23,21 +22,23 @@ class LogService extends StorageService<LogEvent> {
   }
 
   @override
-  LogEvent fromJson(Map<String, dynamic> json){
-    if(json.isEmpty) throw ArgumentError.value(json);
+  LogEvent fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty) throw ArgumentError.value(json);
 
     // wrap the json of a specific item into a jsonObject with type and body and id the runtimeType
-    if(json.containsKey(typeKey) == false){
+    if (json.containsKey(typeKey) == false) {
       logger.fine("hit an old log entry");
       // this is for keeping old logs intact
-      //TODO: the pharamceutical will be of Pharmaceutical Map but should be pharmaceuticalID = json["pharmaceutical"]["pharamceuticalID"]
-      var jsonBody = json;
-      json = {};
       json[typeKey] = medicationIntakaeEventID;
-      json[payloadKey] = jsonBody;
+      json[payloadKey] = {
+        "id": json["id"],
+        "pharmaceuticalID": json["pharmaceutical"]["id"],
+        "eventTime": json["adminDate"],
+        "amount": 1,
+      };
     }
 
-    switch(json[typeKey]){
+    switch (json[typeKey]) {
       case stockEventID:
         return StockEvent.fromJson(json[payloadKey]);
       case medicationIntakaeEventID:
@@ -50,20 +51,20 @@ class LogService extends StorageService<LogEvent> {
   }
 
   @override
-  Map<String, dynamic> toJson(LogEvent t){
+  Map<String, dynamic> toJson(LogEvent t) {
     Map<String, dynamic> json = {};
 
-    if(t is StockEvent){
+    if (t is StockEvent) {
       json[typeKey] = stockEventID;
       json[payloadKey] = t.toJson();
     }
 
-    if(t is MedicationIntakeEvent){
+    if (t is MedicationIntakeEvent) {
       json[typeKey] = medicationIntakaeEventID;
       json[payloadKey] = t.toJson();
     }
 
-    if(json.isEmpty){
+    if (json.isEmpty) {
       logger.severe("cannot serialze this logEvent $t");
     }
 

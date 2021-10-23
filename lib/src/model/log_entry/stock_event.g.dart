@@ -6,7 +6,7 @@ part of 'stock_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-StockEvent _$StockEventFromJson(Map<String, dynamic> json) => StockEvent._(
+StockEvent _$StockEventFromJson(Map<String, dynamic> json) => StockEvent(
       json['id'] as int,
       DateTime.parse(json['eventTime'] as String),
       json['pharmaceuticalID'] as String,

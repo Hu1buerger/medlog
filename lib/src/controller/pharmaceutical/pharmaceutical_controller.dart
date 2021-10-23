@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
@@ -26,18 +27,14 @@ class PharmaceuticalController with ChangeNotifier {
 
   List<Pharmaceutical> get pharmaceuticals => _pharmStore;
 
-  List<String> get tradenames {
-    return pharmaceuticals.map((e) => e.tradename).toSet().toList();
-  }
-
-  List<String> get humanKnownNames => pharmaceuticals.map((e) => e.human_known_name).toList();
+  List<String> get tradenames => pharmaceuticals.map((e) => e.tradename).toSet().toList();
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
   ///
   createPharmaceutical(Pharmaceutical p) {
     assert(p is PharmaceuticalRef == false);
     assert(p.documentState == DocumentState.user_created);
-    assert(p.id_is_set == false);
+    assert(p.isIded == false);
 
     p = p.cloneAndUpdate(id: _createPharmaID());
     addPharmaceutical(p);
@@ -70,22 +67,17 @@ class PharmaceuticalController with ChangeNotifier {
 
   /// adds a already known pharmaceutical back to the store
   ///
-  /// TODO: make sure that id s are unique. this includes updating user_created uuids if collision is detected.
-  ///     even though this is unlikely
-  ///
-  /// TODO: some duplicates not detected
-  ///
   /// inserting takes an amortized constant time
   /// if checking for duplicates is necessary the worst case runtime should be O(N) where N is the length of known pharmaceuticals
   @visibleForTesting
   void addPharmaceutical(Pharmaceutical pharmaceutical) {
-    assert(pharmaceutical.id_is_set);
+    assert(pharmaceutical.isIded);
 
     if (pharmaceutical is PharmaceuticalRef == false) {
       pharmaceutical = PharmaceuticalRef.toRef(pharmaceutical);
     }
 
-    if(pharmaceutical.activeSubstance == "Naproxen"){
+    if (pharmaceutical.activeSubstance == "Naproxen") {
       //TODO: update on remote and remove. THis is only for testing...
       print("updating naproxen to 0.5");
       pharmaceutical.cloneAndUpdate(smallestPartialUnit: 0.5);
@@ -101,7 +93,7 @@ class PharmaceuticalController with ChangeNotifier {
       // if there is a collison;
       // might / should be a method of Pharmaceutical?
       bool isEqual = other.activeSubstance == toInsert.activeSubstance &&
-          other.dosage == toInsert.dosage &&
+          other.dosage.toString() == toInsert.dosage.toString() &&
           other.tradename == toInsert.tradename &&
           other.human_known_name == toInsert.human_known_name;
 
@@ -159,7 +151,7 @@ class PharmaceuticalController with ChangeNotifier {
 
   Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, Dosage dose) {
     var p = pharmaceuticals
-        .where((element) => element.human_known_name.startsWith(tradename))
+        .where((element) => element.displayName.startsWith(tradename))
         .where((element) => element.dosage == dose)
         .toList();
 
@@ -168,13 +160,8 @@ class PharmaceuticalController with ChangeNotifier {
     return p.isNotEmpty ? p.first : null;
   }
 
-  List<Pharmaceutical> filter(String query) {
-    var filters = [
-      (Pharmaceutical p, String queryString) => p.human_known_name.contains(queryString),
-      (Pharmaceutical p, String queryString) => p.tradename.contains(queryString),
-    ];
-
-    return pharmaceuticals.where((element) => filters.map((e) => e(element, query)).contains(true)).toList();
+  List<Pharmaceutical> filter(String query, List<PharmaceuticalFilter> filter) {
+    return PharmaceuticalFilter.filter(filter, pharmaceuticals, query);
   }
 
   bool _isValidPharmaID(String id) {

@@ -39,7 +39,8 @@ class OptionSelector<T> extends StatefulWidget {
   final void Function(T value) onSelectValue;
   final int selected;
 
-  const OptionSelector({Key? key, required this.options, required this.onSelectValue, this.selected = -1}) : super(key: key);
+  const OptionSelector({Key? key, required this.options, required this.onSelectValue, this.selected = -1})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _OptionSelectorState<T>();
@@ -177,7 +178,7 @@ class VariableOptionWidget<T extends num, S extends VariableOption<T>> extends S
   State<StatefulWidget> createState() => _VariableOptionWidgetState<T, S>();
 }
 
-class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> extends State<VariableOptionWidget<T,S>> {
+class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> extends State<VariableOptionWidget<T, S>> {
   VariableOption<T> get option => widget.option;
 
   bool get selected => widget.selected;
@@ -190,14 +191,15 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
     value = option.value;
   }
 
-  void setOptionValue(num value){
+  void setOptionValue(num value) {
     assert(option.value is T);
 
-    if(option.value is int){
+    if (value < option.min) value = option.min;
+
+    if (option.value is int) {
       option.value = value.toInt() as T;
     }
-
-    if(option.value is double){
+    if (option.value is double) {
       option.value = value.toDouble() as T;
     }
   }

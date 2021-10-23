@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class PharmaceuticalSelector extends StatefulWidget {
@@ -60,7 +61,7 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
   }
 
   void updateQuery(String query) {
-    var options = pharmaController.filter(query);
+    var options = pharmaController.filter(query, PharmaceuticalFilter.all());
     logger.fine("updated current options to ${options.length}");
 
     setOptions(options);
@@ -81,7 +82,7 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
   ///  - 1 remaining option => handle as if the user selected this option
   ///  - > 1 remaining options => just update the options
   void onEditingComplete(BuildContext context) {
-    if(options.isEmpty){
+    if (options.isEmpty) {
       logger.fine("Editing complete with query ${searchQueryController.text} and no remaining options");
       widget.onSelectionFailed(searchQueryController.text);
       return;
@@ -91,7 +92,7 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
     if (options.length == 1) {
       state = "found and selected the last remaining option";
       setPharmaceutical(options.single);
-    }else if(options.isNotEmpty){
+    } else if (options.isNotEmpty) {
       state = "and #${options.length} options remain";
     }
 
