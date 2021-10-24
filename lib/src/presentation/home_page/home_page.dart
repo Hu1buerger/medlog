@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/presentation/home_page/log_view.dart';
-import 'package:medlog/src/presentation/home_page/view_stock.dart';
+import 'package:medlog/src/presentation/log/log_view.dart';
+import 'package:medlog/src/presentation/stock/view_stock.dart';
 
 class HomePage extends StatefulWidget {
   static const String route = "/home";

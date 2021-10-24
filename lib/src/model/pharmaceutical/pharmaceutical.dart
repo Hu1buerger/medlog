@@ -32,7 +32,8 @@ class Pharmaceutical {
   /// the smallest unit one can take
   ///
   /// this would be = 0.5 if this pharmaceutical is halfable
-  final double smallestConsumableUnit;
+  final double? _minUnit;
+  double get smallestConsumableUnit => _minUnit ?? 0.25;
 
   /// the string to display for the user
   String get displayName => human_known_name ?? tradename;
@@ -48,27 +49,15 @@ class Pharmaceutical {
       this.human_known_name,
       this.documentState = DocumentState.user_created,
       this.id = Pharmaceutical.emptyID,
-      this.smallestConsumableUnit = 1});
+      double? smallestConsumableUnit})
+      : _minUnit = smallestConsumableUnit;
 
   factory Pharmaceutical.fromJson(Map<String, dynamic> json) => _$PharmaceuticalFromJson(json);
 
-  Map<String, dynamic> _convertV1Json(Map<String, dynamic> json) {
-    /* As to v1.0.1+5 this was the jsonFormat
-        {
-        "id": "97a724a1-d6e5-4722-bce1-14bd08c2d521",
-        "documentState": "in_review",
-        "human_known_name": "Naproxen 500mg",
-        "tradename": "Naproxen",
-        "dosage": "500mg",
-        "activeSubstance": "Naproxen"
-        },
-     */
-
-    int version = 0;
-    Map<String, dynamic> newJson = {"id": json["id"], "version": version};
-
-    throw UnimplementedError();
-    return newJson;
+  Map<String, dynamic> toJson() {
+    assert(isIded);
+    var json = _$PharmaceuticalToJson(this);
+    return json;
   }
 
   /// consider carefully if changing a value is a good idea
@@ -90,11 +79,6 @@ class Pharmaceutical {
         documentState: documentState ?? this.documentState,
         id: id ?? this.id,
         smallestConsumableUnit: smallestPartialUnit ?? smallestConsumableUnit);
-  }
-
-  Map<String, dynamic> toJson() {
-    assert(isIded);
-    return _$PharmaceuticalToJson(this);
   }
 }
 

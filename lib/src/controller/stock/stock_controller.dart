@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
@@ -14,7 +15,8 @@ class StockController with ChangeNotifier {
   Uuid uuid = const Uuid();
 
   StockService service;
-  List<StockItem> stock = [];
+  List<StockItem> _stock = [];
+  List<StockItem> get stock => _stock;
 
   StockController(this.service, this.pharmaController);
 
@@ -101,7 +103,8 @@ class StockController with ChangeNotifier {
       i.pharmaceutical = pharmaceutical!;
     }
 
-    stock = items;
+    _stock = items;
+    notifyListeners();
   }
 
   Future store() {
@@ -114,5 +117,22 @@ class StockController with ChangeNotifier {
       logger.fine("opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
       notifyListeners();
     }
+  }
+
+  void updateStockState(StockItem stockItem, StockState state) {
+    if (stockItem.state == state) return;
+
+    logger.fine(
+        "setting StockItem{id:${stockItem.id}} stockState from ${describeEnum(stockItem.state)} to ${describeEnum(state)}");
+    stockItem.state = state;
+    notifyListeners();
+  }
+
+  void delete(StockItem stockItem) {
+    //TODO: handle linked StockEvents and remove them
+    assert(stock.contains(stockItem));
+
+    stock.remove(stockItem);
+    notifyListeners();
   }
 }

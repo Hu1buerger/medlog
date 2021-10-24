@@ -11,8 +11,8 @@ import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
-import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -242,18 +242,20 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
     // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
-      PharmaceuticalCard(
-        pharmaceutical: selectedPharmaceutical!,
-        units: selectedUnits,
-        onLongPress: () {
-          assert(selectedPharmaceutical != null);
-          assert(modus != _Modus.searching);
+      Card(
+        child: PharmaceuticalWidget(
+          pharmaceutical: selectedPharmaceutical!,
+          units: selectedUnits,
+          onLongPress: () {
+            assert(selectedPharmaceutical != null);
+            assert(modus != _Modus.searching);
 
-          selectedPharmaceutical = null;
-          modus = _Modus.searching;
+            selectedPharmaceutical = null;
+            modus = _Modus.searching;
 
-          setState(() {});
-        },
+            setState(() {});
+          },
+        ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),

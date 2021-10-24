@@ -23,7 +23,7 @@ class VariableOption<T extends num> extends Option<T> {
   T max;
   T step;
 
-  VariableOption({required value, String? title = "custom", String? leading, num min = 0, num max = 1, num step = 1})
+  VariableOption({required T value, String? title = "custom", String? leading, num min = 0, num max = 1, num step = 1})
       : min = min as T,
         max = max as T,
         step = step as T,
@@ -82,13 +82,7 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
     int index = widget.options.indexOf(option);
     assert(index >= 0);
 
-    if (option.fixedValue) {
-      return FixedOptionWidget(
-        option: option,
-        selected: selected,
-        onPressed: () => onClickOnItem(index),
-      );
-    } else {
+    if (option is VariableOption) {
       // just assume that it is a double but should be changed
       return VariableOptionWidget(
         option: option as VariableOption,
@@ -97,6 +91,12 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
         onValueChange: () => onValueChange(option),
       );
     }
+
+    return FixedOptionWidget(
+      option: option,
+      selected: selected,
+      onPressed: () => onClickOnItem(index),
+    );
   }
 
   @override

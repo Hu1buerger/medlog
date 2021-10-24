@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 class PharmaceuticalSelector extends StatefulWidget {
   final PharmaceuticalController pharmaceuticalController;
@@ -140,16 +141,11 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
               itemBuilder: (BuildContext context, int index) {
                 var currentItem = options[index];
 
-                return ListTile(
-                  title: Text(currentItem.displayName),
-                  subtitle: Row(
-                    children: [
-                      Text(currentItem.activeSubstance ?? ""),
-                      const SizedBox(width: 10),
-                      Text(currentItem.dosage.toString())
-                    ],
+                return Card(
+                  child: PharmaceuticalWidget(
+                    pharmaceutical: currentItem,
+                    onTap: () => setPharmaceutical(currentItem),
                   ),
-                  onTap: () => setPharmaceutical(currentItem),
                 );
               },
             ),

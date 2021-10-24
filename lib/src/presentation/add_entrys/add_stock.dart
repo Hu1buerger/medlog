@@ -7,11 +7,11 @@ import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/presentation/stock/stock_item_card.dart';
 import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
-import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
-import 'package:medlog/src/presentation/widgets/stock_item_card.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 // ignore_for_file: curly_braces_in_flow_control_structures
 
@@ -169,9 +169,11 @@ class _AddStockState extends State<AddStock> {
 
     return Column(
       children: [
-        PharmaceuticalCard(
-          pharmaceutical: pharmaceutical!,
-          onLongPress: () => setState(() => pharmaceutical = null),
+        Card(
+          child: PharmaceuticalWidget(
+            pharmaceutical: pharmaceutical!,
+            onLongPress: () => setState(() => pharmaceutical = null),
+          ),
         ),
         OptionSelector<num>(options: quantityOptions, onSelectValue: setQuantity, selected: -1),
       ],
@@ -185,9 +187,11 @@ class _AddStockState extends State<AddStock> {
 
     return Column(
       children: [
-        PharmaceuticalCard(
-          pharmaceutical: pharmaceutical!,
-          onLongPress: () => setState(() => pharmaceutical = null),
+        Card(
+          child: PharmaceuticalWidget(
+            pharmaceutical: pharmaceutical!,
+            onLongPress: () => setState(() => pharmaceutical = null),
+          ),
         ),
         OptionSelector(
             options: quantityOptions,

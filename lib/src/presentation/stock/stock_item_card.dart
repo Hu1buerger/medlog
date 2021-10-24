@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
-import 'package:medlog/src/presentation/widgets/pharmaceutical_card.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 class StockItemCard extends StatelessWidget {
   final StockItem stockItem;
 
-  const StockItemCard({Key? key, required this.stockItem}) : super(key: key);
+  final void Function()? onTap;
+  final void Function()? onLongPress;
+
+  const StockItemCard({Key? key, required this.stockItem, this.onTap, this.onLongPress}) : super(key: key);
 
   Widget buildState(BuildContext context) {
     return CircleAvatar(
@@ -20,7 +23,7 @@ class StockItemCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: buildState(context),
-        title: PharmaceuticalCard(pharmaceutical: stockItem.pharmaceutical),
+        title: PharmaceuticalWidget(pharmaceutical: stockItem.pharmaceutical),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,6 +31,8 @@ class StockItemCard extends StatelessWidget {
             Text("expires on: ${stockItem.expiryDate.dateString()}")
           ],
         ),
+        onTap: onTap,
+        onLongPress: onLongPress,
       ),
     );
   }

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
-import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
+import 'package:medlog/src/presentation/log/medication_intake_details.dart';
+import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 /// see this for https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.5
@@ -97,25 +98,13 @@ class DateChipSmusher extends StatelessWidget {
 
   const DateChipSmusher({Key? key, required this.child, this.dateTime}) : super(key: key);
 
-  String formatDate() {
-    DateTime now = DateTime.now();
-    if (dateTime == null) return "";
-
-    if (dateTime!.isSameDay(now)) return "today";
-    if (dateTime!.isSameDay(now.subtract(const Duration(days: 1)))) {
-      return "yesterday";
-    }
-
-    return dateTime!.dateString();
-  }
-
   @override
   Widget build(BuildContext context) {
     if (dateTime != null) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Chip(label: Text(formatDate())),
+          Chip(label: DateTimeWidget(dateTime: dateTime!, showDate: true, showTime: false)),
           child,
         ],
       );

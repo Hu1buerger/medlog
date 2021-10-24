@@ -4,19 +4,22 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
+import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
 import 'package:medlog/src/presentation/add_entrys/add_stock.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
+import 'package:medlog/src/presentation/log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
-import 'package:medlog/src/presentation/view_log/medication_intake_details.dart';
+import 'package:medlog/src/presentation/stock/stock_item_detail.dart';
 
 import 'controller/log/log_controller.dart';
 import 'controller/pharmaceutical/pharmaceutical_controller.dart';
 
 /// The Widget that configures your application.
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key, required this.logController, required this.pharmaController, required this.stockController})
+class MedlogApp extends StatefulWidget {
+  const MedlogApp(
+      {Key? key, required this.logController, required this.pharmaController, required this.stockController})
       : super(key: key);
 
   final LogController logController;
@@ -27,7 +30,7 @@ class MyApp extends StatefulWidget {
   State<StatefulWidget> createState() => _AppState();
 }
 
-class _AppState extends State<MyApp> with WidgetsBindingObserver {
+class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
   @override
   void initState() {
     print("init");
@@ -104,6 +107,11 @@ class _AppState extends State<MyApp> with WidgetsBindingObserver {
                 return MedicationIntakeDetails(
                   entry: routeSettings.arguments! as MedicationIntakeEvent,
                   logController: widget.logController,
+                );
+              case StockItemDetail.routeName:
+                return StockItemDetail(
+                  stockItem: routeSettings.arguments! as StockItem,
+                  stockController: widget.stockController,
                 );
               case Settings.route_name:
                 return Settings(

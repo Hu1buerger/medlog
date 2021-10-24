@@ -6,6 +6,8 @@ import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_stock.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
+import 'package:medlog/src/presentation/stock/stock_item_card.dart';
+import 'package:medlog/src/presentation/stock/stock_item_detail.dart';
 
 class StockView extends StatefulWidget with HomePagePage {
   static const String routeName = "/viewStock";
@@ -51,26 +53,23 @@ class StockView extends StatefulWidget with HomePagePage {
 class _StockViewState extends State<StockView> {
   static final Logger _logger = Logger("ViewStock");
 
-  late List<StockItem> stock;
+  List<StockItem> get stock => widget.stockController.stock;
 
   @override
   void initState() {
     super.initState();
-    stock = widget.stockController.stock;
     widget.stockController.addListener(stockChanged);
   }
 
   @override
   void dispose() {
     super.dispose();
-
     widget.stockController.removeListener(stockChanged);
   }
 
   void stockChanged() {
     _logger.fine("stock changed");
 
-    stock = widget.stockController.stock;
     setState(() {});
   }
 
@@ -85,20 +84,12 @@ class _StockViewState extends State<StockView> {
         itemBuilder: (BuildContext context, int index) {
           var stockItem = stock[index];
 
-          ///TODO: show all relevant details onClick
-          /// for now
-          ///
+          /// TODO: show all relevant details onClick
           /// remaining days til spoiled stockItem.expiryDate.difference(DateTime.now()).inDays.toString()
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.grey,
-              child: Text(stockItem.state == StockState.open ? "O" : "C"),
-            ),
-            title: Text(stockItem.pharmaceutical.displayName),
-            trailing: Text(stockItem.amount.toString()),
-            onLongPress: () {
-              widget.stockController.openItem(stockItem);
-            },
+          return StockItemCard(
+            stockItem: stockItem,
+            onTap: () => Navigator.pushNamed(context, StockItemDetail.routeName, arguments: stockItem),
+            onLongPress: () => widget.stockController.openItem(stockItem),
           );
         },
       );
