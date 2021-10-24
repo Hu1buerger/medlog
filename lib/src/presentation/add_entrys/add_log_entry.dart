@@ -1,12 +1,18 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/administration_log/log_controller.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_pharmaceutical.dart';
+import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
+import 'package:medlog/src/presentation/widgets/option_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
+import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -19,8 +25,11 @@ class AddLogEntry extends StatefulWidget {
 
   final PharmaceuticalController pharmaController;
   final LogController logController;
+  final StockController stockController;
 
-  const AddLogEntry({Key? key, required this.pharmaController, required this.logController}) : super(key: key);
+  const AddLogEntry(
+      {Key? key, required this.pharmaController, required this.logController, required this.stockController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddLogEntryState();
@@ -37,7 +46,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   LogController get logController => widget.logController;
 
-  TextEditingController searchQueryController = TextEditingController();
+  StockController get stockController => widget.stockController;
+
   TextEditingController adminDateController = TextEditingController();
 
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
@@ -45,94 +55,124 @@ class _AddLogEntryState extends State<AddLogEntry> {
   _Modus modus = _Modus.searching;
   Pharmaceutical? selectedPharmaceutical;
   DateTime adminTime = DateTime.now();
+  double selectedUnits = 1;
 
   _AddLogEntryState();
 
   @override
   void initState() {
     super.initState();
-    currentOptions = pharmaController.pharmaceuticals;
-    logger.fine("init ${currentOptions.length}");
+    logger.fine("initializing with options ${currentOptions.length}");
 
-    pharmaController.addListener(onPharmaControllerChange);
     setAdministrationDateTime(adminTime);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    pharmaController.removeListener(onPharmaControllerChange);
-  }
-
-  void onPharmaControllerChange(){
-    logger.fine("change in pharmaController");
-    updateQuery(searchQueryController.text);
   }
 
   void onReset(BuildContext context) {
     modus = _Modus.searching;
-    searchQueryController.text = "";
-    updateQuery("");
+
+    //TODO persist query;
+    //TODO: reset all items.
   }
 
-  void onDone(BuildContext context) {
+  void onCommitIntake(BuildContext context) {
     if (selectedPharmaceutical == null) return;
 
-    logController.addLogEntry(selectedPharmaceutical!, adminTime);
+    commitIntake(context);
+  }
+
+  commitIntake(BuildContext context) async {
+    assert(selectedPharmaceutical != null);
+
+    if (selectedUnits % selectedPharmaceutical!.smallestConsumableUnit != 0) {
+      logger.info("selected unit is not safely supported");
+    }
+
+    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime, selectedUnits);
+
+    if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
+      logger.severe(
+          "to little stock to log the event and insure that the stock remains in a valid state aka contains no negative items");
+      // as for now set source to stock.
+      intakeEvent.source = PharmaceuticalSource.other;
+
+      //TODO: inform the user that we he tries to perform non-stock-backed operation
+      logController.addMedicationIntake(intakeEvent);
+
+      Navigator.pop(context);
+      return;
+    }
+
+    double remainingUnits = intakeEvent.amount;
+
+    while (remainingUnits > 0) {
+      var stockItems = stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
+      var openItems = stockItems.where((element) => element.state == StockState.open);
+
+      StockItem? stockItemToTakeFrom;
+
+      if (openItems.length != 1) {
+        logger.severe("no open items to take from");
+        await showDialog(
+            context: context,
+            builder: (context) {
+              var options = List.generate(stockItems.length, (index) {
+                var stockItem = stockItems[index];
+                return SimpleDialogOption(
+                  onPressed: () {
+                    if (stockItem.state == StockState.closed) {
+                      stockController.openItem(stockItem);
+                    }
+                    stockItemToTakeFrom = stockItem;
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                      "${describeEnum(stockItem.state)[0]} ${stockItem.pharmaceutical.displayName} spoils on ${stockItem.expiryDate.toString()}"),
+                );
+              });
+
+              return SimpleDialog(
+                title: Text("select item to take from"),
+                children: [...options],
+              );
+            });
+      } else {
+        stockItemToTakeFrom = openItems.single;
+      }
+
+      assert(stockItemToTakeFrom!.pharmaceutical == intakeEvent.pharmaceutical);
+
+      if (stockItemToTakeFrom!.amount < intakeEvent.amount) {
+        logger.severe("unhandled the stock has to little units available to handle this shit");
+      }
+
+      remainingUnits = stockController.takeFromStockItem(stockItemToTakeFrom!, intakeEvent.amount);
+    }
+
+    // as for now set source to stock.
+    intakeEvent.source = PharmaceuticalSource.stock;
+    logController.addMedicationIntake(intakeEvent);
+
     Navigator.pop(context);
-  }
-
-  List<Pharmaceutical> sortPharmaceuticals(List<Pharmaceutical> list) {
-    list.sort((a, b) => a.displayName.compareTo(b.displayName));
-    return list;
-  }
-
-  void updateQuery(String query) {
-    currentOptions = sortPharmaceuticals(pharmaController.filter(query));
-    logger.fine("updated current options to ${currentOptions.length}");
-
-    setState(() {});
-    /*if (currentOptions.isEmpty) {
-      modus = _Modus.failed;
-      onSearchEmpty(context);
-    } else {}*/
-  }
-
-  void setPharmaceutical(Pharmaceutical p) {
-    print("Selecting ${p.id} ${p.displayName}");
-
-    selectedPharmaceutical = p;
-    modus = _Modus.medication_selected;
-    setState(() {});
-  }
-
-  void unselectPharmaceutical() {
-    modus = _Modus.searching;
-    selectedPharmaceutical = null;
-    setState(() {});
+    return true;
   }
 
   void setAdministrationDateTime(DateTime dateTime) {
     adminTime = dateTime;
-    adminDateController.text = adminTime.toIso8601String();
-    // no need to setState bcs the TextController will update the neccessary widget
+  }
+
+  void onSelectUnits(double units) {
+    if (selectedUnits != units) {
+      logger.finest("updating the selectedUnits to $units");
+      selectedUnits = units;
+      setState(() {});
+    }
   }
 
   void onSearchEmpty(BuildContext context) async {
     String result = await selectAddPharmaceutical(context);
     if (result == DIALOG_ADD_PHARM_OK) {
-      Navigator.of(context).popAndPushNamed(AddPharmaceutical.route_name);
+      Navigator.of(context).popAndPushNamed(AddPharmaceutical.routeName);
     }
-  }
-
-  void onEditingComplete(BuildContext context) {
-    logger.fine("Editing complete with ${searchQueryController.text}");
-
-    if (currentOptions.isEmpty) {
-      modus = _Modus.failed;
-    }
-
-    if (modus == _Modus.failed) onSearchEmpty(context);
   }
 
   /// shows the dialog to select whether or not to add a new pharmaceutical
@@ -164,65 +204,23 @@ class _AddLogEntryState extends State<AddLogEntry> {
     return selectedOption;
   }
 
-  /// shows the dialog to select the administrationDateTime
-  void selectAdministrationDateTime(BuildContext context) async {
-    final kindaTomorrow = DateTime.now().add(const Duration(days: 2));
-    final tomorrow = DateTime(kindaTomorrow.year, kindaTomorrow.month, kindaTomorrow.day);
-    final lastYear = DateTime.now().add(const Duration(days: -365));
-
-    DateTime? selectedDate =
-        await showDatePicker(context: context, initialDate: adminTime, firstDate: lastYear, lastDate: tomorrow);
-
-    if (selectedDate == null) return;
-
-    var selectedTime = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(adminTime));
-
-    if (selectedTime == null) return;
-
-    var dateInMicrosecSinceEpoch = selectedDate.microsecondsSinceEpoch + selectedTime.toMicroseconds();
-    var selectedDateTime = DateTime.fromMicrosecondsSinceEpoch(dateInMicrosecSinceEpoch);
-
-    setAdministrationDateTime(selectedDateTime);
-  }
-
   Widget buildSearchWindow(BuildContext context) {
     assert(modus == _Modus.searching);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            controller: searchQueryController,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
-            autocorrect: false,
-            onChanged: (value) => updateQuery(value),
-            onEditingComplete: () => onEditingComplete(context),
-          ),
-        ),
-        Expanded(
-            child: Card(
-          child: ListView.builder(
-              itemCount: currentOptions.length,
-              itemBuilder: (BuildContext context, int index) {
-                var currentItem = currentOptions[index];
+    // maybe use GLobalKey to get info about the state. (why would we?)
+    // maybe the pharmaceuticalSelector should handle empty options or callback onOptionsEmpty and/or callback the query
+    return PharmaceuticalSelector(
+      pharmaceuticalController: pharmaController,
+      onSelectionChange: (Pharmaceutical? p) {
+        if (selectedPharmaceutical == p) return;
 
-                return ListTile(
-                  title: Text(currentItem.displayName),
-                  subtitle: Row(
-                    children: [
-                      Text(currentItem.activeSubstance ?? ""),
-                      const SizedBox(width: 10),
-                      Text(currentItem.dosage)
-                    ],
-                  ),
-                  onTap: () => setPharmaceutical(currentItem),
-                );
-              }),
-        )),
-      ],
+        if (p == null) modus = _Modus.searching;
+        if (p != null) modus = _Modus.medication_selected;
+
+        selectedPharmaceutical = p;
+        setState(() {});
+      },
+      onSelectionFailed: (query) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 
@@ -230,28 +228,48 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(modus == _Modus.medication_selected);
     assert(selectedPharmaceutical != null);
 
-    //TODO: add dismissable to swipe on the Card to unselect
-    // the list of items to display
+    double unitSize = selectedPharmaceutical!.smallestConsumableUnit;
+    var unitOptions = List<Option<num>>.generate(5, (index) {
+      double unitOption = unitSize * (index + 1);
+
+      return Option(
+        value: unitOption,
+      );
+    });
+
+    // TODO: do some elaborate shit to define minUnitSize and more
+    unitOptions.add(VariableOption(value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
+
+    // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
+      Card(
+        child: PharmaceuticalWidget(
+          pharmaceutical: selectedPharmaceutical!,
+          units: selectedUnits,
+          onLongPress: () {
+            assert(selectedPharmaceutical != null);
+            assert(modus != _Modus.searching);
+
+            selectedPharmaceutical = null;
+            modus = _Modus.searching;
+
+            setState(() {});
+          },
+        ),
+      ),
       Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: Card(
-            child: ListTile(
-              title: Text(selectedPharmaceutical!.tradename),
-              subtitle: Text("${selectedPharmaceutical!.activeSubstance} ${selectedPharmaceutical!.dosage}"),
-              onLongPress: unselectPharmaceutical,
-            ),
-          )),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: DateTimePicker(
+          onSelected: setAdministrationDateTime,
+        ),
+      ),
       Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: GestureDetector(
-            child: TextField(
-              controller: adminDateController,
-              decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)),
-              enabled: false, // disable the textinput, but also disables the onText
-            ),
-            onTap: () => selectAdministrationDateTime(context),
-          ))
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: OptionSelector<num>(
+          options: [...unitOptions],
+          onSelectValue: (num value) => onSelectUnits(value.toDouble()),
+        ),
+      )
     ];
 
     return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
@@ -283,7 +301,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             ),
             IconButton(
               icon: const Icon(Icons.done),
-              onPressed: () => onDone(context),
+              onPressed: () => onCommitIntake(context),
             ),
           ],
         ),
@@ -300,13 +318,4 @@ enum _Modus {
 
   /// search for a medication resulted in no found medication
   failed
-}
-
-extension MicrosecondableTimeOfDay on TimeOfDay {
-  static final minuteToMicrosecods = 6 * pow(10, 7);
-
-  /// converts timeOfDay to microseconds since
-  int toMicroseconds() {
-    return ((hour * 60 + minute) * minuteToMicrosecods).toInt();
-  }
 }

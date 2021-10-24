@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/administration_log/log_controller.dart';
-import 'package:medlog/src/model/log_entry/log_entry.dart';
+import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 
-class DetailedLogEntryWidget extends StatelessWidget {
+class MedicationIntakeDetails extends StatelessWidget {
   static const String routeName = "/detailedLogEntry";
   static const String title = "Details";
 
   static final Logger _logger = Logger("DetailedLogEntryWidget");
 
-  final LogEntry entry;
+  final MedicationIntakeEvent entry;
   final LogController logController;
 
-  const DetailedLogEntryWidget({Key? key, required this.entry, required this.logController}) : super(key: key);
+  const MedicationIntakeDetails({Key? key, required this.entry, required this.logController}) : super(key: key);
 
+  /// builds a widget with title and value
+  ///
+  /// displays title and value as a pair
   Widget buildTitleValue(String title, String value) {
     return TextField(
       controller: TextEditingController(text: "  $value"),
@@ -22,7 +25,7 @@ class DetailedLogEntryWidget extends StatelessWidget {
     );
   }
 
-  void onDelete(BuildContext context){
+  void onDelete(BuildContext context) {
     _logger.fine("onDelete for $entry");
     logController.delete(entry);
     Navigator.of(context).pop();
@@ -46,9 +49,9 @@ class DetailedLogEntryWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               buildTitleValue("Tradename:", entry.displayName),
-              buildTitleValue("Dosage:", entry.dosage),
+              buildTitleValue("Dosage:", entry.dosage.toString()),
               buildTitleValue("Active substance:", entry.activeSubstance),
-              buildTitleValue("Date:", entry.adminDate.toString()),
+              buildTitleValue("Date:", entry.eventTime.toString()),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: () => onDelete(context), child: const Text("delete me"))
             ],

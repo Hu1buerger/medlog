@@ -9,7 +9,7 @@ class StorageService<T> {
   static SharedPreferences? preferences;
 
   late final Logger logger;
-  final JsonConverter<T> _jsonConverter;
+  final JsonConverter<T>? _jsonConverter;
   final String _storageKey;
 
   List<T>? backLog;
@@ -17,7 +17,7 @@ class StorageService<T> {
 
   Stream<T> get events => _streamController.stream;
 
-  StorageService(String storageKey, JsonConverter<T> jsonConverter, this.logger)
+  StorageService(String storageKey, this.logger, {JsonConverter<T>? jsonConverter})
       : _storageKey = storageKey,
         _jsonConverter = jsonConverter {
     _streamController = initStreamController();
@@ -30,8 +30,10 @@ class StorageService<T> {
     });
   }
 
-  static Future _init() async {
+  Future<void> _init() async {
     if (preferences == null) {
+      logger.fine("initializing the SharedPreferences");
+
       WidgetsFlutterBinding.ensureInitialized();
       preferences = await SharedPreferences.getInstance();
     }
@@ -39,36 +41,45 @@ class StorageService<T> {
 
   /// loads the data from the local store.
   ///
-  Future<void> loadFromDisk() async {
+  Future<List<T>> loadFromDisk() async {
+    //assert(_streamController.hasListener == false);
+
     await _init();
+    await preferences!.reload();
+    logger.finest("starting to load from disk");
 
     var obsMaps = loadJsonObjects();
-    if (obsMaps.isEmpty) return;
+    if (obsMaps.isEmpty) {
+      return <T>[];
+    }
 
     // convert all objects;
     List<T> obs = [];
 
-    try {
-      obs = obsMaps.map(fromJson).toList();
+    for (var o in obsMaps) {
+      try {
+        var item = fromJson(o);
+        obs.add(item);
+        publish(item);
 
-      for (var e in obs) {
-        publish(e);
+        // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
+      } on CastError catch (e) {
+        logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
+        //combine all jsonobjects to a jsonList
+        onIllegalDataFormat(o);
       }
-      // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
-    } on CastError catch (e) {
-      logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
-      //combine all jsonobjects to a jsonList
-      onIllegalDataFormat(
-          "$_storageKey: [${obsMaps.map((e) => jsonEncode(e)).reduce((value, element) => value = value + "," + element)}]");
-      obs = <T>[];
     }
 
-    return;
+    logger.finest("finishing load with ${obs.length} items");
+    //assert(_streamController.hasListener == false);
+    return obs;
   }
 
   /// stores the data to the local file
   Future<void> store(List<T> list) async {
     await _init();
+
+    logger.finer("storing ${list.length} items");
 
     var strings = stringsEncode(list);
     var writeFut = preferences!.setStringList(_storageKey, strings.toList());
@@ -79,6 +90,7 @@ class StorageService<T> {
   /// cleares the local datarepo
   Future<void> clear() async {
     await _init();
+    logger.fine("clearing datarepo");
     preferences!.remove(_storageKey);
   }
 
@@ -86,8 +98,11 @@ class StorageService<T> {
   ///
   /// returns on done.
   /// EITHER getAll can be called XOR events.listen
-  Future<List<T>> getAll(){
+  Future<List<T>> getAll() async {
     assert(_streamController.hasListener == false);
+    logger.finest("requesting all knowledge as list");
+
+    //await diskLoadDone;
     return events.toList();
   }
 
@@ -105,17 +120,20 @@ class StorageService<T> {
       }
     }
 
+    logger.finest("publishing $t to the controller");
     _streamController.add(t);
   }
 
-  void _publishBackLog(){
+  void _publishBackLog() {
     assert(backLog == null || (backLog != null && (backLog!.isEmpty || _streamController.isClosed == false)));
 
     if (backLog != null) {
+      logger.finer("publishing the backlog with ${backLog!.length} items");
+
       var bLog = backLog!;
       //disable the backlog for now
       backLog = null;
-      for(var e in bLog){
+      for (var e in bLog) {
         publish(e);
       }
 
@@ -124,16 +142,34 @@ class StorageService<T> {
     }
   }
 
+  void enableBacklog() {
+    backLog ??= [];
+  }
+
+  void disableBacklog() {
+    if (backLog != null) {
+      _publishBackLog();
+      backLog = null;
+    }
+  }
+
+  void clearBacklog() {
+    if (backLog != null) {
+      backLog = [];
+    }
+  }
+
   /// signals that no new events will be emitted
-  void signalDone(){
-    if(_streamController.isClosed){
+  void signalDone() {
+    if (_streamController.isClosed) {
       logger.finest("signaling done to closed controller");
-      if(backLog?.isNotEmpty ?? false){
+      if (backLog?.isNotEmpty ?? false) {
         logger.severe("elements were backlogged but the eventStream was already closed");
       }
     }
 
     _publishBackLog();
+    logger.fine("signaling done");
     _streamController.close();
   }
 
@@ -141,7 +177,10 @@ class StorageService<T> {
   ///
   /// only conversion of encoding to Map<String, dynamic> aka jsonish
   List<Map<String, dynamic>> loadJsonObjects() {
-    if (preferences!.containsKey(_storageKey) == false) return [];
+    if (preferences!.containsKey(_storageKey) == false) {
+      logger.finest("storageKey: {$_storageKey} not known");
+      return [];
+    }
 
     final listOfJsons = preferences!.getStringList(_storageKey)!;
 
@@ -149,7 +188,7 @@ class StorageService<T> {
   }
 
   Iterable<Map<String, dynamic>> encodeToMaps(List<T> list) {
-    return list.map((e) => _jsonConverter.toJson(e));
+    return list.map((e) => toJson(e));
   }
 
   /// encodes the hole list to Strings using the jsonConverter object
@@ -159,20 +198,27 @@ class StorageService<T> {
     return strings;
   }
 
-  Future<void> onIllegalDataFormat(String data) async {
+  Future<void> onIllegalDataFormat(Map<String, dynamic> illegalDataformatItem) async {
     logger.severe("policy for illegalConversion is clearing...");
     //write the data to the disk as for now... this can be a security risk due to dumping possibly encrypted data to logcat
-    logger.info("dumping the contents: $data");
+    //"$_storageKey: [${obsMaps.map((e) => jsonEncode(e)).reduce((value, element) => value = value + "," + element)}]";
+    logger.info("dumping the contents: $illegalDataformatItem");
 
-    await clear();
+    //await clear();
   }
 
   T fromJson(Map<String, dynamic> json) {
-    return _jsonConverter.fromJson(json);
+    if (_jsonConverter == null) {
+      throw StateError("the jsonConverter needs to be initialized or this function be overriden");
+    }
+    return _jsonConverter!.fromJson(json);
   }
 
   Map<String, dynamic> toJson(T t) {
-    return _jsonConverter.toJson(t);
+    if (_jsonConverter == null) {
+      throw StateError("the jsonConverter needs to be initialized or this function be overriden");
+    }
+    return _jsonConverter!.toJson(t);
   }
 }
 

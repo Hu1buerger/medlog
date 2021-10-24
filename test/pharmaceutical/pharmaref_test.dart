@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 
 import 'pharmaceutical_controller_test.dart' show testEquals;
 
@@ -7,13 +9,13 @@ import 'pharmaceutical_controller_test.dart' show testEquals;
 void main() {
   Pharmaceutical a = Pharmaceutical(
       tradename: "TRADENAME_A",
-      dosage: "10ccs of stupid",
+      dosage: Dosage.parse("10mg"),
       activeSubstance: "stupidity",
       documentState: DocumentState.user_created);
 
   Pharmaceutical b = Pharmaceutical(
       tradename: "TRADENAME_B",
-      dosage: "20ccs of stupid",
+      dosage: Dosage.parse("20mg"),
       activeSubstance: "truth",
       documentState: DocumentState.in_review);
 
