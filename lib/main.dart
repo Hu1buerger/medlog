@@ -11,17 +11,13 @@ import 'package:medlog/src/controller/stock/stock_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   _initializeLogger();
   Logger.root.info("starting the app");
 
   final pharmController = PharmaceuticalController(PharmaService());
-  await pharmController.load();
   final logController = LogController(pharmController, LogService());
-  await logController.loadLog();
-
   final stockC = StockController(StockService(), pharmController);
-  await stockC.load();
+
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
@@ -30,6 +26,9 @@ void main() async {
     pharmaController: pharmController,
     stockController: stockC,
   ));
+  await pharmController.load();
+  await logController.loadLog();
+  await stockC.load();
 }
 
 void _initializeLogger() {

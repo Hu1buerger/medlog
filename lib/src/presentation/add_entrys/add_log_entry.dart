@@ -261,14 +261,15 @@ class _AddLogEntryState extends State<AddLogEntry> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: DateTimePicker(
           onSelected: setAdministrationDateTime,
+          initiallySelectedDT: adminTime,
         ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: OptionSelector<num>(
-          options: [...unitOptions],
-          onSelectValue: (num value) => onSelectUnits(value.toDouble()),
-        ),
+            options: [...unitOptions],
+            onSelectValue: (num value) => onSelectUnits(value.toDouble()),
+            selected: unitOptions.indexWhere((element) => element.value == selectedUnits)),
       )
     ];
 

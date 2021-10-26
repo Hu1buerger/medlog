@@ -9,6 +9,10 @@ class DateTimePicker extends StatefulWidget {
   /// user shall select time
   final bool selectTime;
 
+  /// the dateTime that is selected until the user selects another one
+  /// or if null no DT is selected
+  final DateTime? initiallySelectedDT;
+
   final DateTime? firstDT;
   final DateTime? selectedDT;
   final DateTime? lastDT;
@@ -21,6 +25,7 @@ class DateTimePicker extends StatefulWidget {
       {Key? key,
       this.title = "",
       required this.onSelected,
+      this.initiallySelectedDT,
       this.firstDT,
       this.selectedDT,
       this.lastDT,
@@ -101,6 +106,10 @@ class _DateTimePickerState extends State<DateTimePicker> {
     lastDT = widget.lastDT ?? selectedDateTime.add(const Duration(days: 365));
 
     dateTimeController.text = widget.title;
+
+    if (widget.initiallySelectedDT != null) {
+      setSelectedDateTime(widget.initiallySelectedDT!);
+    }
   }
 
   void setSelectedDateTime(DateTime dt) {
