@@ -89,7 +89,7 @@ void main() async {
       var controller = PharmaceuticalController(service);
 
       controller.addPharmaceutical(Pharmaceutical(
-          id: PharmaceuticalController.uuid.v4(),
+          id: PharmaceuticalController.createPharmaID(),
           tradename: "name",
           dosage: Dosage.parse("1g"),
           activeSubstance: "goFuckyourSelf",

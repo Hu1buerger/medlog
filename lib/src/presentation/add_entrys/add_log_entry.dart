@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/controller/provider.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
@@ -24,11 +25,11 @@ class AddLogEntry extends StatefulWidget {
   static const String routeName = "/addMedicationIntakeLog";
 
   final PharmaceuticalController pharmaController;
-  final LogController logController;
+  final LogProvider logProvider;
   final StockController stockController;
 
   const AddLogEntry(
-      {Key? key, required this.pharmaController, required this.logController, required this.stockController})
+      {Key? key, required this.pharmaController, required this.logProvider, required this.stockController})
       : super(key: key);
 
   @override
@@ -44,7 +45,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   PharmaceuticalController get pharmaController => widget.pharmaController;
 
-  LogController get logController => widget.logController;
+  LogProvider get logProvider => widget.logProvider;
 
   StockController get stockController => widget.stockController;
 
@@ -96,7 +97,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
       intakeEvent.source = PharmaceuticalSource.other;
 
       //TODO: inform the user that we he tries to perform non-stock-backed operation
-      logController.addMedicationIntake(intakeEvent);
+      logProvider.addMedicationIntake(intakeEvent);
 
       Navigator.pop(context);
       return;
@@ -150,7 +151,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
     // as for now set source to stock.
     intakeEvent.source = PharmaceuticalSource.stock;
-    logController.addMedicationIntake(intakeEvent);
+    logProvider.addMedicationIntake(intakeEvent);
 
     Navigator.pop(context);
     return true;

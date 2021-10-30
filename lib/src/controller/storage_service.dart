@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -192,10 +193,17 @@ class StorageService<T> {
 
   /// encodes the hole list to Strings using the jsonConverter object
   Iterable<String> stringsEncode(List<T> list) {
-    var strings = list.map((e) => toJson(e)).map((e) => json.encode(e));
+    var map = toJsonArray(list);
 
-    return strings;
+    assert(map.containsKey(_storageKey));
+    return map[_storageKey]!.map((e) => json.encode(e));
   }
+
+  Map<String, List<Map<String, dynamic>>> toJsonArray(List<T> items){
+    return {
+      _storageKey : items.map((e) => toJson(e)).toList()
+    };
+  } 
 
   @protected
   Future<void> onIllegalDataFormat(Map<String, dynamic> illegalDataformatItem) async {

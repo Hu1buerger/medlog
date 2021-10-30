@@ -51,6 +51,25 @@ class LogService extends StorageService<LogEvent> {
       }
     }
   }
+
+  StorageService<T> _storageServiceByT<T extends LogEvent>(){
+     assert(delegates.containsKey(T));
+
+     return delegates[T]! as StorageService<T>;
+  }
+
+  Map<String, List<Map<String, dynamic>>> getJson<T extends LogEvent>(List<LogEvent> items) => _storageServiceByT<T>().toJsonArray(items.whereType<T>().toList());
+
+  @override
+  Map<String, List<Map<String, dynamic>>> toJsonArray(List<LogEvent> items) {
+    var medJson = getJson<MedicationIntakeEvent>(items);
+    var stockJson = getJson<StockEvent>(items);
+
+    return {
+      medJson.keys.single : medJson.values.single,
+      stockJson.keys.single: stockJson.values.single,
+    };
+  }
 }
 
 class _MedicationIntakeStorageService extends StorageService<MedicationIntakeEvent> {

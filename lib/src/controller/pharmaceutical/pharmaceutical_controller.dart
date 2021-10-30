@@ -11,32 +11,69 @@ import 'package:uuid/uuid.dart';
 
 class PharmaceuticalController with ChangeNotifier {
   /// uid generator using crypto random number generator;
-  static const Uuid uuid = Uuid();
+  static const Uuid _uuid = Uuid();
 
-  PharmaceuticalController(this.pharmaservice, {this.fetchEnabled = true});
+  PharmaceuticalController(PharmaService pharmaservice,
+      {this.fetchEnabled = true})
+      : _pharmaservice = pharmaservice;
 
   final Logger _logger = Logger("PharmaceuticalController");
-  @visibleForTesting
-  final PharmaService pharmaservice;
 
-  late final StreamSubscription<Pharmaceutical> eventsSubscription;
+  PharmaService get pharmaservice => _pharmaservice;
+  List<Pharmaceutical> get pharmaceuticals => _pharmStore;
+
+  @visibleForTesting
+  final PharmaService _pharmaservice;
+
+  late final StreamSubscription<Pharmaceutical> _eventsSubscription;
 
   final List<PharmaceuticalRef> _pharmStore = [];
 
+  @visibleForTesting
   final bool fetchEnabled;
 
-  List<Pharmaceutical> get pharmaceuticals => _pharmStore;
+  /// loads all data from disk and restores the _pharmastore
+  Future<void> load() async {
+    pharmaservice.enableBacklog();
 
-  List<String> get tradenames => pharmaceuticals.map((e) => e.tradename).toSet().toList();
+    var items = await pharmaservice.loadFromDisk();
+    items.forEach(addPharmaceutical);
+
+    pharmaservice.clearBacklog();
+    pharmaservice.disableBacklog();
+
+    _logger.fine("finished adding all ${items.length}");
+    // enable the subscription
+    _eventsSubscription = pharmaservice.events.listen((event) {
+      addPharmaceutical(event);
+    });
+
+    if (fetchEnabled) pharmaservice.startRemoteFetch();
+
+    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
+    return;
+  }
+
+  Future<void> store() async {
+    pharmaservice.store(pharmaceuticals);
+  }
+
+  Map<String, List<Map<String, dynamic>>> jsonKV(){
+    return _pharmaservice.toJsonArray(pharmaceuticals);
+  }
+
+  void startRemoteFetch() {
+    _logger.info("enabling fetch");
+    pharmaservice.startRemoteFetch();
+  }
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
-  ///
   createPharmaceutical(Pharmaceutical p) {
     assert(p is PharmaceuticalRef == false);
     assert(p.documentState == DocumentState.user_created);
     assert(p.isIded == false);
 
-    p = p.cloneAndUpdate(id: _createPharmaID());
+    p = p.cloneAndUpdate(id: createPharmaID());
     addPharmaceutical(p);
   }
 
@@ -100,18 +137,20 @@ class PharmaceuticalController with ChangeNotifier {
       // no need to update
       if (isEqual && other.documentState == toInsert.documentState) return;
 
-      if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
+      if (other.documentState == DocumentState.user_created &&
+          other.human_known_name != toInsert.human_known_name) {
         // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
-        other.cloneAndUpdate(id: _createPharmaID());
+        other.cloneAndUpdate(id: createPharmaID());
         notifyListeners();
         //other is already in the store so no need to insert.
         return;
       }
 
-      if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
+      if (toInsert.documentState == DocumentState.user_created &&
+          other.human_known_name != toInsert.human_known_name) {
         // and the new item is userCreated, we can just change the id
         // aka the user wants to create a new Pharmaceutical
-        toInsert.cloneAndUpdate(id: _createPharmaID());
+        toInsert.cloneAndUpdate(id: createPharmaID());
         _insert(toInsert);
         return;
       }
@@ -130,7 +169,10 @@ class PharmaceuticalController with ChangeNotifier {
         //maybe the pharmaceutical should track a versionID
         //collision and no change in documentState.
         // or the remote is always right
-        _logger.severe("Unfixable collison of $other and $toInsert while adding", null, StackTrace.current);
+        _logger.severe(
+            "Unfixable collison of $other and $toInsert while adding",
+            null,
+            StackTrace.current);
         //throw StateError("unfixable collision of $other and $toInsert while adding");
       }
 
@@ -166,11 +208,13 @@ class PharmaceuticalController with ChangeNotifier {
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(
+        fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
-  String _createPharmaID() {
-    return uuid.v4();
+  @visibleForTesting
+  static String createPharmaID() {
+    return _uuid.v4();
   }
 
   _insert(PharmaceuticalRef p) {
@@ -179,31 +223,5 @@ class PharmaceuticalController with ChangeNotifier {
 
     _logger.fine("inserted ${p.id} ${p.displayName}");
     notifyListeners();
-  }
-
-  /// loads all data from disk and restores the _pharmastore
-  Future<void> load() async {
-    pharmaservice.enableBacklog();
-
-    var items = await pharmaservice.loadFromDisk();
-    items.forEach(addPharmaceutical);
-
-    pharmaservice.clearBacklog();
-    pharmaservice.disableBacklog();
-
-    _logger.fine("finished adding all ${items.length}");
-    // enable the subscription
-    eventsSubscription = pharmaservice.events.listen((event) {
-      addPharmaceutical(event);
-    });
-
-    if (fetchEnabled) pharmaservice.startRemoteFetch();
-
-    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
-    return;
-  }
-
-  Future<void> store() async {
-    pharmaservice.store(pharmaceuticals);
   }
 }

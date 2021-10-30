@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/controller/log/log_provider.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
@@ -31,10 +32,10 @@ class AddStock extends StatefulWidget {
   final PharmaceuticalController pharmaceuticalController;
 
   final StockController stockController;
-  final LogController logController;
+  final LogProvider logProvider;
 
   const AddStock(
-      {Key? key, required this.pharmaceuticalController, required this.stockController, required this.logController})
+      {Key? key, required this.pharmaceuticalController, required this.stockController, required this.logProvider})
       : super(key: key);
 
   @override
@@ -94,7 +95,7 @@ class _AddStockState extends State<AddStock> {
     StockEvent se = StockEvent.restock(DateTime.now(), si);
 
     widget.stockController.addStockItem(si);
-    widget.logController.addStockEvent(se);
+    widget.logProvider.addStockEvent(se);
     Navigator.pop(context);
   }
 

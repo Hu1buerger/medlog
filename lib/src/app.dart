@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logging/logging.dart';
+import 'package:medlog/src/controller/log/log_provider.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -31,16 +33,21 @@ class MedlogApp extends StatefulWidget {
 }
 
 class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
+  static final logger = Logger("MedlogApp");
+  
+  late final LogProvider logProvider;
+
   @override
   void initState() {
-    print("init");
+    logger.fine("initializing state");
     WidgetsBinding.instance!.addObserver(this);
+    logProvider = LogProvider(widget.logController);
     super.initState();
   }
 
   @override
   void dispose() {
-    print("dispose");
+    logger.fine("disposing of state");
 
     WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
@@ -50,11 +57,12 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    print("state: $state");
+    logger.fine("state: $state");
     if (state == AppLifecycleState.paused) {
       // store all data once the app gets disposed of
-      widget.logController.storeLog();
+      logger.info("writing the apps state back to the disk");
       widget.pharmaController.store();
+      widget.logController.storeLog();
       widget.stockController.store();
     }
   }
@@ -92,7 +100,7 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
                 );
               case AddLogEntry.routeName:
                 return AddLogEntry(
-                    logController: widget.logController,
+                    logProvider: logProvider,
                     pharmaController: widget.pharmaController,
                     stockController: widget.stockController);
               case AddPharmaceutical.routeName:
@@ -101,7 +109,7 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
                 return AddStock(
                   pharmaceuticalController: widget.pharmaController,
                   stockController: widget.stockController,
-                  logController: widget.logController,
+                  logProvider: logProvider,
                 );
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
@@ -116,6 +124,7 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
               case Settings.route_name:
                 return Settings(
                   pharmaceuticalController: widget.pharmaController,
+                  logProvider: logProvider,
                   logController: widget.logController,
                   stockController: widget.stockController,
                 );

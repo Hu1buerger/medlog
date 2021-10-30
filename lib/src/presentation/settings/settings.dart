@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:medlog/src/controller/file_exporter.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/controller/log/log_provider.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
@@ -11,11 +13,12 @@ class Settings extends StatefulWidget {
   static const String route_name = "/settings";
 
   final PharmaceuticalController pharmaceuticalController;
+  final LogProvider logProvider;
   final LogController logController;
   final StockController stockController;
 
   const Settings(
-      {Key? key, required this.pharmaceuticalController, required this.logController, required this.stockController})
+      {Key? key, required this.pharmaceuticalController, required this.logProvider, required this.stockController, required this.logController})
       : super(key: key);
 
   @override
@@ -27,7 +30,7 @@ class _SettingsState extends State<Settings> {
 
   PharmaceuticalController get pharmController => widget.pharmaceuticalController;
 
-  LogController get logController => widget.logController;
+  LogProvider get logProvider => widget.logProvider;
 
   StockController get stockController => widget.stockController;
 
@@ -49,41 +52,20 @@ class _SettingsState extends State<Settings> {
 
                   return Text("${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
                 }),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  var result = await pharmController.pharmaservice.storeToExternal(pharmController.pharmaceuticals);
-                  if (result) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("data written")));
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("failed to write text ${e}")));
-                }
-              },
-              child: Text("writeToDisk"),
-            ),
+            ElevatedButton(onPressed: (){
+              var fx = FileExporter(widget.logController, pharmController, stockController);
+              fx.write();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("backup finished")));
+            }, child: Text("backup")),
             ElevatedButton(
               onPressed: () async {
                 // quick fix for removing user defined pharmaceuticals
                 pharmController.pharmaceuticals.clear();
+                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
                 pharmController.notifyListeners();
               },
               child: Text("cleanAll"),
             ),
-            ElevatedButton(
-                onPressed: () async {
-                  var stockItem = StockItem.create(pharmController.pharmaceuticals.first, 10, StockState.open,
-                      DateTime.now().add(Duration(days: 187)));
-
-                  // maybe the stockController should add the logEntry
-                  stockController.addStockItem(stockItem);
-
-                  var stockItem2 = StockItem.create(pharmController.pharmaceuticals.last, 7, StockState.closed,
-                      DateTime.now().add(Duration(days: 187)));
-                  stockController.addStockItem(stockItem2);
-
-                  var stockEvent = StockEvent.create(DateTime.now(), stockItem.pharmaceutical, stockItem.amount);
-                  logController.addStockEvent(stockEvent);
-                },
-                child: Text("add mocked stock")),
             ElevatedButton(
                 onPressed: () {
                   stockController.stock.clear();
@@ -95,11 +77,6 @@ class _SettingsState extends State<Settings> {
                   }
                 },
                 child: Text("fill stock for all")),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.popAndPushNamed(context, HomePage.route);
-                },
-                child: Text("goto homepage"))
           ],
         ));
   }

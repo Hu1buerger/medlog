@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:medlog/src/controller/file_exporter.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
@@ -17,11 +18,15 @@ class PharmaService extends StorageService<Pharmaceutical> {
   static const String updateURL =
       "https://gist.githubusercontent.com/Hu1buerger/3a92d33965db9e299f8077fe6feb5f97/raw/pharmaceuticals.json";
 
-  late Timer onlineFetcher;
+  Timer? onlineFetcher;
 
   PharmaService() : super(storageKey, logger: Logger("PharmaService"), jsonConverter: jsonConverter);
 
   void startRemoteFetch() {
+    if(onlineFetcher != null){
+      onlineFetcher?.cancel();
+    }
+
     _fetchRemote();
     onlineFetcher = Timer.periodic(const Duration(minutes: 15), (timer) {
       logger.info("starting periodic fetch");
@@ -29,7 +34,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
     });
   }
 
-  Future<bool> storeToExternal(List<Pharmaceutical> list) async {
+  Future<String> storeToExternal(List<Pharmaceutical> list) async {
     var externDir = await path_provider.getExternalStorageDirectory();
     if (externDir == null || externDir.existsSync() == false) throw StateError("couldnt create outputdir");
 
@@ -41,8 +46,8 @@ class PharmaService extends StorageService<Pharmaceutical> {
     var data = jsonEncode({storageKey: pharms});
 
     await exportFile.writeAsString(data);
-    logger.info("written data to ${exportFile.path}");
-    return true;
+    logger.info("data written to ${exportFile.path}");
+    return exportFile.path;
   }
 
   _fetchRemote() async {

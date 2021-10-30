@@ -10,8 +10,14 @@ import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 
 /// Handles the keeping of records
+///
+/// This class currently seems to handle to much
+///
+/// TODO: The [LogProvider] will take over
+///  and its responsibility is to just combine all LogEvents and thats it
 class LogController with ChangeNotifier {
   static final _logger = Logger("LogController");
+  static final supportedTypes = [MedicationIntakeEvent, StockEvent];
 
   LogService logService;
   PharmaceuticalController pharmaController;
@@ -26,46 +32,6 @@ class LogController with ChangeNotifier {
 
   LogController(this.pharmaController, this.logService) {
     pharmaController.addListener(_tryRehydrate);
-  }
-
-  /// adds an event that changes the stock
-  /// TODO: use StockItem as argument.... like yeah
-  void addStockEvent(StockEvent event) {
-    assert(event.pharmaceutical is PharmaceuticalRef);
-
-    addLogEvent(event);
-  }
-
-  /// logs the intake of medication
-  void addMedicationIntake(MedicationIntakeEvent event) {
-    assert(event.pharmaceutical is PharmaceuticalRef);
-
-    addLogEvent(event);
-  }
-
-  void addLogEvent(LogEvent event) {
-    assert(log.contains(event) == false);
-
-    event.id = ++_lastID;
-    _insert(event);
-  }
-
-  void delete(entry) {
-    assert(log.contains(entry));
-
-    bool wasRemoved = log.remove(entry);
-    if (wasRemoved) {
-      notifyListeners();
-    }
-  }
-
-  void _insert(LogEvent le) {
-    assert(log.any((element) => element.id == le.id) == false);
-
-    _logger.fine("inserted ${le.id} as ${le.runtimeType.toString()}");
-    log.add(le);
-    _sortLog();
-    notifyListeners();
   }
 
   Future<void> loadLog() async {
@@ -94,6 +60,36 @@ class LogController with ChangeNotifier {
     await logService.store(_log);
   }
 
+  Map<String, List<Map<String, dynamic>>> jsonKV() => logService.toJsonArray(log);
+
+  int nextID() => _lastID++;
+
+  void addLogEvent(LogEvent event) {
+    assert(log.contains(event) == false);
+
+    event.id = nextID();
+    _insert(event);
+  }
+
+  void delete(LogEvent event) {
+    assert(log.contains(event));
+
+    bool updated = log.remove(event);
+    if (updated) {
+      _logger.fine("removing $event");
+      notifyListeners();
+    }
+  }
+
+  void _insert(LogEvent le) {
+    assert(log.any((element) => element.id == le.id) == false);
+
+    _logger.fine("inserted ${le.id} as ${le.runtimeType.toString()}");
+    log.add(le);
+    _sortLog();
+    notifyListeners();
+  }
+
   _tryRehydrate() {
     for (int i = _itemsInNeedToRehydrate.length - 1; i >= 0; i--) {
       var e = _itemsInNeedToRehydrate[i];
@@ -105,7 +101,7 @@ class LogController with ChangeNotifier {
         _itemsInNeedToRehydrate.removeAt(i);
         _insert(e);
       } else {
-        _logger.fine("failed to rehydrate ${e.id}");
+        _logger.severe("failed to rehydrate ${e.id}");
       }
     }
   }
@@ -114,3 +110,5 @@ class LogController with ChangeNotifier {
     _log.sort((a, b) => a.eventTime.compareTo(b.eventTime));
   }
 }
+
+class MedicationIntakeController {}
