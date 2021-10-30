@@ -37,7 +37,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
     var exportFile = File("${dir.path}/pharmaceuticals-export-${DateTime.now().toIso8601String()}.json");
 
     // encode data to the right format.
-    var pharms = encodeToMaps(list).toList();
+    var pharms = list.map((e) => toJson(e)).toList();
     var data = jsonEncode({storageKey: pharms});
 
     await exportFile.writeAsString(data);

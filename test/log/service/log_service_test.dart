@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/controller/log/log_service.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
@@ -21,6 +23,7 @@ main() {
 
     var matcher = unorderedMatches(list.map((e) => LogEventMatcher(e)));
     expect(result, matcher);
+    log("stored ${result.length} items");
   });
 }
 

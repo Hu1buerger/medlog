@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,7 @@ class StorageService<T> {
   }
 
   /// sets the streamController up that is used for the publish action;
+  @protected
   StreamController<T> initStreamController() {
     return StreamController(onListen: () {
       _publishBackLog();
@@ -43,8 +45,6 @@ class StorageService<T> {
   /// loads the data from the local store.
   ///
   Future<List<T>> loadFromDisk() async {
-    //assert(_streamController.hasListener == false);
-
     await _init();
     //await preferences!.reload();
     logger.finest("starting to load from disk");
@@ -107,6 +107,7 @@ class StorageService<T> {
     return events.toList();
   }
 
+  @protected
   void publish(T t) {
     if (_streamController.isClosed) {
       logger.severe("streamController is closed but still trying to publish", null, StackTrace.current);
@@ -161,6 +162,7 @@ class StorageService<T> {
   }
 
   /// signals that no new events will be emitted
+  @protected
   void signalDone() {
     if (_streamController.isClosed) {
       logger.finest("signaling done to closed controller");
@@ -188,17 +190,14 @@ class StorageService<T> {
     return listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>).toList();
   }
 
-  Iterable<Map<String, dynamic>> encodeToMaps(List<T> list) {
-    return list.map((e) => toJson(e));
-  }
-
   /// encodes the hole list to Strings using the jsonConverter object
   Iterable<String> stringsEncode(List<T> list) {
-    var strings = encodeToMaps(list).map((e) => json.encode(e));
+    var strings = list.map((e) => toJson(e)).map((e) => json.encode(e));
 
     return strings;
   }
 
+  @protected
   Future<void> onIllegalDataFormat(Map<String, dynamic> illegalDataformatItem) async {
     logger.severe("policy for illegalConversion is clearing...");
     //write the data to the disk as for now... this can be a security risk due to dumping possibly encrypted data to logcat
@@ -208,6 +207,7 @@ class StorageService<T> {
     //await clear();
   }
 
+  @protected
   T fromJson(Map<String, dynamic> json) {
     if (_jsonConverter == null) {
       throw StateError("the jsonConverter needs to be initialized or this function be overriden");
@@ -215,6 +215,7 @@ class StorageService<T> {
     return _jsonConverter!.fromJson(json);
   }
 
+  @protected
   Map<String, dynamic> toJson(T t) {
     if (_jsonConverter == null) {
       throw StateError("the jsonConverter needs to be initialized or this function be overriden");

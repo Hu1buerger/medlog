@@ -71,8 +71,7 @@ class LogController with ChangeNotifier {
   Future<void> loadLog() async {
     _logger.fine("starting to load the log");
 
-    logService.loadFromDisk();
-    var logs = await logService.getAll();
+    var logs = await logService.loadFromDisk();
 
     if (logs.isNotEmpty) {
       _itemsInNeedToRehydrate = logs;

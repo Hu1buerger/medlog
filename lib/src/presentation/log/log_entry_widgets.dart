@@ -7,46 +7,6 @@ import 'package:medlog/src/presentation/log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
-/// see this for https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.5
-class MedicationLogWidget extends LogEventWidget<MedicationIntakeEvent> {
-  const MedicationLogWidget({Key? key, required MedicationIntakeEvent item, bool showDateChip = true})
-      : super(key: key, logEvent: item, showDate: showDateChip);
-
-  void onTap(BuildContext context) {
-    Navigator.pushNamed(context, MedicationIntakeDetails.routeName, arguments: logEvent);
-  }
-
-  @override
-  Widget buildChild(BuildContext context) {
-    var logEntry = ListTile(
-      title: Text(logEvent.displayName),
-      subtitle: Text(logEvent.dosage.toString()),
-      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
-      onTap: () => onTap(context),
-    );
-    return logEntry;
-  }
-}
-
-class StockEventWidget extends LogEventWidget<StockEvent> {
-  const StockEventWidget({Key? key, required StockEvent item, bool showDate = true})
-      : super(key: key, logEvent: item, showDate: showDate);
-
-  @override
-  Widget buildChild(BuildContext context) {
-    var changeText = "${logEvent.amount.isNegative ? "-" : "+"} ${logEvent.amount.abs().toString()}";
-
-    var logEntry = ListTile(
-      title: Text(logEvent.pharmaceutical.displayName),
-      subtitle: Text(changeText),
-      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
-      onTap: () => onTap(context),
-    );
-
-    return logEntry;
-  }
-}
-
 abstract class LogEventWidget<T extends LogEvent> extends StatelessWidget {
   final T logEvent;
 
@@ -89,6 +49,46 @@ abstract class LogEventWidget<T extends LogEvent> extends StatelessWidget {
     }
 
     return child;
+  }
+}
+
+/// see this for https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.5
+class MedicationLogWidget extends LogEventWidget<MedicationIntakeEvent> {
+  const MedicationLogWidget({Key? key, required MedicationIntakeEvent item, bool showDateChip = true})
+      : super(key: key, logEvent: item, showDate: showDateChip);
+
+  void onTap(BuildContext context) {
+    Navigator.pushNamed(context, MedicationIntakeDetails.routeName, arguments: logEvent);
+  }
+
+  @override
+  Widget buildChild(BuildContext context) {
+    var logEntry = ListTile(
+      title: Text(logEvent.displayName),
+      subtitle: Text(logEvent.dosage.toString()),
+      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
+      onTap: () => onTap(context),
+    );
+    return logEntry;
+  }
+}
+
+class StockEventWidget extends LogEventWidget<StockEvent> {
+  const StockEventWidget({Key? key, required StockEvent item, bool showDate = true})
+      : super(key: key, logEvent: item, showDate: showDate);
+
+  @override
+  Widget buildChild(BuildContext context) {
+    var changeText = "${logEvent.amount.isNegative ? "-" : "+"} ${logEvent.amount.abs().toString()}";
+
+    var logEntry = ListTile(
+      title: Text(logEvent.pharmaceutical.displayName),
+      subtitle: Text(changeText),
+      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
+      onTap: () => onTap(context),
+    );
+
+    return logEntry;
   }
 }
 

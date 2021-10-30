@@ -3,7 +3,10 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 //  this can be the substance, dosage, tradename...
 class PharmaceuticalFilter {
-  static final Map<String, String Function(Pharmaceutical)> _matchers = {"Name": (Pharmaceutical p) => p.displayName};
+  static final Map<String, String Function(Pharmaceutical)> _matchers = {
+    "Name": (Pharmaceutical p) => p.displayName,
+    "Substance": (p) => p.activeSubstance ?? "",
+  };
 
   /// filters [pharmaceutical] with [filter] and includes all matches that any filter matches on
   static List<Pharmaceutical> filter(

@@ -47,7 +47,7 @@ class _SettingsState extends State<Settings> {
                   if (asyncSnapshot.hasData == false) return const Text("versionNumber");
                   var packageInfo = asyncSnapshot.data!;
 
-                  return Text("${packageInfo.version}+${packageInfo.buildNumber}");
+                  return Text("${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
                 }),
             ElevatedButton(
               onPressed: () async {

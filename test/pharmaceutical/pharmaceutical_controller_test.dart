@@ -34,7 +34,7 @@ void main() async {
     var service = MockPharmaService([]);
     var controller = PharmaceuticalController(service);
 
-    test("test create pharmaceutical", () => _testCreatePharmaceutical(controller));
+    test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller));
     test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
   });
 
@@ -123,9 +123,12 @@ void _testPCcontainsOnlyRefs(PharmaceuticalController c) {
   }
 }
 
-void _testCreatePharmaceutical(PharmaceuticalController c) {
+void _testRetrieveByNameAndDosage(PharmaceuticalController c) {
   var pharma = Pharmaceutical(
-      human_known_name: "RETARDIN AL 25mg", tradename: "RETARDIN", dosage: Dosage.parse("25mg"), activeSubstance: "Homopathie");
+      human_known_name: "RETARDIN AL 25mg",
+      tradename: "RETARDIN",
+      dosage: Dosage.parse("25mg"),
+      activeSubstance: "Homopathie");
   c.createPharmaceutical(pharma);
   var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", Dosage.parse("25mg"));
 
@@ -160,14 +163,14 @@ Future<PharmaceuticalController> createPharmaController(
 
 void populatePC(PharmaceuticalController pc) {
   if (pc.pharmaceuticals.isEmpty) {
-    pc.createPharmaceutical(
-        Pharmaceutical(tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));
+    pc.createPharmaceutical(Pharmaceutical(
+        tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));
   }
 }
 
 List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
   return List.generate(
       count,
-      (index) =>
-          Pharmaceutical(tradename: "Tradename-$index", dosage: Dosage.parse("$index mg"), activeSubstance: "Substance-$index"));
+      (index) => Pharmaceutical(
+          tradename: "Tradename-$index", dosage: Dosage.parse("$index mg"), activeSubstance: "Substance-$index"));
 }
