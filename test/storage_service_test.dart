@@ -37,7 +37,6 @@ void main() async {
       testGetAllOnData(ps);
     });
   });
-
 }
 
 /// tests the getAll on an empty load
@@ -57,7 +56,7 @@ void testGetAllOnData(MockStorageService ps) async {
 }
 
 /// test that we can receive events and publish
-void testReceiveEvents(MockStorageService ps) async{
+void testReceiveEvents(MockStorageService ps) async {
   var completer = Completer();
 
   var result = [];
@@ -80,8 +79,9 @@ class MockStorageService extends StorageService<String> {
   List<String> data = [];
 
   MockStorageService(this.data)
-      : super(
-      "mock", Logger("MockStorageService"), jsonConverter: JsonConverter(toJson: (s) => {s: s}, fromJson: (m) => m.keys.first));
+      : super("mock",
+            logger: Logger("MockStorageService"),
+            jsonConverter: JsonConverter(toJson: (s) => {s: s}, fromJson: (m) => m.keys.first));
 
   @override
   Future<List<String>> loadFromDisk() async {

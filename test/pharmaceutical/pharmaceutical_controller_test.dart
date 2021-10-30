@@ -169,5 +169,5 @@ List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
   return List.generate(
       count,
       (index) =>
-          Pharmaceutical(tradename: "Tradename-$index", dosage: Dosage.parse("$index-mg"), activeSubstance: "Substance-$index"));
+          Pharmaceutical(tradename: "Tradename-$index", dosage: Dosage.parse("$index mg"), activeSubstance: "Substance-$index"));
 }

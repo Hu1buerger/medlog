@@ -12,7 +12,7 @@ class LogService extends StorageService<LogEvent> {
   static const String stockEventID = "SE";
   static const String medicationIntakaeEventID = "ME";
 
-  LogService() : super("log", Logger("LogService"));
+  LogService() : super("log", logger: Logger("LogService"));
 
   @override
   Future<List<LogEvent>> loadFromDisk() async {

@@ -19,7 +19,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
 
   late Timer onlineFetcher;
 
-  PharmaService() : super(storageKey, Logger("PharmaService"), jsonConverter: jsonConverter);
+  PharmaService() : super(storageKey, logger: Logger("PharmaService"), jsonConverter: jsonConverter);
 
   void startRemoteFetch() {
     _fetchRemote();

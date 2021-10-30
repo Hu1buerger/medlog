@@ -58,6 +58,7 @@ main() {
     var sp = await SharedPreferences.getInstance();
     await stockController.store();
 
+    await sp.reload();
     expect(sp.getKeys().length, 1);
     var strings = sp.getStringList(StockService.key);
     expect(strings?.length ?? 0, testStock.length);

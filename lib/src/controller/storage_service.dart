@@ -17,8 +17,9 @@ class StorageService<T> {
 
   Stream<T> get events => _streamController.stream;
 
-  StorageService(String storageKey, this.logger, {JsonConverter<T>? jsonConverter})
+  StorageService(String storageKey, {Logger? logger, JsonConverter<T>? jsonConverter})
       : _storageKey = storageKey,
+        logger = logger ?? Logger(storageKey),
         _jsonConverter = jsonConverter {
     _streamController = initStreamController();
   }

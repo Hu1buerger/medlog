@@ -3,14 +3,13 @@ import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/controller/storage_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
-class MockPharmaService extends PharmaService{
-
+class MockPharmaService extends PharmaService {
   List<Pharmaceutical> data;
 
   MockPharmaService(this.data);
 
   @override
-  Future<List<Pharmaceutical>> loadFromDisk() async{
+  Future<List<Pharmaceutical>> loadFromDisk() async {
     data.forEach(publish);
     signalDone();
     return data;
@@ -23,13 +22,13 @@ class MockPharmaService extends PharmaService{
   }
 }
 
-class MockStorageService<T> extends StorageService<T>{
-
+class MockStorageService<T> extends StorageService<T> {
   List<T> data;
-  MockStorageService(String storageKey, this.data) : super(storageKey, Logger("MockStorageService-$storageKey"));
+  MockStorageService(String storageKey, this.data)
+      : super(storageKey, logger: Logger("MockStorageService-$storageKey"));
 
   @override
-  Future<List<T>> loadFromDisk() async{
+  Future<List<T>> loadFromDisk() async {
     data.forEach(publish);
     return data;
   }

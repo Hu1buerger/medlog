@@ -12,9 +12,8 @@ part 'stock_event.g.dart';
 /// This is only used if the change is not from taking a medication
 @JsonSerializable(ignoreUnannotated: true)
 class StockEvent extends LogEvent {
-  @JsonKey()
-
   /// the id of the pharmaceutical that has been restocked
+  @JsonKey()
   String pharmaceuticalID;
 
   Pharmaceutical? _pharmaceutical;
@@ -29,9 +28,8 @@ class StockEvent extends LogEvent {
     _pharmaceutical = p;
   }
 
-  @JsonKey()
-
   /// the delta of stockChanges
+  @JsonKey()
   double amount;
 
   StockEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount) : super(id, eventTime);

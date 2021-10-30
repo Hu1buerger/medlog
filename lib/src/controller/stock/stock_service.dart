@@ -6,7 +6,7 @@ class StockService extends StorageService<StockItem> {
   static final Logger _logger = Logger("StockService");
   static const String key = "stock";
 
-  StockService() : super(key, _logger);
+  StockService() : super(key, logger: _logger);
 
   @override
   StockItem fromJson(Map<String, dynamic> json) => StockItem.fromJson(json);
