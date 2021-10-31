@@ -30,16 +30,24 @@ class VariableOption<T extends num> extends Option<T> {
         super(value: value, title: title, leading: leading);
 }
 
+//TODO: Add a onCancle / unselect callback to represent the rigth state
+/// This widget is WIP
+///  and supposed to select 1 option out of {...}.
+///
+/// This dosnt handle debouncing or waiting until the user has committed.
 class OptionSelector<T> extends StatefulWidget {
   static final Logger _logger = Logger("OptionSelector");
 
   Logger get logger => _logger;
 
   final List<Option<T>> options;
+  //TODO: Migrate to this callback bcs it is superior.
+  final void Function(Option<T> option)? onSelectOption;
   final void Function(T value) onSelectValue;
   final int selected;
 
-  const OptionSelector({Key? key, required this.options, required this.onSelectValue, this.selected = -1})
+  const OptionSelector(
+      {Key? key, required this.options, required this.onSelectValue, this.selected = -1, this.onSelectOption})
       : super(key: key);
 
   @override
@@ -55,6 +63,9 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
     selected = widget.selected;
   }
 
+  /// Handles selecting an option
+  ///
+  /// This is a result of clicking the living shit out of the item.
   void onClickOnItem(int i) {
     assert(i >= 0);
 
@@ -64,7 +75,7 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
       widget.logger.fine("selecting $i");
       selected = i;
 
-      onValueChange(option);
+      updateSelected(option);
     } else {
       // click on the same item
       widget.logger.fine("deselecting item");
@@ -74,7 +85,10 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
     setState(() {});
   }
 
-  void onValueChange(Option o) {
+  /// updates the selected option.
+  void updateSelected(Option<T> o) {
+    widget.logger.finest("value of $o changed to ${o.value}");
+    if (widget.onSelectOption != null) widget.onSelectOption!(o);
     widget.onSelectValue(o.value);
   }
 
@@ -88,7 +102,7 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
         option: option as VariableOption,
         selected: selected,
         onPressed: () => onClickOnItem(index),
-        onValueChange: () => onValueChange(option),
+        onValueChange: () => updateSelected(option),
       );
     }
 
@@ -129,7 +143,6 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
         bool isSelected = selected == i;
 
         options.add(Expanded(flex: isSelected ? 3 : 1, child: buildOption(optionI, isSelected)));
-        //options.add(buildOption(optionI, isSelected));
       }
     } else {
       options = List.generate(widget.options.length, (index) {
@@ -202,10 +215,16 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
     if (option.value is double) {
       option.value = value.toDouble() as T;
     }
+
+    this.value = option.value;
   }
 
+  /// commit the value the user selected
+  /// and inform the callback.
   void onValue(num value) {
     if (widget.onValueChange == null) return;
+
+    setOptionValue(value);
     widget.onValueChange!();
   }
 
@@ -230,10 +249,7 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
               value = (val - (val % option.step)) as T;
               setState(() {});
             },
-            onChangeEnd: (val) {
-              setOptionValue(value);
-              onValue(value);
-            },
+            onChangeEnd: (val) => onValue(value),
           )
         ],
       );

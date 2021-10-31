@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/controller/provider.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
@@ -54,8 +53,9 @@ class _AddLogEntryState extends State<AddLogEntry> {
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
 
   _Modus modus = _Modus.searching;
+
   Pharmaceutical? selectedPharmaceutical;
-  DateTime adminTime = DateTime.now();
+  DateTime? adminTime;
   double selectedUnits = 1;
 
   _AddLogEntryState();
@@ -65,7 +65,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     super.initState();
     logger.fine("initializing with options ${currentOptions.length}");
 
-    setAdministrationDateTime(adminTime);
+    setAdministrationDateTime(DateTime.now());
   }
 
   void onReset(BuildContext context) {
@@ -83,12 +83,14 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   commitIntake(BuildContext context) async {
     assert(selectedPharmaceutical != null);
+    assert(adminTime != null);
+    assert(selectedUnits > 0);
 
     if (selectedUnits % selectedPharmaceutical!.smallestConsumableUnit != 0) {
       logger.info("selected unit is not safely supported");
     }
 
-    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime, selectedUnits);
+    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime!, selectedUnits);
 
     if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
       logger.severe(
@@ -230,7 +232,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(selectedPharmaceutical != null);
 
     double unitSize = selectedPharmaceutical!.smallestConsumableUnit;
-    var unitOptions = List<Option<num>>.generate(5, (index) {
+    var unitOptions = List<Option<double>>.generate(5, (index) {
       double unitOption = unitSize * (index + 1);
 
       return Option(

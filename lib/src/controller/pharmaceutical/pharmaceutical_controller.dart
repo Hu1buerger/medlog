@@ -13,21 +13,19 @@ class PharmaceuticalController with ChangeNotifier {
   /// uid generator using crypto random number generator;
   static const Uuid _uuid = Uuid();
 
-  PharmaceuticalController(PharmaService pharmaservice,
-      {this.fetchEnabled = true})
-      : _pharmaservice = pharmaservice;
+  PharmaceuticalController(PharmaService pharmaservice, {this.fetchEnabled = true}) : _pharmaservice = pharmaservice;
 
   final Logger _logger = Logger("PharmaceuticalController");
 
-  PharmaService get pharmaservice => _pharmaservice;
-  List<Pharmaceutical> get pharmaceuticals => _pharmStore;
-
   @visibleForTesting
+  PharmaService get pharmaservice => _pharmaservice;
+  List<Pharmaceutical> get pharmaceuticals => _pharmaStore;
+
   final PharmaService _pharmaservice;
 
   late final StreamSubscription<Pharmaceutical> _eventsSubscription;
 
-  final List<PharmaceuticalRef> _pharmStore = [];
+  final List<PharmaceuticalRef> _pharmaStore = [];
 
   @visibleForTesting
   final bool fetchEnabled;
@@ -58,7 +56,7 @@ class PharmaceuticalController with ChangeNotifier {
     pharmaservice.store(pharmaceuticals);
   }
 
-  Map<String, List<Map<String, dynamic>>> jsonKV(){
+  Map<String, List<Map<String, dynamic>>> jsonKV() {
     return _pharmaservice.toJsonArray(pharmaceuticals);
   }
 
@@ -137,8 +135,7 @@ class PharmaceuticalController with ChangeNotifier {
       // no need to update
       if (isEqual && other.documentState == toInsert.documentState) return;
 
-      if (other.documentState == DocumentState.user_created &&
-          other.human_known_name != toInsert.human_known_name) {
+      if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
         other.cloneAndUpdate(id: createPharmaID());
         notifyListeners();
@@ -146,8 +143,7 @@ class PharmaceuticalController with ChangeNotifier {
         return;
       }
 
-      if (toInsert.documentState == DocumentState.user_created &&
-          other.human_known_name != toInsert.human_known_name) {
+      if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // and the new item is userCreated, we can just change the id
         // aka the user wants to create a new Pharmaceutical
         toInsert.cloneAndUpdate(id: createPharmaID());
@@ -169,10 +165,7 @@ class PharmaceuticalController with ChangeNotifier {
         //maybe the pharmaceutical should track a versionID
         //collision and no change in documentState.
         // or the remote is always right
-        _logger.severe(
-            "Unfixable collison of $other and $toInsert while adding",
-            null,
-            StackTrace.current);
+        _logger.severe("Unfixable collison of $other and $toInsert while adding", null, StackTrace.current);
         //throw StateError("unfixable collision of $other and $toInsert while adding");
       }
 
@@ -208,8 +201,7 @@ class PharmaceuticalController with ChangeNotifier {
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(
-        fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
   @visibleForTesting
@@ -218,7 +210,7 @@ class PharmaceuticalController with ChangeNotifier {
   }
 
   _insert(PharmaceuticalRef p) {
-    _pharmStore.add(p);
+    _pharmaStore.add(p);
     p.registered = true;
 
     _logger.fine("inserted ${p.id} ${p.displayName}");
