@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
@@ -11,6 +12,7 @@ class LogView extends StatelessWidget with HomePagePage {
   static const String title = "Log";
   static const String routeName = "/logview";
 
+  static final Logger logger = Logger("LogView");
   final LogController logController;
   List<LogEvent> get items => logController.log;
 
@@ -52,6 +54,8 @@ class LogView extends StatelessWidget with HomePagePage {
     return AnimatedBuilder(
       animation: logController,
       builder: (BuildContext context, Widget? child) {
+        logger.fine("rebuilding due to change");
+        
         //lazy build the list items
         return ListView.builder(
             restorationId: 'administrationLogListView',

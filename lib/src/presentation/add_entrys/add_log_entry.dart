@@ -163,7 +163,16 @@ class _AddLogEntryState extends State<AddLogEntry> {
     adminTime = dateTime;
   }
 
-  void onSelectUnits(double units) {
+  void onSelectUnits(Option<num>? option) {
+    if(option == null){
+      logger.fine("unselect the units");
+      // just reset it....
+      setState(() => selectedUnits = 1);
+      return;
+    }
+
+    double units = option.value.toDouble();
+    assert(units > 0);
     if (selectedUnits != units) {
       logger.finest("updating the selectedUnits to $units");
       selectedUnits = units;
@@ -271,7 +280,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: OptionSelector<num>(
             options: [...unitOptions],
-            onSelectValue: (num value) => onSelectUnits(value.toDouble()),
+            onSelectOption: onSelectUnits,
             selected: unitOptions.indexWhere((element) => element.value == selectedUnits)),
       )
     ];

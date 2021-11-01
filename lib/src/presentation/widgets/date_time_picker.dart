@@ -152,8 +152,6 @@ class _DateTimePickerState extends State<DateTimePicker> {
     setSelectedDateTime(newSelectedDateTime);
   }
 
-  void selectDate(BuildContext context) {}
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
