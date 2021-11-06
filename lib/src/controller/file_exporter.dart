@@ -10,8 +10,7 @@ import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 class FileExporter {
-  FileExporter(
-      this.logController, this.pharmaceuticalController, this.stockController);
+  FileExporter(this.logController, this.pharmaceuticalController, this.stockController);
 
   static final Logger logger = Logger("FileExporter");
 
@@ -20,6 +19,8 @@ class FileExporter {
   final StockController stockController;
 
   Future write() async {
+    //TODO: replace against the JsonStore
+
     Map<String, dynamic> result = {};
 
     var logSon = logController.jsonKV();
@@ -38,13 +39,10 @@ class FileExporter {
 
   Future<File> createFile() async {
     var externDir = await path_provider.getExternalStorageDirectory();
-    if (externDir == null || externDir.existsSync() == false)
-      throw StateError("couldnt create outputdir");
+    if (externDir == null || externDir.existsSync() == false) throw StateError("couldnt create outputdir");
 
-    var exportDir =
-        await Directory("${externDir.path}/medlog").create(recursive: true);
-    var exportFile = File(
-        "${exportDir.path}/medlog-export-${DateTime.now().toIso8601String()}.json");
+    var exportDir = await Directory("${externDir.path}/medlog").create(recursive: true);
+    var exportFile = File("${exportDir.path}/medlog-export-${DateTime.now().toIso8601String()}.json");
     return exportFile;
   }
 }

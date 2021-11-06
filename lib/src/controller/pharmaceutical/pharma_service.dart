@@ -4,11 +4,10 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/file_exporter.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
-import '../storage_service.dart';
+import '../services/storage_service.dart';
 
 class PharmaService extends StorageService<Pharmaceutical> {
   static String storageKey = "pharmaceuticals";
@@ -23,7 +22,7 @@ class PharmaService extends StorageService<Pharmaceutical> {
   PharmaService() : super(storageKey, logger: Logger("PharmaService"), jsonConverter: jsonConverter);
 
   void startRemoteFetch() {
-    if(onlineFetcher != null){
+    if (onlineFetcher != null) {
       onlineFetcher?.cancel();
     }
 

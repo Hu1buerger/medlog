@@ -13,11 +13,11 @@ abstract class Store {
   Future<void> load();
   Future<void> flush();
 
-  void storeJson(String key, Json json);
-  void storeString(String key, String value);
+  void insertJson(String key, Json json);
+  void insertString(String key, String value);
 
-  Json loadJson(String key);
-  String loadString(String key);
+  Json getJson(String key);
+  String getString(String key);
 
   bool containsKey(String key);
 }
@@ -76,19 +76,31 @@ class JsonStore implements Store {
   }
 
   @override
-  void storeJson(String key, Json json) => _cache[key] = json;
+  void insertString(String key, String value) {
+    if (containsKey(key)) throw StateError("key already contained");
+    updateString(key, value);
+  }
 
   @override
-  void storeString(String key, String value) => _cache[key] = value;
+  void insertJson(String key, Json value) {
+    if (containsKey(key)) throw StateError("key already contained");
+    updateJson(key, value);
+  }
 
   @override
-  String loadString(String key) {
+  void updateJson(String key, Json value) => _cache[key] = value;
+
+  @override
+  void updateString(String key, String value) => _cache[key] = value;
+
+  @override
+  String getString(String key) {
     if (containsKey(key) == false) throw ArgumentError("key not available");
     return _cache[key] as String;
   }
 
   @override
-  Json loadJson(String key) {
+  Json getJson(String key) {
     if (containsKey(key) == false) throw ArgumentError("key not available");
     return _cache[key] as Json;
   }
@@ -122,7 +134,7 @@ class Backupmanager{
 
   Future<bool> _shouldBackup(Store store) async {
     if (store.containsKey(versionKey)) {
-      final filesAppVersion = store.loadString(versionKey);
+      final filesAppVersion = store.getString(versionKey);
 
       if (filesAppVersion.isEmpty) {
         logger.severe("the file did contain the VERSION_KEY but no version");

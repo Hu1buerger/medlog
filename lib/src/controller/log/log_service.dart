@@ -3,7 +3,7 @@ import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 
-import '../storage_service.dart';
+import '../services/storage_service.dart';
 
 class LogService extends StorageService<LogEvent> {
   final Map<Type, StorageService> delegates = {
@@ -52,13 +52,14 @@ class LogService extends StorageService<LogEvent> {
     }
   }
 
-  StorageService<T> _storageServiceByT<T extends LogEvent>(){
-     assert(delegates.containsKey(T));
+  StorageService<T> _storageServiceByT<T extends LogEvent>() {
+    assert(delegates.containsKey(T));
 
-     return delegates[T]! as StorageService<T>;
+    return delegates[T]! as StorageService<T>;
   }
 
-  Map<String, List<Map<String, dynamic>>> getJson<T extends LogEvent>(List<LogEvent> items) => _storageServiceByT<T>().toJsonArray(items.whereType<T>().toList());
+  Map<String, List<Map<String, dynamic>>> getJson<T extends LogEvent>(List<LogEvent> items) =>
+      _storageServiceByT<T>().toJsonArray(items.whereType<T>().toList());
 
   @override
   Map<String, List<Map<String, dynamic>>> toJsonArray(List<LogEvent> items) {
@@ -66,7 +67,7 @@ class LogService extends StorageService<LogEvent> {
     var stockJson = getJson<StockEvent>(items);
 
     return {
-      medJson.keys.single : medJson.values.single,
+      medJson.keys.single: medJson.values.single,
       stockJson.keys.single: stockJson.values.single,
     };
   }

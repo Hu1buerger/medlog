@@ -9,30 +9,32 @@ import 'package:mocktail/mocktail.dart' hide when;
 import 'package:mocktail/mocktail.dart' as mktl show when;
 
 void main() {
-  group("mocktest", () {
+  given("mocked file", () {
     File file = MockFile();
 
     setUp(() async {
       reset(file);
+      // setup the mock so initializing the store dosnt throw
       mktl.when(() => file.parent).thenReturn(Directory.current);
       mktl.when(() => file.existsSync()).thenReturn(true);
     });
 
+    when("the store contains values", () {});
     test("test s/r on cache", () {
       // s/r as store & retrieve
-      Store store = JsonStore(file: file);
+      KVStore store = JsonStore(file: file);
 
       const String key = "test";
       const String value = "value";
 
       expect(store.containsKey(key), isFalse);
 
-      store.storeString(key, value);
-      expect(store.loadString(key), value);
+      store.insertString(key, value);
+      expect(store.getString(key), value);
     });
 
     test("test write", () async {
-      Store store = JsonStore(file: file);
+      KVStore store = JsonStore(file: file);
 
       throwOnMissingStub(file as Mock);
       mktl.when(() => file.writeAsString(any())).thenAnswer((invocation) => Future.value(file));
@@ -43,19 +45,19 @@ void main() {
     });
   });
 
-  given("emtpy file", () {
+  given("empty file", () {
     when("storing a valid store", () {
       final file = _emptyTmpFile();
       var store = JsonStore(file: file);
 
       assert(file.lengthSync() == 0);
 
-      store.storeString("test", "test");
-      
-      then("file should exist", (){
+      store.insertString("test", "test");
+
+      then("file should exist", () {
         expect(file.existsSync(), isTrue);
       });
-      
+
       then("the file should contain data", () async {
         await store.flush();
         expect(file.lengthSync() > 0, isTrue);
@@ -63,45 +65,85 @@ void main() {
     });
   });
 
-  given("valid file", (){
+  given("valid file", () {
     then("load should contain all keys", () async {
       final file = _emptyTmpFile();
       file.createSync();
-      
-      Json items = generateData();
-      Store store = JsonStore(file: file);
 
-      items.forEach((key, value) => store.storeString(key, value.toString()));
+      Json items = generateData();
+      KVStore store = JsonStore(file: file);
+
+      items.forEach((key, value) => store.insertString(key, value.toString()));
       await store.flush();
       //end of generating data
 
-      Store store2 = JsonStore(file: file);
+      KVStore store2 = JsonStore(file: file);
       await store2.load();
 
-      for(var entry in items.entries){
+      for (var entry in items.entries) {
         expect(store.containsKey(entry.key), isTrue);
-        expect(store.loadString(entry.key), entry.value);
+        expect(store.getString(entry.key), entry.value);
       }
     });
   });
 
-  given("operating on cache", (){
+  given("empty JsonStore", () {
     var file = _emptyTmpFile();
-    Store store = JsonStore(file: file);
+    late KVStore store;
 
-    assert(file.lengthSync() == 0);
+    before(() => store = JsonStore(file: file));
 
-    when("adding string", (){
+    given("value as string", () {
       const String key = "key";
       const String value = "value";
-      store.storeString(key, "value");
 
-      then("extracting string is valid", (){
-        expect(store.loadString(key), isNot(throwsA(anything)));
-        expect(store.loadString(key), value);
+      when("inserting string", () {
+        then("inserting the same key, even though it is already contained should throw", () {
+          store.insertString(key, value);
+
+          expect(() => store.insertString(key, value), throwsA(anything));
+        });
+        then("retrieving it should result the same value", () {
+          store.insertString(key, value);
+
+          expect(store.getString(key), isNot(throwsA(anything)));
+          expect(store.getString(key), value);
+        });
+        then("loading other type should throw", () {
+          store.insertString(key, value);
+
+          expect(() => store.getJson(key), throwsA(anything));
+        });
       });
-      then("loading other type should throw", (){
-        expect(() => store.loadJson(key), throwsA(anything));
+
+      when("updating key", () {
+        when("[AND] the key is not present", () {
+          then(",it should be inserted", () {
+            assert(store.containsKey(key) == false);
+
+            store.updateString(key, value);
+            expect(store.containsKey(key), isTrue);
+          });
+        });
+
+        when("[AND] the key is present", () {
+          before(() => store.insertString(key, value));
+
+          then("a contained key should change value", () {
+            const val2 = "val2";
+            assert(val2 != value);
+
+            store.updateString(key, val2);
+            expect(store.getString(key), val2);
+          });
+
+          then("inserting another type should change the type", () {
+            final Map<String, dynamic> val2 = {"string": "string"};
+            store.updateJson(key, val2);
+
+            expect(store.getJson(key), val2);
+          });
+        });
       });
     });
   });
@@ -139,12 +181,12 @@ void main() {
 
 final tmpDir = Directory.systemTemp.createTempSync();
 int fileNO = -1;
-File _emptyTmpFile(){
+File _emptyTmpFile() {
   fileNO++;
   return File(tmpDir.path + "/$fileNO.txt");
 }
 
-Json generateData(){
+Json generateData() {
   int entrys = 10;
 
   Json result = {};
@@ -155,10 +197,11 @@ Json generateData(){
   return result;
 }
 
-String _randomString(){
+String _randomString() {
   Random rng = Random();
   int length = rng.nextInt(59) + 1;
 
   return String.fromCharCodes(List.generate(length, (index) => rng.nextInt(33) + 89));
 }
+
 class MockFile extends Mock implements File {}
