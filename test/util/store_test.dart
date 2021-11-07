@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:given_when_then_unit_test/given_when_then_unit_test.dart';
+import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:medlog/src/util/store.dart';
 import 'package:mocktail/mocktail.dart' hide when;
 import 'package:mocktail/mocktail.dart' as mktl show when;
@@ -102,6 +103,36 @@ void main() {
       then("loading other type should throw", (){
         expect(() => store.loadJson(key), throwsA(anything));
       });
+    });
+  });
+
+  given("Backupmanager and a predefined jsonString", (){
+    late File file;
+    late Directory backupmanagerDir;
+
+    before(() {
+      backupmanagerDir = tmpDir.createTempSync();
+      file = backupmanagerDir.createNamed(Backupmanager.latestFileName);
+    });
+
+    when("the versionKey is not contained", (){
+        const String content = '{}';
+        late JsonStore jsonStore;
+
+        before((){
+          file.createSync();
+          file.writeAsStringSync(content);
+          
+          var bckmgr = Backupmanager(backupmanagerDir);
+          jsonStore = bckmgr.createStore();
+        });
+
+        then("the backupmanager should create a backup", () async {
+          await jsonStore.load();
+
+          var files = backupmanagerDir.listFiles();
+          print(files);
+        });
     });
   });
 }

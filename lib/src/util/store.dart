@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/util/date_time_extension.dart';
 import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -57,7 +58,7 @@ class JsonStore implements Store {
 
     if(backupmanager != null){
       await backupmanager!.checkAndDoBackup(this);
-      _cache[backupmanager!.versionKey] = await VersionHandler.getVersion();
+      _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
     }
   }
 
@@ -101,10 +102,24 @@ class Backupmanager{
 
   static final Logger logger = Logger("Backupmanager");
 
-  Backupmanager();
+  late Directory _managedDir;
+  late File _latest;
+  
+  Backupmanager(Directory dir){
+    if(dir.existsSync() == false) throw ArgumentError();
+
+    var possibleLatest = dir.createNamed(latestFileName);
+    if(possibleLatest.existsSync() == false) possibleLatest.createSync();
+
+    _latest = possibleLatest;
+  }
 
   String get versionKey => constVersionKey;
   
+  JsonStore createStore(){
+    return JsonStore(file: _latest, backupmanager: this);
+  }
+
   Future<bool> _shouldBackup(Store store) async {
     if (store.containsKey(versionKey)) {
       final filesAppVersion = store.loadString(versionKey);
@@ -113,7 +128,7 @@ class Backupmanager{
         logger.severe("the file did contain the VERSION_KEY but no version");
         return true;
       }
-      final currentVersion = await VersionHandler.getVersion();
+      final currentVersion = await VersionHandler.Instance.getVersion();
 
       if (filesAppVersion == currentVersion) {
         return false;
@@ -129,7 +144,7 @@ class Backupmanager{
     if(state){
       logger.fine("version missmatch doing backup");
       
-      String path = store.file.parent.newFilePath("${DateTime.now().toIso8601String()}.json");
+      String path = store.file.parent.newFilePath("${DateTime.now().fileSystemName()}.json");
       await store.file.copy(path);
       logger.info("copyed the current state to $path");
       //_updateFiles();
@@ -138,9 +153,11 @@ class Backupmanager{
 }
 
 class VersionHandler {
-  static Future<PackageInfo> pkgInfo = PackageInfo.fromPlatform();
+  static VersionHandler Instance = VersionHandler();
 
-  static Future<String> getVersion() async {
+  Future<PackageInfo> pkgInfo = PackageInfo.fromPlatform();
+
+  Future<String> getVersion() async {
     var info = await pkgInfo;
     return info.version;
   }

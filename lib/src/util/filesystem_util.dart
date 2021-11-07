@@ -24,8 +24,10 @@ extension DirectoryExtension on Directory{
     if(named.isEmpty) throw ArgumentError.value(named);
     if(named.contains(Platform.pathSeparator)) throw ArgumentError.value(named, null, "contains the platformSeperator");
 
-    return "{$path}{$Platform.pathSeparator}{$named}";
+    return "$path${Platform.pathSeparator}$named";
   }
+
+  List<File> listFiles() => FilesystemUtil.listFiles(this);
 }
 
 class FilesystemUtil {

@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Adapter to store typed data
+/// 
+/// This instance handles on key.
+/// It can i.e. store a list of Pharmaceuticals
 class StorageService<T> {
   static SharedPreferences? preferences;
 
