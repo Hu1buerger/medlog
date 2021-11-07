@@ -4,9 +4,7 @@ import 'package:medlog/src/controller/log/log_controller.dart';
 import 'package:medlog/src/controller/log/log_provider.dart';
 import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
 import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
-import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Settings extends StatefulWidget {
