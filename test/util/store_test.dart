@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -22,7 +23,7 @@ void main() {
     when("the store contains values", () {});
     test("test s/r on cache", () {
       // s/r as store & retrieve
-      KVStore store = JsonStore(file: file);
+      Store store = JsonStore(file: file);
 
       const String key = "test";
       const String value = "value";
@@ -34,7 +35,7 @@ void main() {
     });
 
     test("test write", () async {
-      KVStore store = JsonStore(file: file);
+      Store store = JsonStore(file: file);
 
       throwOnMissingStub(file as Mock);
       mktl.when(() => file.writeAsString(any())).thenAnswer((invocation) => Future.value(file));
@@ -71,13 +72,13 @@ void main() {
       file.createSync();
 
       Json items = generateData();
-      KVStore store = JsonStore(file: file);
+      Store store = JsonStore(file: file);
 
       items.forEach((key, value) => store.insertString(key, value.toString()));
       await store.flush();
       //end of generating data
 
-      KVStore store2 = JsonStore(file: file);
+      Store store2 = JsonStore(file: file);
       await store2.load();
 
       for (var entry in items.entries) {
@@ -89,7 +90,7 @@ void main() {
 
   given("empty JsonStore", () {
     var file = _emptyTmpFile();
-    late KVStore store;
+    late Store store;
 
     before(() => store = JsonStore(file: file));
 
@@ -145,36 +146,6 @@ void main() {
           });
         });
       });
-    });
-  });
-
-  given("Backupmanager and a predefined jsonString", (){
-    late File file;
-    late Directory backupmanagerDir;
-
-    before(() {
-      backupmanagerDir = tmpDir.createTempSync();
-      file = backupmanagerDir.createNamed(Backupmanager.latestFileName);
-    });
-
-    when("the versionKey is not contained", (){
-        const String content = '{}';
-        late JsonStore jsonStore;
-
-        before((){
-          file.createSync();
-          file.writeAsStringSync(content);
-          
-          var bckmgr = Backupmanager(backupmanagerDir);
-          jsonStore = bckmgr.createStore();
-        });
-
-        then("the backupmanager should create a backup", () async {
-          await jsonStore.load();
-
-          var files = backupmanagerDir.listFiles();
-          print(files);
-        });
     });
   });
 }

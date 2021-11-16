@@ -16,6 +16,9 @@ abstract class Store {
   void insertJson(String key, Json json);
   void insertString(String key, String value);
 
+  void updateJson(String key, Json value);
+  void updateString(String key, String value);
+
   Json getJson(String key);
   String getString(String key);
 
