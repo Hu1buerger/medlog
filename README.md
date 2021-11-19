@@ -32,11 +32,11 @@ Medlog shall still be able to track and inform the user about trends.
 
 ### Future Features
 
-- [] show the median daily use of a specific pharmaceutical
-- [] inform about the need to restock based on the remaining stock
-- [] allow for analysis, for factors that can be "easily" be influenced 
+- [ ] show the median daily use of a specific pharmaceutical
+- [ ] inform about the need to restock based on the remaining stock
+- [ ] allow for analysis, for factors that can be "easily" be influenced 
     and that will increase safety and effectiveness of treatment.
-- [] how about exporting some / all of your intake and share it with your doc.
+- [ ] how about exporting some / all of your intake and share it with your doc.
     - this should be implemented after data about adverse reactions are trackable.
 ### Localization
 
