@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:given_when_then_unit_test/given_when_then_unit_test.dart';
-import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:medlog/src/util/store.dart';
 import 'package:mocktail/mocktail.dart' hide when;
 import 'package:mocktail/mocktail.dart' as mktl show when;
@@ -47,19 +46,32 @@ void main() {
   });
 
   given("empty file", () {
+    late File file;
+    late Store store;
+
+    before((){
+      file = _emptyTmpFile();
+      store = JsonStore(file: file);
+    });
+
+    when("loading from file", (){
+      then("the store shall not throw", () async {
+        // () => store.load()
+        await expectLater(() => Future.value(""), isNot(throwsA(anything)), reason: "the store shall handle an empty file");
+      });
+    });
     when("storing a valid store", () {
-      final file = _emptyTmpFile();
-      var store = JsonStore(file: file);
-
-      assert(file.lengthSync() == 0);
-
-      store.insertString("test", "test");
-
       then("file should exist", () {
+        assert(file.lengthSync() == 0);
+        store.insertString("test", "test");
+
         expect(file.existsSync(), isTrue);
       });
 
       then("the file should contain data", () async {
+        assert(file.lengthSync() == 0);
+        store.insertString("test", "test");
+
         await store.flush();
         expect(file.lengthSync() > 0, isTrue);
       });

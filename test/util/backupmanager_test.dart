@@ -16,12 +16,22 @@ void main() {
     late File file;
     late Directory backupmanagerDir;
 
+    late MockVersionHandler versionHandler;
+
+    String appVersion = "1.2.1";
+
     before(() {
       backupmanagerDir = tmpDir.createTempSync();
       file = backupmanagerDir.createNamed(Backupmanager.latestFileName);
+
+      // mock the VersionHandler bcs PlatformTools throws on PackageInfo.getAll and that gets calle
+      versionHandler = MockVersionHandler();
+      VersionHandler.Instance = versionHandler;
+
+      mktl.when(() => versionHandler.getVersion()).thenAnswer((_) => Future.value(appVersion));
     });
 
-    given("a file with content", () {
+    given("[AND] a file with content", () {
       late JsonStore jsonStore;
 
       before(() {
@@ -45,18 +55,6 @@ void main() {
       });
 
       when("the versionKey is contained", () {
-        // ignore: prefer_function_declarations_over_variables
-        String appVersion = "1.2.1";
-
-        late MockVersionHandler versionHandler;
-
-        before(() {
-          versionHandler = MockVersionHandler();
-          VersionHandler.Instance = versionHandler;
-
-          mktl.when(() => versionHandler.getVersion()).thenAnswer((_) => Future.value(appVersion));
-        });
-
         when("it is equal to the running version", () {
           String fileVersion = appVersion;
 
@@ -70,7 +68,7 @@ void main() {
             expect(files.length, 1);
           });
         });
-        when("and the versions dont match", () {
+        when("[AND] the versions dont match", () {
           String fileVersion = "1.2.1.1";
 
           assert(appVersion != fileVersion);

@@ -25,7 +25,7 @@ abstract class Store {
   bool containsKey(String key);
 }
 
-//TODO: maybe hide certain keys ie HIDDEN-VersionKey 
+//TODO: maybe hide certain keys ie HIDDEN-VersionKey
 class JsonStore implements Store {
   JsonStore({required File file, this.backupmanager}) {
     if (file.parent.existsSync() == false) throw ArgumentError("the directory which contains file dosnt exist");
@@ -48,7 +48,6 @@ class JsonStore implements Store {
   Map<String, dynamic> _cache = {};
   bool clean = true;
 
-
   @protected
   File get file => _file;
 
@@ -56,10 +55,16 @@ class JsonStore implements Store {
   Future<void> load() async {
     var content = await _file.readAsString();
 
-    _cache = jsonDecode(content);
+    if(content.isNotEmpty){
+      _cache = jsonDecode(content);
+    }
     clean = true;
 
-    if(backupmanager != null){
+    await checkBackuptools();
+  }
+
+  checkBackuptools() async {
+    if (backupmanager != null) {
       await backupmanager!.checkAndDoBackup(this);
       _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
     }
@@ -109,7 +114,7 @@ class JsonStore implements Store {
   }
 }
 
-class Backupmanager{
+class Backupmanager {
   static const String appIdentifier = "io.hu1buerger.medlog";
   static const String constVersionKey = "$appIdentifier/version";
 
@@ -119,19 +124,19 @@ class Backupmanager{
 
   late Directory _managedDir;
   late File _latest;
-  
-  Backupmanager(Directory dir){
-    if(dir.existsSync() == false) throw ArgumentError();
+
+  Backupmanager(Directory dir) {
+    if (dir.existsSync() == false) throw ArgumentError();
 
     var possibleLatest = dir.createNamed(latestFileName);
-    if(possibleLatest.existsSync() == false) possibleLatest.createSync();
+    if (possibleLatest.existsSync() == false) possibleLatest.createSync();
 
     _latest = possibleLatest;
   }
 
   String get versionKey => constVersionKey;
-  
-  JsonStore createStore(){
+
+  JsonStore createStore() {
     return JsonStore(file: _latest, backupmanager: this);
   }
 
@@ -156,9 +161,9 @@ class Backupmanager{
     //assert(_latestFile == store.file);
 
     final state = await _shouldBackup(store);
-    if(state){
+    if (state) {
       logger.fine("version missmatch doing backup");
-      
+
       String path = store.file.parent.newFilePath("${DateTime.now().fileSystemName()}.json");
       await store.file.copy(path);
       logger.info("copyed the current state to $path");
