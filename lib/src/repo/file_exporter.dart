@@ -4,9 +4,9 @@ import 'dart:core' hide print;
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 class FileExporter {
@@ -14,9 +14,9 @@ class FileExporter {
 
   static final Logger logger = Logger("FileExporter");
 
-  final LogController logController;
-  final PharmaceuticalController pharmaceuticalController;
-  final StockController stockController;
+  final LogRepo logController;
+  final PharmaceuticalRepo pharmaceuticalController;
+  final StockRepo stockController;
 
   Future write() async {
     //TODO: replace against the JsonStore

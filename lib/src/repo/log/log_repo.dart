@@ -2,12 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/log/log_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
-import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 
 /// Handles the keeping of records
 ///
@@ -15,12 +14,12 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 ///
 /// TODO: The [LogProvider] will take over
 ///  and its responsibility is to just combine all LogEvents and thats it
-class LogController with ChangeNotifier {
+class LogRepo with ChangeNotifier {
   static final _logger = Logger("LogController");
   static final supportedTypes = [MedicationIntakeEvent, StockEvent];
 
   LogService logService;
-  PharmaceuticalController pharmaController;
+  PharmaceuticalRepo pharmaController;
 
   int _lastID = 0;
 
@@ -30,7 +29,7 @@ class LogController with ChangeNotifier {
 
   List<LogEvent> _itemsInNeedToRehydrate = [];
 
-  LogController(this.pharmaController, this.logService) {
+  LogRepo(this.pharmaController, this.logService) {
     pharmaController.addListener(_tryRehydrate);
   }
 

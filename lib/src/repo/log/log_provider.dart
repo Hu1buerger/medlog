@@ -1,5 +1,5 @@
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
@@ -12,7 +12,7 @@ class LogProvider {
 
   static final logger = Logger("LogProvider");
 
-  final LogController _logController;
+  final LogRepo _logController;
 
   List<LogEvent> cache = [];
 
@@ -32,8 +32,7 @@ class LogProvider {
 
   void delete(LogEvent entry) {
     assert(cache.contains(entry));
-    assert(LogController.supportedTypes
-        .any((element) => element == entry.runtimeType));
+    assert(LogRepo.supportedTypes.any((element) => element == entry.runtimeType));
 
     _logController.delete(entry);
   }

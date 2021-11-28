@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 
 main() {
   final validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-.+#";
@@ -26,7 +26,7 @@ main() {
         Random rng = Random();
 
         final value =
-        String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
         final query = value;
 
         expect(filter.stringPartialMatch(value, query), isFalse);
@@ -83,6 +83,6 @@ main() {
 
     var ket = pharms.where((p) => filter.isMatch(p: p, query: "ket")).toList();
     expect(ket.length, 2);
-    expect(ket.toSet(), pharms.getRange(1,3).toList().toSet());
+    expect(ket.toSet(), pharms.getRange(1, 3).toList().toSet());
   });
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/controller/stock/stock_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
+import 'package:medlog/src/repo/stock/stock_service.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
@@ -13,15 +13,13 @@ import '../pharmaceutical/pharmaceutical_controller_test.dart';
 
 main() {
   Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record){
+  Logger.root.onRecord.listen((record) {
     print("${record.level}/${record.message}");
   });
 
   test("mocking prevents writing to disk", () async {
     String testKey = "testKey";
-    SharedPreferences.setMockInitialValues(
-      {testKey:[]}
-    );
+    SharedPreferences.setMockInitialValues({testKey: []});
 
     var otherInstance = await SharedPreferences.getInstance();
     expect(otherInstance.containsKey(testKey), isTrue);
@@ -33,9 +31,7 @@ main() {
   });
 
   test("createItems", () async {
-    SharedPreferences.setMockInitialValues({
-      StockService.key: []
-    });
+    SharedPreferences.setMockInitialValues({StockService.key: []});
 
     var tuple = await setupStockController();
     var testStock = tuple.item2;
@@ -46,7 +42,7 @@ main() {
     expect(stockController.stock.any((element) => element.pharmaceutical != null), isNot(throwsA(anything)));
   });
 
-  test("store items", () async{
+  test("store items", () async {
     SharedPreferences.setMockInitialValues({});
 
     var tuple = await setupStockController();
@@ -64,7 +60,7 @@ main() {
     expect(strings?.length ?? 0, testStock.length);
   });
 
-  test("controller dosnt write empty items", (){
+  test("controller dosnt write empty items", () {
     //maybe the controller should write empty items too?
   });
 
@@ -82,9 +78,9 @@ main() {
     var sp = await SharedPreferences.getInstance();
     expect(sp.getKeys().length >= 2, isTrue);
 
-    var pharmac = PharmaceuticalController(PharmaService(), fetchEnabled: false);
+    var pharmac = PharmaceuticalRepo(PharmaService(), fetchEnabled: false);
     await pharmac.load();
-    var stockc = StockController(StockService(), pharmac);
+    var stockc = StockRepo(StockService(), pharmac);
     await stockc.load();
 
     //expect that all items are rehydrated
@@ -97,16 +93,18 @@ DateTime futureTime() {
   return DateTime.now().add(const Duration(days: 3, hours: 1, minutes: 8, seconds: 7));
 }
 
-Future<Tuple3<PharmaceuticalController, List<StockItem>, StockController>> setupStockController() async {
+Future<Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>> setupStockController() async {
   var pharmaController = await createPharmaController(items: 3);
   var pharmaceuticals = pharmaController.pharmaceuticals;
 
-  var testStock = List.generate(10, (index) =>
-      StockItem.create(pharmaceuticals[index % pharmaceuticals.length], index + 1, StockState.closed, futureTime()));
+  var testStock = List.generate(
+      10,
+      (index) => StockItem.create(
+          pharmaceuticals[index % pharmaceuticals.length], index + 1, StockState.closed, futureTime()));
 
   var stockService = StockService();
-  var stockController = StockController(stockService, pharmaController);
+  var stockController = StockRepo(stockService, pharmaController);
   testStock.forEach(stockController.addStockItem);
 
-  return Tuple3<PharmaceuticalController, List<StockItem>, StockController>(pharmaController, testStock, stockController);
+  return Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>(pharmaController, testStock, stockController);
 }

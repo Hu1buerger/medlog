@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:uuid/uuid.dart';
 
-class PharmaceuticalController with ChangeNotifier {
+class PharmaceuticalRepo with ChangeNotifier {
   /// uid generator using crypto random number generator;
   static const Uuid _uuid = Uuid();
 
-  PharmaceuticalController(PharmaService pharmaservice, {this.fetchEnabled = true}) : _pharmaservice = pharmaservice;
+  PharmaceuticalRepo(PharmaService pharmaservice, {this.fetchEnabled = true}) : _pharmaservice = pharmaservice;
 
   final Logger _logger = Logger("PharmaceuticalController");
 

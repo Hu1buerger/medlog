@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
@@ -12,7 +12,7 @@ class StockItemDetail extends StatelessWidget {
 
   final StockItem stockItem;
 
-  final StockController stockController;
+  final StockRepo stockController;
 
   const StockItemDetail({Key? key, required this.stockController, required this.stockItem}) : super(key: key);
 

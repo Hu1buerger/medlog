@@ -2,9 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/provider.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -13,6 +10,9 @@ import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/provider.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -23,9 +23,9 @@ import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 class AddLogEntry extends StatefulWidget {
   static const String routeName = "/addMedicationIntakeLog";
 
-  final PharmaceuticalController pharmaController;
+  final PharmaceuticalRepo pharmaController;
   final LogProvider logProvider;
-  final StockController stockController;
+  final StockRepo stockController;
 
   const AddLogEntry(
       {Key? key, required this.pharmaController, required this.logProvider, required this.stockController})
@@ -42,11 +42,11 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   final Logger logger = Logger("AddLogEntryState");
 
-  PharmaceuticalController get pharmaController => widget.pharmaController;
+  PharmaceuticalRepo get pharmaController => widget.pharmaController;
 
   LogProvider get logProvider => widget.logProvider;
 
-  StockController get stockController => widget.stockController;
+  StockRepo get stockController => widget.stockController;
 
   TextEditingController adminDateController = TextEditingController();
 
@@ -164,7 +164,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
   }
 
   void onSelectUnits(Option<num>? option) {
-    if(option == null){
+    if (option == null) {
       logger.fine("unselect the units");
       // just reset it....
       setState(() => selectedUnits = 1);

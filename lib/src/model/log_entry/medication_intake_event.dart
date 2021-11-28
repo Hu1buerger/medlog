@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
@@ -56,7 +56,7 @@ class MedicationIntakeEvent extends LogEvent {
   }
 
   @override
-  bool rehydrate(PharmaceuticalController p) {
+  bool rehydrate(PharmaceuticalRepo p) {
     var pharmaceutical = p.pharmaceuticalByID(pharmaceuticalID);
     if (pharmaceutical == null) {
       //throw StateError("couldnt rehydrate bcs the pharmaceutical with id couldnt be found");

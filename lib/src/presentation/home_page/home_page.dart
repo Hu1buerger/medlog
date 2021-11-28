@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:medlog/src/presentation/log/log_view.dart';
 import 'package:medlog/src/presentation/stock/view_stock.dart';
 
 class HomePage extends StatefulWidget {
   static const String route = "/home";
 
-  final LogController logController;
-  final StockController stockController;
+  final LogRepo logController;
+  final StockRepo stockController;
 
   const HomePage({Key? key, required this.logController, required this.stockController, int? selectPage = 0})
       : super(key: key);

@@ -3,8 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_provider.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
@@ -14,9 +12,10 @@ import 'package:medlog/src/presentation/home_page/home_page.dart';
 import 'package:medlog/src/presentation/log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/settings/settings.dart';
 import 'package:medlog/src/presentation/stock/stock_item_detail.dart';
-
-import 'controller/log/log_controller.dart';
-import 'controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/log/log_provider.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 /// The Widget that configures your application.
 class MedlogApp extends StatefulWidget {
@@ -24,9 +23,9 @@ class MedlogApp extends StatefulWidget {
       {Key? key, required this.logController, required this.pharmaController, required this.stockController})
       : super(key: key);
 
-  final LogController logController;
-  final PharmaceuticalController pharmaController;
-  final StockController stockController;
+  final LogRepo logController;
+  final PharmaceuticalRepo pharmaController;
+  final StockRepo stockController;
 
   @override
   State<StatefulWidget> createState() => _AppState();
@@ -34,7 +33,7 @@ class MedlogApp extends StatefulWidget {
 
 class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
   static final logger = Logger("MedlogApp");
-  
+
   late final LogProvider logProvider;
 
   @override

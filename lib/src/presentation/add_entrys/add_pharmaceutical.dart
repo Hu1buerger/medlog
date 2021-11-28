@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class AddPharmaceutical extends StatefulWidget {
   static const String routeName = "Add_Pharmaceutical";
 
-  final PharmaceuticalController pharmController;
+  final PharmaceuticalRepo pharmController;
 
   const AddPharmaceutical({Key? key, required this.pharmController}) : super(key: key);
 

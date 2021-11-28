@@ -16,7 +16,8 @@ class PharmaceuticalFilter {
     for (var p in pharmaceutical) {
       bool match = false;
       for (var f in filter) {
-        //TODO: as for now we dont know if the query is [filter[0] && ...] || [filter[0] || ...]
+        //as for now we dont know if the query is [filter[0] && ...] || [filter[0] || ...]
+        // therefore we treat it as a inclusive query
         match |= f.isMatch(p: p, query: query);
       }
 

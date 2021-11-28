@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
 import 'package:logging/src/logger.dart';
-import 'package:medlog/src/controller/services/storage_service.dart';
+import 'package:medlog/src/repo/services/storage_service.dart';
 
 var rng = Random();
 

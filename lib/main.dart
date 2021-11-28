@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:logging_to_logcat/logging_to_logcat.dart';
 import 'package:medlog/src/app.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/log/log_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/controller/stock/stock_service.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/repo/log/log_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
+import 'package:medlog/src/repo/stock/stock_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,9 +15,9 @@ void main() async {
   _initializeLogger();
   Logger.root.info("starting the app");
 
-  final pharmController = PharmaceuticalController(PharmaService());
-  final logController = LogController(pharmController, LogService());
-  final stockC = StockController(StockService(), pharmController);
+  final pharmController = PharmaceuticalRepo(PharmaService());
+  final logController = LogRepo(pharmController, LogService());
+  final stockC = StockRepo(StockService(), pharmController);
 
   await pharmController.load();
   await logController.loadLog();

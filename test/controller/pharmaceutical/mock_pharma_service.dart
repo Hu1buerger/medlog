@@ -1,6 +1,6 @@
 import 'package:logging/src/logger.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/services/storage_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/services/storage_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class MockPharmaService extends PharmaService {

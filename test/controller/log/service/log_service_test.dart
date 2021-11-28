@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/controller/log/log_service.dart';
+import 'package:medlog/src/repo/log/log_service.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';

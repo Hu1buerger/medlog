@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 class PharmaceuticalSelector extends StatefulWidget {
-  final PharmaceuticalController pharmaceuticalController;
+  final PharmaceuticalRepo pharmaceuticalController;
 
   final String initialQuery;
 
@@ -26,7 +26,7 @@ class PharmaceuticalSelector extends StatefulWidget {
 }
 
 class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
-  PharmaceuticalController get pharmaController => widget.pharmaceuticalController;
+  PharmaceuticalRepo get pharmaController => widget.pharmaceuticalController;
 
   Logger logger = Logger("Pharmaselector");
   TextEditingController searchQueryController = TextEditingController();

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
@@ -32,7 +32,7 @@ void main() async {
 
   group("localActions", () {
     var service = MockPharmaService([]);
-    var controller = PharmaceuticalController(service);
+    var controller = PharmaceuticalRepo(service);
 
     test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller));
     test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
@@ -41,7 +41,7 @@ void main() async {
   group("test collisionHandling", () {
     test("insert twice the same", () {
       var service = MockPharmaService([]);
-      var controller = PharmaceuticalController(service);
+      var controller = PharmaceuticalRepo(service);
 
       var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
 
@@ -52,7 +52,7 @@ void main() async {
 
     test("insert different", () {
       var service = MockPharmaService([]);
-      var controller = PharmaceuticalController(service);
+      var controller = PharmaceuticalRepo(service);
 
       var p1 = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
       var p2 = Pharmaceutical(tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
@@ -65,7 +65,7 @@ void main() async {
 
     test("insert a authored version", () {
       var service = MockPharmaService([]);
-      var controller = PharmaceuticalController(service);
+      var controller = PharmaceuticalRepo(service);
 
       var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
 
@@ -86,10 +86,10 @@ void main() async {
 
     test("reject downgrade", () {
       var service = MockPharmaService([]);
-      var controller = PharmaceuticalController(service);
+      var controller = PharmaceuticalRepo(service);
 
       controller.addPharmaceutical(Pharmaceutical(
-          id: PharmaceuticalController.createPharmaID(),
+          id: PharmaceuticalRepo.createPharmaID(),
           tradename: "name",
           dosage: Dosage.parse("1g"),
           activeSubstance: "goFuckyourSelf",
@@ -117,13 +117,13 @@ void testEquals(Pharmaceutical actual, Pharmaceutical expected) {
 }
 
 /// tests that all stored entrys are Refs to ensure updatablility
-void _testPCcontainsOnlyRefs(PharmaceuticalController c) {
+void _testPCcontainsOnlyRefs(PharmaceuticalRepo c) {
   for (var p in c.pharmaceuticals) {
     expect(PharmaceuticalRef, p.runtimeType);
   }
 }
 
-void _testRetrieveByNameAndDosage(PharmaceuticalController c) {
+void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
   var pharma = Pharmaceutical(
       human_known_name: "RETARDIN AL 25mg",
       tradename: "RETARDIN",
@@ -138,7 +138,7 @@ void _testRetrieveByNameAndDosage(PharmaceuticalController c) {
   testEquals(pharma, retrieved);
 }
 
-Future<PharmaceuticalController> createPharmaController(
+Future<PharmaceuticalRepo> createPharmaController(
     {int items = 0, bool fetchEnabled = false, bool mockedService = false}) async {
   // all items are fully configured
   var service;
@@ -150,7 +150,7 @@ Future<PharmaceuticalController> createPharmaController(
     service = PharmaService();
   }
 
-  var controller = PharmaceuticalController(service, fetchEnabled: fetchEnabled);
+  var controller = PharmaceuticalRepo(service, fetchEnabled: fetchEnabled);
   await controller.load();
 
   if (items > 0) {
@@ -161,7 +161,7 @@ Future<PharmaceuticalController> createPharmaController(
   return controller;
 }
 
-void populatePC(PharmaceuticalController pc) {
+void populatePC(PharmaceuticalRepo pc) {
   if (pc.pharmaceuticals.isEmpty) {
     pc.createPharmaceutical(Pharmaceutical(
         tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));

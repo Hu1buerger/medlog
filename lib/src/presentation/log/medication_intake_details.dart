@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 
 class MedicationIntakeDetails extends StatelessWidget {
@@ -10,7 +10,7 @@ class MedicationIntakeDetails extends StatelessWidget {
   static final Logger _logger = Logger("DetailedLogEntryWidget");
 
   final MedicationIntakeEvent entry;
-  final LogController logController;
+  final LogRepo logController;
 
   const MedicationIntakeDetails({Key? key, required this.entry, required this.logController}) : super(key: key);
 

@@ -1,24 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:uuid/uuid.dart';
 
 //TODO: extend this mofo and override load and store => ExampleDataStockController
-class StockController with ChangeNotifier {
+class StockRepo with ChangeNotifier {
   Logger logger = Logger("StockController");
 
-  PharmaceuticalController pharmaController;
+  PharmaceuticalRepo pharmaController;
   Uuid uuid = const Uuid();
 
   StockService service;
   List<StockItem> _stock = [];
   List<StockItem> get stock => _stock;
 
-  StockController(this.service, this.pharmaController);
+  StockRepo(this.service, this.pharmaController);
 
   List<StockItem> stockItemByPharmaceutical(Pharmaceutical p) {
     return stock.where((element) => element.pharmaceutical == p).toList();
