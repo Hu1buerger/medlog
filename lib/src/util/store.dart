@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 import 'package:medlog/src/util/filesystem_util.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:medlog/src/util/version_handler.dart';
 
 typedef Json = Map<String, dynamic>;
 
+//TODO: add a func to set a list as val
 abstract class Store {
   Future<void> load();
   Future<void> flush();
@@ -30,10 +31,8 @@ class JsonStore implements Store {
   JsonStore({required File file, this.backupmanager}) {
     if (file.parent.existsSync() == false) throw ArgumentError("the directory which contains file dosnt exist");
 
-    if (file.existsSync()) {
-      logger.fine("file exists");
-    } else {
-      logger.fine("creating file");
+    if (!file.existsSync()) {
+      logger.fine("creating file ${file.path}");
       file.createSync();
     }
 
@@ -55,15 +54,16 @@ class JsonStore implements Store {
   Future<void> load() async {
     var content = await _file.readAsString();
 
-    if(content.isNotEmpty){
+    if (content.isNotEmpty) {
       _cache = jsonDecode(content);
     }
     clean = true;
 
-    await checkBackuptools();
+    await _checkBackuptools();
   }
 
-  checkBackuptools() async {
+  /// if the backupmanager is instantiated use it and make backups
+  _checkBackuptools() async {
     if (backupmanager != null) {
       await backupmanager!.checkAndDoBackup(this);
       _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
@@ -79,9 +79,7 @@ class JsonStore implements Store {
   }
 
   @override
-  bool containsKey(String key) {
-    return _cache.containsKey(key);
-  }
+  bool containsKey(String key) => _cache.containsKey(key);
 
   @override
   void insertString(String key, String value) {
@@ -169,16 +167,5 @@ class Backupmanager {
       logger.info("copyed the current state to $path");
       //_updateFiles();
     }
-  }
-}
-
-class VersionHandler {
-  static VersionHandler Instance = VersionHandler();
-
-  Future<PackageInfo> pkgInfo = PackageInfo.fromPlatform();
-
-  Future<String> getVersion() async {
-    var info = await pkgInfo;
-    return info.version;
   }
 }

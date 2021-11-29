@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:medlog/src/repo/file_exporter.dart';
+import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/repo/log/log_provider.dart';
 import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/repo/stock/stock_controller.dart';
-import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Settings extends StatefulWidget {
@@ -49,16 +48,16 @@ class _SettingsState extends State<Settings> {
             FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (bc, asyncSnapshot) {
-                  if (asyncSnapshot.hasData == false) return const Text("versionNumber");
+                  if (asyncSnapshot.hasData == false) return const Text("versionNumber loading...");
                   var packageInfo = asyncSnapshot.data!;
 
                   return Text("${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
                 }),
             ElevatedButton(
                 onPressed: () {
-                  var fx = FileExporter(widget.logController, pharmController, stockController);
-                  fx.write();
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("backup finished")));
+                  //var fx = FileExporter(widget.logController, pharmController, stockController);
+                  //fx.write();
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("backup not performed")));
                 },
                 child: Text("backup")),
             ElevatedButton(
