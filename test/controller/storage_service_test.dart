@@ -9,10 +9,10 @@ import 'package:medlog/src/repo/services/storage_service.dart';
 var rng = Random();
 
 void main() async {
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((event) {
-    print(event.message);
-  });
+  //Logger.root.level = Level.ALL;
+  //Logger.root.onRecord.listen((event) {
+  //  print(event.message);
+  //});
 
   late MockStorageService ps;
 

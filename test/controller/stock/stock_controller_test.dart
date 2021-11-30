@@ -1,21 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logging/logging.dart';
+import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:medlog/src/repo/stock/stock_service.dart';
-import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 
 import '../pharmaceutical/pharmaceutical_controller_test.dart';
 
 main() {
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    print("${record.level}/${record.message}");
-  });
+  //Logger.root.level = Level.ALL;
+  //Logger.root.onRecord.listen((record) {
+  //  print("${record.level}/${record.message}");
+  //});
 
   test("mocking prevents writing to disk", () async {
     String testKey = "testKey";

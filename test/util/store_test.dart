@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -49,15 +48,14 @@ void main() {
     late File file;
     late Store store;
 
-    before((){
+    before(() {
       file = _emptyTmpFile();
       store = JsonStore(file: file);
     });
 
-    when("loading from file", (){
+    when("loading from file", () {
       then("the store shall not throw", () async {
-        // () => store.load()
-        await expectLater(() => Future.value(""), isNot(throwsA(anything)), reason: "the store shall handle an empty file");
+        expect(() => store.load(), returnsNormally, reason: "the store shall handle an empty file");
       });
     });
     when("storing a valid store", () {

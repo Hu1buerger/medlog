@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 
 import 'mock_pharma_service.dart';
 
@@ -141,11 +141,11 @@ void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
 Future<PharmaceuticalRepo> createPharmaController(
     {int items = 0, bool fetchEnabled = false, bool mockedService = false}) async {
   // all items are fully configured
-  var service;
-
+  PharmaService service;
   if (mockedService) {
     service = MockPharmaService([]);
   } else {
+    // ignore: avoid_print
     print("CAUTION writing to the production data is possible, using production pharmaservice");
     service = PharmaService();
   }
