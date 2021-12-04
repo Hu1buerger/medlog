@@ -3,7 +3,8 @@ name: CI-Test
 on:
   push:
     branches:
-      - main, dev
+      - main
+      - dev
     tags:
       - 'v*'
 
@@ -32,7 +33,7 @@ jobs:
       
       - run: flutter test
       - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
+        if: 1 == 2                        # run this step even if previous step failed
         with:
           name: test-results
           path: reports/test-results.json
