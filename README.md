@@ -1,3 +1,5 @@
+[![CI-Test](https://github.com/Hu1buerger/medlog/actions/workflows/build-artifacts.yml/badge.svg)](https://github.com/Hu1buerger/medlog/actions/workflows/build-artifacts.yml)
+
 # medlog
 
 A new Flutter project.
