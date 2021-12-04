@@ -5,11 +5,13 @@ import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 
+import '../../model/pharamaceutical/pharma_test_tools.dart';
+
 main() {
   final validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-.+#";
 
   group("string test", () {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 25; i++) {
       test("!negate match - $i", () {
         PharmaceuticalFilter filter = PharmaceuticalFilter.test(negate: false);
         Random rng = Random();
@@ -71,17 +73,17 @@ main() {
   test("test on pharmaceuticals", () {
     var pharms = [
       Pharmaceutical(tradename: "Naproxen", dosage: Dosage.parse("10mg"), activeSubstance: "Naproxen"),
-      Pharmaceutical(tradename: "Ketamin", dosage: Dosage.parse("10mg"), activeSubstance: "Ketamin"),
-      Pharmaceutical(tradename: "Esketamin", dosage: Dosage.parse("10mg"), activeSubstance: "Esketamin"),
+      Pharmaceutical(tradename: "Abc-med", dosage: Dosage.parse("10mg"), activeSubstance: "abc-med"),
+      Pharmaceutical(tradename: "Ebcabc-med", dosage: Dosage.parse("10mg"), activeSubstance: "ebc-med"),
     ];
 
     var filter = PharmaceuticalFilter(matcher: "Name", negate: false);
 
     var nap = pharms.where((p) => filter.isMatch(p: p, query: "nap")).toList();
     expect(nap.length, 1);
-    expect(nap.single, pharms[0]);
+    expect(nap.single, PharmaceuticalMatcher(pharms[0]));
 
-    var ket = pharms.where((p) => filter.isMatch(p: p, query: "ket")).toList();
+    var ket = pharms.where((p) => filter.isMatch(p: p, query: "abc")).toList();
     expect(ket.length, 2);
     expect(ket.toSet(), pharms.getRange(1, 3).toList().toSet());
   });

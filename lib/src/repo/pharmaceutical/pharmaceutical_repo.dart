@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
-import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:uuid/uuid.dart';
 
 class PharmaceuticalRepo with ChangeNotifier {
@@ -19,10 +18,12 @@ class PharmaceuticalRepo with ChangeNotifier {
 
   @visibleForTesting
   PharmaService get pharmaservice => _pharmaservice;
+
   List<Pharmaceutical> get pharmaceuticals => _pharmaStore;
 
   final PharmaService _pharmaservice;
 
+  // ignore: unused_field
   late final StreamSubscription<Pharmaceutical> _eventsSubscription;
 
   final List<PharmaceuticalRef> _pharmaStore = [];
@@ -119,12 +120,19 @@ class PharmaceuticalRepo with ChangeNotifier {
     }
 
     var toInsert = pharmaceutical as PharmaceuticalRef;
-
     // the id is set so it is either already tracked or from the server
-    // TODO: this dosnt handle if toInsert is a change from remote with a different id (duplication)
+
     var other = pharmaceuticalByID(toInsert.id);
 
     if (other != null) {
+      /*
+      * TODO: dosnt handle if toInsert is a change from remote with a different id (duplication)
+      *
+      * Desc:
+      * Currently versioning of the pharmaceuticals is problematic.
+      * Semantic versioning, or numeric versioning is impossible, bcs only oneway communication is automated
+      */
+
       // if there is a collison;
       // might / should be a method of Pharmaceutical?
       bool isEqual = other.activeSubstance == toInsert.activeSubstance &&
@@ -182,17 +190,6 @@ class PharmaceuticalRepo with ChangeNotifier {
     assert(results.length < 2);
 
     return results.isEmpty ? null : results.single;
-  }
-
-  Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, Dosage dose) {
-    var p = pharmaceuticals
-        .where((element) => element.displayName.startsWith(tradename))
-        .where((element) => element.dosage == dose)
-        .toList();
-
-    assert(p.length < 2);
-
-    return p.isNotEmpty ? p.first : null;
   }
 
   List<Pharmaceutical> filter(String query, List<PharmaceuticalFilter> filter) {

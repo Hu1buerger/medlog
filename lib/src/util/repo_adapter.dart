@@ -1,31 +1,37 @@
 import 'package:medlog/src/util/store.dart';
 
+/*
+ * TODO: The encodingAdapters are typeunsafe
+ *  THis is a result of json.Encode not using a type reifying
+ *
+ */
 class RepoAdapter {
-  late Store fileKVStore;
+  RepoAdapter(this.kvstore);
+
+  Store kvstore;
   List<Function(RepoAdapter)> shutdownHook = [];
 
-  T load<T>(String key, T Function(Json json) adapter) {
-    if (fileKVStore.containsKey(key) == false) throw ArgumentError.value(key);
+  T load<T>(String key, T Function(Object json) adapter) {
+    if (kvstore.containsKey(key) == false) throw ArgumentError.value(key, "", "not stored in kv-store");
 
-    Json val = fileKVStore.getJson(key);
-    return adapter(val);
+    return adapter(kvstore.get(key));
   }
 
-  void store<T>(String key, T val, Json Function(T) adapter) {
-    Json json = adapter(val);
-
-    fileKVStore.updateJson(key, json);
+  void store<T>(String key, T val, Object Function(T) adapter) {
+    kvstore.update(key, adapter(val));
   }
 
-  List<T> loadList<T>(String key, T Function(Json) adapter) {
-    if (fileKVStore.containsKey(key) == false) throw ArgumentError.value(key);
+  List<T> loadList<T>(String key, T Function(Object) adapter) {
+    if (kvstore.containsKey(key) == false) throw ArgumentError.value(key, "", "not stored in kv-store");
 
-    final list = fileKVStore.getJson(key) as List<Json>;
+    final storedValue = kvstore.get(key);
+    final list = storedValue as List<Object>;
     return list.map(adapter).toList();
   }
 
-  storeList<T>(String key, List<T> list, Json Function(T) adapter) {
+  /// store a list of
+  storeList<T>(String key, List<T> list, Object Function(T) adapter) {
     var jsonList = list.map(adapter).toList();
-    //TODO: handle see store.dart
+    kvstore.update(key, jsonList);
   }
 }

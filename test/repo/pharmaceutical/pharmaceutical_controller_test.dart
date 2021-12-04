@@ -4,7 +4,9 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
+import '../../model/pharamaceutical/pharma_test_tools.dart';
 import 'mock_pharma_service.dart';
 
 /// The pharmaceutical controller is a unit that handles the keeping of records for pharmaceuticals
@@ -34,7 +36,8 @@ void main() async {
     var service = MockPharmaService([]);
     var controller = PharmaceuticalRepo(service);
 
-    test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller));
+    test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller),
+        skip: "retrieving a pharm by name and dosage is currently unsupported");
     test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
   });
 
@@ -67,7 +70,7 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
+      var p = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -92,7 +95,7 @@ void main() async {
           id: PharmaceuticalRepo.createPharmaID(),
           tradename: "name",
           dosage: Dosage.parse("1g"),
-          activeSubstance: "goFuckyourSelf",
+          activeSubstance: "a_subst",
           documentState: DocumentState.in_review));
       var p = controller.pharmaceuticals.first;
 
@@ -107,13 +110,7 @@ void main() async {
 }
 
 void testEquals(Pharmaceutical actual, Pharmaceutical expected) {
-  expect(actual.id, expected.id);
-  expect(actual.human_known_name, expected.human_known_name);
-  expect(actual.displayName, expected.displayName);
-  expect(actual.activeSubstance, expected.activeSubstance);
-  expect(actual.dosage, expected.dosage);
-  expect(actual.tradename, expected.tradename);
-  expect(actual.documentState, expected.documentState);
+  expect(actual, PharmaceuticalMatcher(expected));
 }
 
 /// tests that all stored entrys are Refs to ensure updatablility
@@ -130,7 +127,8 @@ void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
       dosage: Dosage.parse("25mg"),
       activeSubstance: "Homopathie");
   c.createPharmaceutical(pharma);
-  var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", Dosage.parse("25mg"));
+  var retrieved = null;
+  //var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", Dosage.parse("25mg"));
 
   expect(retrieved != null, isTrue);
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour
@@ -145,8 +143,10 @@ Future<PharmaceuticalRepo> createPharmaController(
   if (mockedService) {
     service = MockPharmaService([]);
   } else {
-    // ignore: avoid_print
-    print("CAUTION writing to the production data is possible, using production pharmaservice");
+    if (SharedPreferencesStorePlatform.instance is! InMemorySharedPreferencesStore) {
+      // ignore: avoid_print
+      print("CAUTION the test is acting on data from file !!! CAVE: Production data???");
+    }
     service = PharmaService();
   }
 
