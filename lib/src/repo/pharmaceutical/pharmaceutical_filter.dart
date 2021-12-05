@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
+//TODO: test this one...
 //  this can be the substance, dosage, tradename...
 class PharmaceuticalFilter {
-  static final Map<String, String Function(Pharmaceutical)> _matchers = {"Name": (Pharmaceutical p) => p.displayName};
+  static final Map<String, String Function(Pharmaceutical)> _valueRetriever = {
+    "Name": (Pharmaceutical p) => p.displayName,
+    "Substance": (p) => p.activeSubstance ?? "",
+    "Dosage": (p) => p.dosage.toString(),
+  };
 
   /// filters [pharmaceutical] with [filter] and includes all matches that any filter matches on
-  static List<Pharmaceutical> filter(
-      List<PharmaceuticalFilter> filter, List<Pharmaceutical> pharmaceutical, String query) {
+  static List<Pharmaceutical> filter(List<PharmaceuticalFilter> filter,
+      List<Pharmaceutical> pharmaceutical, String query) {
     var result = <Pharmaceutical>[];
 
     for (var p in pharmaceutical) {
       bool match = false;
       for (var f in filter) {
-        //TODO: as for now we dont know if the query is [filter[0] && ...] || [filter[0] || ...]
+        //as for now we dont know if the query is [filter[0] && ...] || [filter[0] || ...]
+        // therefore we treat it as a inclusive query
         match |= f.isMatch(p: p, query: query);
       }
 
@@ -24,13 +30,17 @@ class PharmaceuticalFilter {
   }
 
   static List<PharmaceuticalFilter> all() {
-    return List.generate(_matchers.length, (index) => PharmaceuticalFilter(matcher: _matchers.keys.toList()[index]));
+    return List.generate(
+        _valueRetriever.length,
+        (index) => PharmaceuticalFilter(
+            matcher: _valueRetriever.keys.toList()[index]));
   }
 
   @visibleForTesting
   PharmaceuticalFilter.test({required this.negate}) : matcher = "";
 
-  PharmaceuticalFilter({required this.matcher, this.negate = false}) : assert(_matchers.keys.contains(matcher));
+  PharmaceuticalFilter({required this.matcher, this.negate = false})
+      : assert(_valueRetriever.keys.contains(matcher));
 
   /// the matcher that shall be used for this filter
   final String matcher;
@@ -43,7 +53,7 @@ class PharmaceuticalFilter {
 
   /// the filter says that [p] is a match
   bool isMatch({required Pharmaceutical p, required String query}) {
-    final valueRetriever = _matchers[matcher]!;
+    final valueRetriever = _valueRetriever[matcher]!;
     final fieldValue = valueRetriever(p);
 
     return stringIsMatch(fieldValue, query);
@@ -51,7 +61,9 @@ class PharmaceuticalFilter {
 
   @visibleForTesting
   bool stringIsMatch(String value, String query) {
-    return partialMatch ? stringPartialMatch(value, query) : stringFullMatch(value, query);
+    return partialMatch
+        ? stringPartialMatch(value, query)
+        : stringFullMatch(value, query);
   }
 
   @visibleForTesting

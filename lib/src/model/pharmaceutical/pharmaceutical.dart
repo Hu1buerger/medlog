@@ -4,7 +4,6 @@ import 'dosage.dart';
 
 part 'pharmaceutical.g.dart';
 
-/// TODO: turn dosage into object for scaling and other manipulations
 ///   Pharmaceutical
 ///     - It contains a substance that is causing the treatment effect (including homeopathics)
 ///     - It is identified by an id. This can either be created on the client device and is denoted by the [DocumentState.user_created]
@@ -33,7 +32,7 @@ class Pharmaceutical {
   ///
   /// this would be = 0.5 if this pharmaceutical is halfable
   final double? _minUnit;
-  double get smallestConsumableUnit => _minUnit ?? 0.25;
+  double get minUnit => _minUnit ?? 0.25;
 
   /// the string to display for the user
   String get displayName => human_known_name ?? tradename;
@@ -52,7 +51,8 @@ class Pharmaceutical {
       double? smallestConsumableUnit})
       : _minUnit = smallestConsumableUnit;
 
-  factory Pharmaceutical.fromJson(Map<String, dynamic> json) => _$PharmaceuticalFromJson(json);
+  factory Pharmaceutical.fromJson(Map<String, dynamic> json) =>
+      _$PharmaceuticalFromJson(json);
 
   Map<String, dynamic> toJson() {
     assert(isIded);
@@ -78,7 +78,7 @@ class Pharmaceutical {
         human_known_name: humanName ?? this.human_known_name,
         documentState: documentState ?? this.documentState,
         id: id ?? this.id,
-        smallestConsumableUnit: smallestPartialUnit ?? smallestConsumableUnit);
+        smallestConsumableUnit: smallestPartialUnit ?? minUnit);
   }
 }
 

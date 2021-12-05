@@ -9,7 +9,11 @@ class DateTimeWidget extends StatelessWidget {
   final bool showTime;
 
   //TODO: show "in 3 days" instead of a date
-  const DateTimeWidget({Key? key, required this.dateTime, this.showDate = true, this.showTime = true})
+  const DateTimeWidget(
+      {Key? key,
+      required this.dateTime,
+      this.showDate = true,
+      this.showTime = true})
       : assert(showDate || showTime),
         super(key: key);
 
@@ -38,6 +42,8 @@ class DateTimeWidget extends StatelessWidget {
       return Text(formatDate());
     }
 
-    return Text("${showDate ? dateTime.dateString() : ""} ${showTime ? dateTime.timeString() : ""}".trim());
+    return Text(
+        "${showDate ? dateTime.dateString() : ""} ${showTime ? dateTime.timeString() : ""}"
+            .trim());
   }
 }

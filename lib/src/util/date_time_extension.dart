@@ -36,4 +36,9 @@ extension DateTimeExtension on DateTime {
     // match day first bcs it is most likely to change
     return day == other.day && month == other.month && year == other.year;
   }
+
+  /// a format of date and time that can be used as a filename
+  String filesystemName() {
+    return "${year}_${month}_${day}_${hour}_${minute}_$second";
+  }
 }

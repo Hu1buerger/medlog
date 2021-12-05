@@ -2,41 +2,64 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharma_service.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
-import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/provider.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
+import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
-class PharmaceuticalController with ChangeNotifier {
+class PharmaceuticalRepo with ChangeNotifier {
   /// uid generator using crypto random number generator;
-  static const Uuid uuid = Uuid();
+  static const String storageKey = "pharmaceuticals";
+  static const Uuid _uuid = Uuid();
 
-  PharmaceuticalController(this.pharmaservice, {this.fetchEnabled = true});
+  PharmaceuticalRepo(this.repoAdapter, {this.fetchEnabled = true});
 
-  final Logger _logger = Logger("PharmaceuticalController");
+  final Logger _logger = Logger("PharmaceuticalRepo");
+
+  final RepoAdapter repoAdapter;
+
+  final List<PharmaceuticalRef> _pharmaStore = [];
+
+  List<Pharmaceutical> get pharmaceuticals => _pharmaStore;
+
   @visibleForTesting
-  final PharmaService pharmaservice;
-
-  late final StreamSubscription<Pharmaceutical> eventsSubscription;
-
-  final List<PharmaceuticalRef> _pharmStore = [];
-
   final bool fetchEnabled;
 
-  List<Pharmaceutical> get pharmaceuticals => _pharmStore;
+  /// loads all data from disk and restores the _pharmastore
+  Future<void> load() async {
+    var items =
+        repoAdapter.loadListOrDefault<Json, Pharmaceutical>(storageKey, (Json p0) => Pharmaceutical.fromJson(p0), []);
 
-  List<String> get tradenames => pharmaceuticals.map((e) => e.tradename).toSet().toList();
+    items.forEach(addPharmaceutical);
+    _logger.fine("finished adding all ${items.length}");
+
+    //FIXME if (fetchEnabled) pharmaservice.startRemoteFetch();
+
+    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
+    return;
+  }
+
+  store() {
+    _logger.info("storing ${_pharmaStore.length} pharmaceuticals");
+    repoAdapter.storeList(storageKey, _pharmaStore, (Pharmaceutical p) => p.toJson());
+  }
+
+  void startRemoteFetch() {
+    _logger.info("enabling fetch");
+    throw UnimplementedError();
+    //pharmaservice.startRemoteFetch();
+  }
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
-  ///
   createPharmaceutical(Pharmaceutical p) {
     assert(p is PharmaceuticalRef == false);
     assert(p.documentState == DocumentState.user_created);
     assert(p.isIded == false);
 
-    p = p.cloneAndUpdate(id: _createPharmaID());
+    p = p.cloneAndUpdate(id: createPharmaID());
     addPharmaceutical(p);
   }
 
@@ -84,12 +107,19 @@ class PharmaceuticalController with ChangeNotifier {
     }
 
     var toInsert = pharmaceutical as PharmaceuticalRef;
-
     // the id is set so it is either already tracked or from the server
-    // TODO: this dosnt handle if toInsert is a change from remote with a different id (duplication)
+
     var other = pharmaceuticalByID(toInsert.id);
 
     if (other != null) {
+      /*
+      * TODO: dosnt handle if toInsert is a change from remote with a different id (duplication)
+      *
+      * Desc:
+      * Currently versioning of the pharmaceuticals is problematic.
+      * Semantic versioning, or numeric versioning is impossible, bcs only oneway communication is automated
+      */
+
       // if there is a collison;
       // might / should be a method of Pharmaceutical?
       bool isEqual = other.activeSubstance == toInsert.activeSubstance &&
@@ -102,7 +132,7 @@ class PharmaceuticalController with ChangeNotifier {
 
       if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
-        other.cloneAndUpdate(id: _createPharmaID());
+        other.cloneAndUpdate(id: createPharmaID());
         notifyListeners();
         //other is already in the store so no need to insert.
         return;
@@ -111,7 +141,7 @@ class PharmaceuticalController with ChangeNotifier {
       if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // and the new item is userCreated, we can just change the id
         // aka the user wants to create a new Pharmaceutical
-        toInsert.cloneAndUpdate(id: _createPharmaID());
+        toInsert.cloneAndUpdate(id: createPharmaID());
         _insert(toInsert);
         return;
       }
@@ -149,17 +179,6 @@ class PharmaceuticalController with ChangeNotifier {
     return results.isEmpty ? null : results.single;
   }
 
-  Pharmaceutical? pharmaceuticalByNameAndDosage(String tradename, Dosage dose) {
-    var p = pharmaceuticals
-        .where((element) => element.displayName.startsWith(tradename))
-        .where((element) => element.dosage == dose)
-        .toList();
-
-    assert(p.length < 2);
-
-    return p.isNotEmpty ? p.first : null;
-  }
-
   List<Pharmaceutical> filter(String query, List<PharmaceuticalFilter> filter) {
     return PharmaceuticalFilter.filter(filter, pharmaceuticals, query);
   }
@@ -169,41 +188,16 @@ class PharmaceuticalController with ChangeNotifier {
     return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
-  String _createPharmaID() {
-    return uuid.v4();
+  @visibleForTesting
+  static String createPharmaID() {
+    return _uuid.v4();
   }
 
   _insert(PharmaceuticalRef p) {
-    _pharmStore.add(p);
+    _pharmaStore.add(p);
     p.registered = true;
 
     _logger.fine("inserted ${p.id} ${p.displayName}");
     notifyListeners();
-  }
-
-  /// loads all data from disk and restores the _pharmastore
-  Future<void> load() async {
-    pharmaservice.enableBacklog();
-
-    var items = await pharmaservice.loadFromDisk();
-    items.forEach(addPharmaceutical);
-
-    pharmaservice.clearBacklog();
-    pharmaservice.disableBacklog();
-
-    _logger.fine("finished adding all ${items.length}");
-    // enable the subscription
-    eventsSubscription = pharmaservice.events.listen((event) {
-      addPharmaceutical(event);
-    });
-
-    if (fetchEnabled) pharmaservice.startRemoteFetch();
-
-    _logger.fine("finished loading all pharmaceuticals with #${items.length}");
-    return;
-  }
-
-  Future<void> store() async {
-    pharmaservice.store(pharmaceuticals);
   }
 }

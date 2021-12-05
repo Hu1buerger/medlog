@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 
 class MedicationIntakeDetails extends StatelessWidget {
@@ -10,9 +10,11 @@ class MedicationIntakeDetails extends StatelessWidget {
   static final Logger _logger = Logger("DetailedLogEntryWidget");
 
   final MedicationIntakeEvent entry;
-  final LogController logController;
+  final LogRepo logController;
 
-  const MedicationIntakeDetails({Key? key, required this.entry, required this.logController}) : super(key: key);
+  const MedicationIntakeDetails(
+      {Key? key, required this.entry, required this.logController})
+      : super(key: key);
 
   /// builds a widget with title and value
   ///
@@ -53,7 +55,9 @@ class MedicationIntakeDetails extends StatelessWidget {
               buildTitleValue("Active substance:", entry.activeSubstance),
               buildTitleValue("Date:", entry.eventTime.toString()),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: () => onDelete(context), child: const Text("delete me"))
+              ElevatedButton(
+                  onPressed: () => onDelete(context),
+                  child: const Text("delete me"))
             ],
           ),
         ));

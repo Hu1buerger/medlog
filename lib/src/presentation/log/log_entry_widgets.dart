@@ -7,55 +7,17 @@ import 'package:medlog/src/presentation/log/medication_intake_details.dart';
 import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
-/// see this for https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.5
-class MedicationLogWidget extends LogEventWidget<MedicationIntakeEvent> {
-  const MedicationLogWidget({Key? key, required MedicationIntakeEvent item, bool showDateChip = true})
-      : super(key: key, logEvent: item, showDate: showDateChip);
-
-  void onTap(BuildContext context) {
-    Navigator.pushNamed(context, MedicationIntakeDetails.routeName, arguments: logEvent);
-  }
-
-  @override
-  Widget buildChild(BuildContext context) {
-    var logEntry = ListTile(
-      title: Text(logEvent.displayName),
-      subtitle: Text(logEvent.dosage.toString()),
-      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
-      onTap: () => onTap(context),
-    );
-    return logEntry;
-  }
-}
-
-class StockEventWidget extends LogEventWidget<StockEvent> {
-  const StockEventWidget({Key? key, required StockEvent item, bool showDate = true})
-      : super(key: key, logEvent: item, showDate: showDate);
-
-  @override
-  Widget buildChild(BuildContext context) {
-    var changeText = "${logEvent.amount.isNegative ? "-" : "+"} ${logEvent.amount.abs().toString()}";
-
-    var logEntry = ListTile(
-      title: Text(logEvent.pharmaceutical.displayName),
-      subtitle: Text(changeText),
-      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
-      onTap: () => onTap(context),
-    );
-
-    return logEntry;
-  }
-}
-
 abstract class LogEventWidget<T extends LogEvent> extends StatelessWidget {
   final T logEvent;
 
   /// show the DateChip if the item is the first item in the current day.
   final bool showDate;
 
-  const LogEventWidget({Key? key, required this.logEvent, this.showDate = true}) : super(key: key);
+  const LogEventWidget({Key? key, required this.logEvent, this.showDate = true})
+      : super(key: key);
 
-  factory LogEventWidget.build({Key? key, required T item, bool showDate = true}) {
+  factory LogEventWidget.build(
+      {Key? key, required T item, bool showDate = true}) {
     if (item is MedicationIntakeEvent) {
       return MedicationLogWidget(
         key: key,
@@ -92,11 +54,56 @@ abstract class LogEventWidget<T extends LogEvent> extends StatelessWidget {
   }
 }
 
+/// see this for https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.5
+class MedicationLogWidget extends LogEventWidget<MedicationIntakeEvent> {
+  const MedicationLogWidget(
+      {Key? key, required MedicationIntakeEvent item, bool showDateChip = true})
+      : super(key: key, logEvent: item, showDate: showDateChip);
+
+  void onTap(BuildContext context) {
+    Navigator.pushNamed(context, MedicationIntakeDetails.routeName,
+        arguments: logEvent);
+  }
+
+  @override
+  Widget buildChild(BuildContext context) {
+    var logEntry = ListTile(
+      title: Text(logEvent.displayName),
+      subtitle: Text(logEvent.dosage.toString()),
+      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
+      onTap: () => onTap(context),
+    );
+    return logEntry;
+  }
+}
+
+class StockEventWidget extends LogEventWidget<StockEvent> {
+  const StockEventWidget(
+      {Key? key, required StockEvent item, bool showDate = true})
+      : super(key: key, logEvent: item, showDate: showDate);
+
+  @override
+  Widget buildChild(BuildContext context) {
+    var changeText =
+        "${logEvent.amount.isNegative ? "-" : "+"} ${logEvent.amount.abs().toString()}";
+
+    var logEntry = ListTile(
+      title: Text(logEvent.pharmaceutical.displayName),
+      subtitle: Text(changeText),
+      trailing: Text(logEvent.eventTime.toTimeOfDay().format(context)),
+      onTap: () => onTap(context),
+    );
+
+    return logEntry;
+  }
+}
+
 class DateChipSmusher extends StatelessWidget {
   final DateTime? dateTime;
   final Widget child;
 
-  const DateChipSmusher({Key? key, required this.child, this.dateTime}) : super(key: key);
+  const DateChipSmusher({Key? key, required this.child, this.dateTime})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +111,9 @@ class DateChipSmusher extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Chip(label: DateTimeWidget(dateTime: dateTime!, showDate: true, showTime: false)),
+          Chip(
+              label: DateTimeWidget(
+                  dateTime: dateTime!, showDate: true, showTime: false)),
           child,
         ],
       );

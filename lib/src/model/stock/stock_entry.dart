@@ -32,21 +32,29 @@ class StockItem {
   Pharmaceutical get pharmaceutical => _pharmaceutical!;
 
   set pharmaceutical(Pharmaceutical p) {
-    if (p.isIded == false || (pharmaceuticalID != Pharmaceutical.emptyID && p.id != pharmaceuticalID)) {
+    if (p.isIded == false ||
+        (pharmaceuticalID != Pharmaceutical.emptyID &&
+            p.id != pharmaceuticalID)) {
       throw ArgumentError("wrong phramaceutical");
     }
     _pharmaceutical = p;
   }
 
-  StockItem(this.id, this.pharmaceuticalID, this.amount, this.state, this.expiryDate) {
-    if (amount <= 0) throw ArgumentError.value(amount, "amount", "amount violates the constraints [1,...]");
+  StockItem(this.id, this.pharmaceuticalID, this.amount, this.state,
+      this.expiryDate) {
+    if (amount <= 0)
+      throw ArgumentError.value(
+          amount, "amount", "amount violates the constraints [1,...]");
   }
 
-  factory StockItem.create(Pharmaceutical pharmaceutical, double amount, StockState itemState, DateTime expiryDate) {
-    return StockItem(emptyID, pharmaceutical.id, amount, itemState, expiryDate)..pharmaceutical = pharmaceutical;
+  factory StockItem.create(Pharmaceutical pharmaceutical, double amount,
+      StockState itemState, DateTime expiryDate) {
+    return StockItem(emptyID, pharmaceutical.id, amount, itemState, expiryDate)
+      ..pharmaceutical = pharmaceutical;
   }
 
-  factory StockItem.fromJson(Map<String, dynamic> json) => _$StockItemFromJson(json);
+  factory StockItem.fromJson(Map<String, dynamic> json) =>
+      _$StockItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$StockItemToJson(this);
 }

@@ -4,10 +4,11 @@ description: A new Flutter project.
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.0.2
+# all versions with major := 1 are development versions. breaking changes are always expected
+version: 1.0.4
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -17,11 +18,11 @@ dependencies:
 
   intl: ^0.17.0
   http: ^0.13.4
-  json_annotation: ^4.1.0
+  json_annotation: ^4.4.0
   logging: ^1.0.2
   logging_to_logcat: ^0.0.4
   package_info_plus: 1.3.0
-  path_provider: ^2.0.5
+  path_provider: ^2.0.7
   shared_preferences: ^2.0.8
   uuid: ^3.0.5
 
@@ -29,9 +30,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  build_runner: ^2.1.5
+  file: ^6.1.2
   flutter_lints: ^1.0.4
-  build_runner: ^2.1.4
-  json_serializable: ^5.0.2
+  given_when_then_unit_test: ^0.0.4
+  json_serializable: ^6.1.1
+  mocktail: 0.2.0
   tuple: ^2.0.0
 
 flutter:

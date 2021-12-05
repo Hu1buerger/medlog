@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
+import 'package:logging/logging.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/presentation/add_entrys/add_log_entry.dart';
 import 'package:medlog/src/presentation/home_page/home_page.dart';
@@ -11,7 +12,8 @@ class LogView extends StatelessWidget with HomePagePage {
   static const String title = "Log";
   static const String routeName = "/logview";
 
-  final LogController logController;
+  static final Logger logger = Logger("LogView");
+  final LogRepo logController;
   List<LogEvent> get items => logController.log;
 
   const LogView({Key? key, required this.logController}) : super(key: key);
@@ -52,10 +54,13 @@ class LogView extends StatelessWidget with HomePagePage {
     return AnimatedBuilder(
       animation: logController,
       builder: (BuildContext context, Widget? child) {
+        logger.fine("rebuilding due to change");
+
         //lazy build the list items
         return ListView.builder(
             restorationId: 'administrationLogListView',
-            reverse: false, //For reversing we need to change the smushing behaviour
+            reverse:
+                false, //For reversing we need to change the smushing behaviour
             itemCount: items.length,
             itemBuilder: (BuildContext context, int index) {
               final item = items[index];

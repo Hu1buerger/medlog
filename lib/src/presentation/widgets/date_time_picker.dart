@@ -9,6 +9,10 @@ class DateTimePicker extends StatefulWidget {
   /// user shall select time
   final bool selectTime;
 
+  /// the dateTime that is selected until the user selects another one
+  /// or if null no DT is selected
+  final DateTime? initiallySelectedDT;
+
   final DateTime? firstDT;
   final DateTime? selectedDT;
   final DateTime? lastDT;
@@ -21,6 +25,7 @@ class DateTimePicker extends StatefulWidget {
       {Key? key,
       this.title = "",
       required this.onSelected,
+      this.initiallySelectedDT,
       this.firstDT,
       this.selectedDT,
       this.lastDT,
@@ -30,14 +35,16 @@ class DateTimePicker extends StatefulWidget {
         assert(() {
           //firstDT <= selectedDT
           if (selectedDT != null && firstDT != null) {
-            return selectedDT.isAfter(firstDT) || firstDT.isAtSameMomentAs(selectedDT);
+            return selectedDT.isAfter(firstDT) ||
+                firstDT.isAtSameMomentAs(selectedDT);
           }
           return true;
         }()),
         assert(() {
           //selectedDT <= lastDT
           if (selectedDT != null && lastDT != null) {
-            return lastDT.isAfter(selectedDT) || selectedDT.isAtSameMomentAs(lastDT);
+            return lastDT.isAfter(selectedDT) ||
+                selectedDT.isAtSameMomentAs(lastDT);
           }
           return true;
         }()),
@@ -97,10 +104,15 @@ class _DateTimePickerState extends State<DateTimePicker> {
      * final lastYear = DateTime.now().add(const Duration(days: -365));
      */
     selectedDateTime = widget.selectedDT ?? DateTime.now();
-    firstDT = widget.firstDT ?? selectedDateTime.subtract(const Duration(days: 365));
+    firstDT =
+        widget.firstDT ?? selectedDateTime.subtract(const Duration(days: 365));
     lastDT = widget.lastDT ?? selectedDateTime.add(const Duration(days: 365));
 
     dateTimeController.text = widget.title;
+
+    if (widget.initiallySelectedDT != null) {
+      setSelectedDateTime(widget.initiallySelectedDT!);
+    }
   }
 
   void setSelectedDateTime(DateTime dt) {
@@ -124,33 +136,38 @@ class _DateTimePickerState extends State<DateTimePicker> {
     int dateInMicroseconds = selectedDateTime.toDate().microsecondsSinceEpoch;
 
     if (widget.selectDate) {
-      DateTime? selectedDate =
-          await showDatePicker(context: context, initialDate: selectedDateTime, firstDate: firstDT, lastDate: lastDT);
+      DateTime? selectedDate = await showDatePicker(
+          context: context,
+          initialDate: selectedDateTime,
+          firstDate: firstDT,
+          lastDate: lastDT);
 
       if (selectedDate == null) return;
       dateInMicroseconds = selectedDate.toDate().microsecondsSinceEpoch;
     }
 
     if (widget.selectTime) {
-      var selectedTime = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(selectedDateTime));
+      var selectedTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(selectedDateTime));
 
       if (selectedTime == null) return;
       dateInMicroseconds += selectedTime.toMicroseconds();
     }
 
-    var newSelectedDateTime = DateTime.fromMicrosecondsSinceEpoch(dateInMicroseconds);
+    var newSelectedDateTime =
+        DateTime.fromMicrosecondsSinceEpoch(dateInMicroseconds);
 
     setSelectedDateTime(newSelectedDateTime);
   }
-
-  void selectDate(BuildContext context) {}
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       child: TextField(
         controller: dateTimeController,
-        decoration: const InputDecoration(border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)),
+        decoration: const InputDecoration(
+            border: OutlineInputBorder(), prefixIcon: Icon(Icons.schedule)),
         enabled: false, // disable the textinput, but also disables the onText
       ),
       onTap: () => showSelectDateTimeDialog(context),

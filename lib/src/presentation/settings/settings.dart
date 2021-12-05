@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
-import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
-import 'package:medlog/src/presentation/home_page/home_page.dart';
+import 'package:medlog/src/repo/log/log_provider.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Settings extends StatefulWidget {
   static const String route_name = "/settings";
 
-  final PharmaceuticalController pharmaceuticalController;
-  final LogController logController;
-  final StockController stockController;
+  final PharmaceuticalRepo pharmaceuticalController;
+  final LogProvider logProvider;
+  final LogRepo logController;
+  final StockRepo stockController;
 
   const Settings(
-      {Key? key, required this.pharmaceuticalController, required this.logController, required this.stockController})
+      {Key? key,
+      required this.pharmaceuticalController,
+      required this.logProvider,
+      required this.stockController,
+      required this.logController})
       : super(key: key);
 
   @override
@@ -25,11 +29,11 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   static String title = "Settings";
 
-  PharmaceuticalController get pharmController => widget.pharmaceuticalController;
+  PharmaceuticalRepo get pharmController => widget.pharmaceuticalController;
 
-  LogController get logController => widget.logController;
+  LogProvider get logProvider => widget.logProvider;
 
-  StockController get stockController => widget.stockController;
+  StockRepo get stockController => widget.stockController;
 
   @override
   Widget build(BuildContext context) {
@@ -44,62 +48,42 @@ class _SettingsState extends State<Settings> {
             FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (bc, asyncSnapshot) {
-                  if (asyncSnapshot.hasData == false) return const Text("versionNumber");
+                  if (asyncSnapshot.hasData == false)
+                    return const Text("versionNumber loading...");
                   var packageInfo = asyncSnapshot.data!;
 
-                  return Text("${packageInfo.version}+${packageInfo.buildNumber}");
+                  return Text(
+                      "${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
                 }),
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  var result = await pharmController.pharmaservice.storeToExternal(pharmController.pharmaceuticals);
-                  if (result) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("data written")));
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("failed to write text ${e}")));
-                }
-              },
-              child: Text("writeToDisk"),
-            ),
+                onPressed: () {
+                  //var fx = FileExporter(widget.logController, pharmController, stockController);
+                  //fx.write();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("backup not performed")));
+                },
+                child: Text("backup")),
             ElevatedButton(
               onPressed: () async {
                 // quick fix for removing user defined pharmaceuticals
                 pharmController.pharmaceuticals.clear();
+                // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
                 pharmController.notifyListeners();
               },
               child: Text("cleanAll"),
             ),
             ElevatedButton(
-                onPressed: () async {
-                  var stockItem = StockItem.create(pharmController.pharmaceuticals.first, 10, StockState.open,
-                      DateTime.now().add(Duration(days: 187)));
-
-                  // maybe the stockController should add the logEntry
-                  stockController.addStockItem(stockItem);
-
-                  var stockItem2 = StockItem.create(pharmController.pharmaceuticals.last, 7, StockState.closed,
-                      DateTime.now().add(Duration(days: 187)));
-                  stockController.addStockItem(stockItem2);
-
-                  var stockEvent = StockEvent.create(DateTime.now(), stockItem.pharmaceutical, stockItem.amount);
-                  logController.addStockEvent(stockEvent);
-                },
-                child: Text("add mocked stock")),
-            ElevatedButton(
                 onPressed: () {
                   stockController.stock.clear();
 
                   for (var p in pharmController.pharmaceuticals) {
-                    var stockItem = StockItem.create(p, 20, StockState.closed, DateTime.now().add(Duration(days: 187)));
+                    var stockItem = StockItem.create(p, 20, StockState.closed,
+                        DateTime.now().add(Duration(days: 187)));
 
                     stockController.addStockItem(stockItem);
                   }
                 },
                 child: Text("fill stock for all")),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.popAndPushNamed(context, HomePage.route);
-                },
-                child: Text("goto homepage"))
           ],
         ));
   }

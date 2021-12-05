@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 
 class AddPharmaceutical extends StatefulWidget {
   static const String routeName = "Add_Pharmaceutical";
 
-  final PharmaceuticalController pharmController;
+  final PharmaceuticalRepo pharmController;
 
-  const AddPharmaceutical({Key? key, required this.pharmController}) : super(key: key);
+  const AddPharmaceutical({Key? key, required this.pharmController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddPharmaceuticalState();
@@ -58,7 +59,8 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
 
   String? dosageValidator(String? value) {
     if (value == null || value.isEmpty) return "Illegal dosage name";
-    if (["mg", "ng", "g", "ug", "IU"].any((unit) => value.contains(unit)) == false) return "Illegal dosage, use unit";
+    if (["mg", "ng", "g", "ug", "IU"].any((unit) => value.contains(unit)) ==
+        false) return "Illegal dosage, use unit";
 
     return null;
   }
@@ -100,7 +102,9 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                 ),
                 TextFormField(
                   controller: activeSubstCrtl,
-                  decoration: const InputDecoration(hintText: "Activesubstance:", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      hintText: "Activesubstance:",
+                      border: OutlineInputBorder()),
                   validator: medNameValidator,
                 ),
                 const SizedBox(
@@ -108,7 +112,8 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                 ),
                 TextFormField(
                   controller: dosageCrtl,
-                  decoration: const InputDecoration(hintText: "Dosage:", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      hintText: "Dosage:", border: OutlineInputBorder()),
                   validator: dosageValidator,
                 ),
                 const SizedBox(

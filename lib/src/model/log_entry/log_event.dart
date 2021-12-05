@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 
 abstract class LogEvent {
   static const unsetID = -1;
@@ -20,5 +20,5 @@ abstract class LogEvent {
   ///
   /// true on success
   /// false on fail
-  bool rehydrate(PharmaceuticalController pc);
+  bool rehydrate(PharmaceuticalRepo pc);
 }

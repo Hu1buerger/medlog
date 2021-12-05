@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 
 class PharmaceuticalSelector extends StatefulWidget {
-  final PharmaceuticalController pharmaceuticalController;
+  final PharmaceuticalRepo pharmaceuticalController;
 
   final String initialQuery;
 
@@ -26,7 +26,7 @@ class PharmaceuticalSelector extends StatefulWidget {
 }
 
 class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
-  PharmaceuticalController get pharmaController => widget.pharmaceuticalController;
+  PharmaceuticalRepo get pharmaController => widget.pharmaceuticalController;
 
   Logger logger = Logger("Pharmaselector");
   TextEditingController searchQueryController = TextEditingController();
@@ -84,7 +84,8 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
   ///  - > 1 remaining options => just update the options
   void onEditingComplete(BuildContext context) {
     if (options.isEmpty) {
-      logger.fine("Editing complete with query ${searchQueryController.text} and no remaining options");
+      logger.fine(
+          "Editing complete with query ${searchQueryController.text} and no remaining options");
       widget.onSelectionFailed(searchQueryController.text);
       return;
     }
@@ -97,7 +98,8 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
       state = "and #${options.length} options remain";
     }
 
-    logger.fine("Editing complete with query ${searchQueryController.text} $state");
+    logger.fine(
+        "Editing complete with query ${searchQueryController.text} $state");
   }
 
   void setPharmaceutical(Pharmaceutical p) {
@@ -108,7 +110,8 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
 
   void _updatePharmaceutical(Pharmaceutical? p) {
     if (selectedPharmaceutical == p) {
-      logger.finest("updating the pharmaceutical selection: but selected and new are ==");
+      logger.finest(
+          "updating the pharmaceutical selection: but selected and new are ==");
       return;
     }
 
@@ -128,7 +131,9 @@ class _PharmaceuticalSelectorState extends State<PharmaceuticalSelector> {
           child: TextField(
             controller: searchQueryController,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(), hintText: 'Enter a search term:', prefixIcon: Icon(Icons.search)),
+                border: OutlineInputBorder(),
+                hintText: 'Enter a search term:',
+                prefixIcon: Icon(Icons.search)),
             autocorrect: false,
             onChanged: (value) => updateQuery(value),
             onEditingComplete: () => onEditingComplete(context),

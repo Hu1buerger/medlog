@@ -2,9 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -13,6 +10,9 @@ import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/provider.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 /// Supports adding a logentry to the log
 ///
@@ -23,12 +23,15 @@ import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
 class AddLogEntry extends StatefulWidget {
   static const String routeName = "/addMedicationIntakeLog";
 
-  final PharmaceuticalController pharmaController;
-  final LogController logController;
-  final StockController stockController;
+  final PharmaceuticalRepo pharmaController;
+  final LogProvider logProvider;
+  final StockRepo stockController;
 
   const AddLogEntry(
-      {Key? key, required this.pharmaController, required this.logController, required this.stockController})
+      {Key? key,
+      required this.pharmaController,
+      required this.logProvider,
+      required this.stockController})
       : super(key: key);
 
   @override
@@ -42,19 +45,20 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   final Logger logger = Logger("AddLogEntryState");
 
-  PharmaceuticalController get pharmaController => widget.pharmaController;
+  PharmaceuticalRepo get pharmaController => widget.pharmaController;
 
-  LogController get logController => widget.logController;
+  LogProvider get logProvider => widget.logProvider;
 
-  StockController get stockController => widget.stockController;
+  StockRepo get stockController => widget.stockController;
 
   TextEditingController adminDateController = TextEditingController();
 
   List<Pharmaceutical> currentOptions = <Pharmaceutical>[];
 
   _Modus modus = _Modus.searching;
+
   Pharmaceutical? selectedPharmaceutical;
-  DateTime adminTime = DateTime.now();
+  DateTime? adminTime;
   double selectedUnits = 1;
 
   _AddLogEntryState();
@@ -64,7 +68,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     super.initState();
     logger.fine("initializing with options ${currentOptions.length}");
 
-    setAdministrationDateTime(adminTime);
+    setAdministrationDateTime(DateTime.now());
   }
 
   void onReset(BuildContext context) {
@@ -82,21 +86,25 @@ class _AddLogEntryState extends State<AddLogEntry> {
 
   commitIntake(BuildContext context) async {
     assert(selectedPharmaceutical != null);
+    assert(adminTime != null);
+    assert(selectedUnits > 0);
 
-    if (selectedUnits % selectedPharmaceutical!.smallestConsumableUnit != 0) {
+    if (selectedUnits % selectedPharmaceutical!.minUnit != 0) {
       logger.info("selected unit is not safely supported");
     }
 
-    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime, selectedUnits);
+    var intakeEvent = MedicationIntakeEvent.create(
+        selectedPharmaceutical!, adminTime!, selectedUnits);
 
-    if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
+    if (stockController.remainingUnits(intakeEvent.pharmaceutical) <
+        intakeEvent.amount) {
       logger.severe(
           "to little stock to log the event and insure that the stock remains in a valid state aka contains no negative items");
       // as for now set source to stock.
       intakeEvent.source = PharmaceuticalSource.other;
 
       //TODO: inform the user that we he tries to perform non-stock-backed operation
-      logController.addMedicationIntake(intakeEvent);
+      logProvider.addMedicationIntake(intakeEvent);
 
       Navigator.pop(context);
       return;
@@ -105,8 +113,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
     double remainingUnits = intakeEvent.amount;
 
     while (remainingUnits > 0) {
-      var stockItems = stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
-      var openItems = stockItems.where((element) => element.state == StockState.open);
+      var stockItems =
+          stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
+      var openItems =
+          stockItems.where((element) => element.state == StockState.open);
 
       StockItem? stockItemToTakeFrom;
 
@@ -142,15 +152,17 @@ class _AddLogEntryState extends State<AddLogEntry> {
       assert(stockItemToTakeFrom!.pharmaceutical == intakeEvent.pharmaceutical);
 
       if (stockItemToTakeFrom!.amount < intakeEvent.amount) {
-        logger.severe("unhandled the stock has to little units available to handle this shit");
+        logger.severe(
+            "unhandled the stock has to little units available to handle this shit");
       }
 
-      remainingUnits = stockController.takeFromStockItem(stockItemToTakeFrom!, intakeEvent.amount);
+      remainingUnits = stockController.takeFromStockItem(
+          stockItemToTakeFrom!, intakeEvent.amount);
     }
 
     // as for now set source to stock.
     intakeEvent.source = PharmaceuticalSource.stock;
-    logController.addMedicationIntake(intakeEvent);
+    logProvider.addMedicationIntake(intakeEvent);
 
     Navigator.pop(context);
     return true;
@@ -160,7 +172,16 @@ class _AddLogEntryState extends State<AddLogEntry> {
     adminTime = dateTime;
   }
 
-  void onSelectUnits(double units) {
+  void onSelectUnits(Option<num>? option) {
+    if (option == null) {
+      logger.fine("unselect the units");
+      // just reset it....
+      setState(() => selectedUnits = 1);
+      return;
+    }
+
+    double units = option.value.toDouble();
+    assert(units > 0);
     if (selectedUnits != units) {
       logger.finest("updating the selectedUnits to $units");
       selectedUnits = units;
@@ -186,7 +207,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
             actions: <Widget>[
               TextButton(
                 child: const Text("No"),
-                onPressed: () => Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
+                onPressed: () =>
+                    Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
               ),
               TextButton(
                 child: const Text("Yes"),
@@ -220,7 +242,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
         selectedPharmaceutical = p;
         setState(() {});
       },
-      onSelectionFailed: (query) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
+      onSelectionFailed: (query) =>
+          Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 
@@ -228,8 +251,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(modus == _Modus.medication_selected);
     assert(selectedPharmaceutical != null);
 
-    double unitSize = selectedPharmaceutical!.smallestConsumableUnit;
-    var unitOptions = List<Option<num>>.generate(5, (index) {
+    double unitSize = selectedPharmaceutical!.minUnit;
+    var unitOptions = List<Option<double>>.generate(5, (index) {
       double unitOption = unitSize * (index + 1);
 
       return Option(
@@ -238,7 +261,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
     });
 
     // TODO: do some elaborate shit to define minUnitSize and more
-    unitOptions.add(VariableOption(value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
+    unitOptions.add(VariableOption(
+        value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
 
     // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
@@ -261,18 +285,23 @@ class _AddLogEntryState extends State<AddLogEntry> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: DateTimePicker(
           onSelected: setAdministrationDateTime,
+          initiallySelectedDT: adminTime,
         ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: OptionSelector<num>(
-          options: [...unitOptions],
-          onSelectValue: (num value) => onSelectUnits(value.toDouble()),
-        ),
+            options: [...unitOptions],
+            onSelectOption: onSelectUnits,
+            selected: unitOptions
+                .indexWhere((element) => element.value == selectedUnits)),
       )
     ];
 
-    return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
+    return SingleChildScrollView(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: gollum));
   }
 
   @override

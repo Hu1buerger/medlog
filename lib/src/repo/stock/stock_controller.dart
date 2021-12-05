@@ -1,24 +1,27 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
+import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
 //TODO: extend this mofo and override load and store => ExampleDataStockController
-class StockController with ChangeNotifier {
-  Logger logger = Logger("StockController");
+class StockRepo with ChangeNotifier {
+  static const String key = "stock";
 
-  PharmaceuticalController pharmaController;
+  Logger logger = Logger("StockRepo");
+
+  PharmaceuticalRepo pharmaController;
   Uuid uuid = const Uuid();
 
-  StockService service;
+  final RepoAdapter repoAdapter;
   List<StockItem> _stock = [];
   List<StockItem> get stock => _stock;
 
-  StockController(this.service, this.pharmaController);
+  StockRepo(this.repoAdapter, this.pharmaController);
 
   List<StockItem> stockItemByPharmaceutical(Pharmaceutical p) {
     return stock.where((element) => element.pharmaceutical == p).toList();
@@ -95,7 +98,7 @@ class StockController with ChangeNotifier {
   }
 
   Future load() async {
-    var items = await service.loadFromDisk();
+    var items = repoAdapter.loadListOrDefault<Json, StockItem>(key, (json) => StockItem.fromJson(json), []);
 
     for (var i in items) {
       var pharmaceutical = pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
@@ -107,8 +110,8 @@ class StockController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future store() {
-    return service.store(stock);
+  store() {
+    repoAdapter.storeList(key, stock, (StockItem s) => s.toJson());
   }
 
   void openItem(StockItem stockItem) {

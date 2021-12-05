@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/controller/log/log_controller.dart';
-import 'package:medlog/src/controller/pharmaceutical/pharmaceutical_controller.dart';
-import 'package:medlog/src/controller/stock/stock_controller.dart';
+import 'package:medlog/src/repo/log/log_provider.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -28,13 +28,16 @@ class AddStock extends StatefulWidget {
   static const String routeName = "/addStock";
   final String title = "Edit stock";
 
-  final PharmaceuticalController pharmaceuticalController;
+  final PharmaceuticalRepo pharmaceuticalController;
 
-  final StockController stockController;
-  final LogController logController;
+  final StockRepo stockController;
+  final LogProvider logProvider;
 
   const AddStock(
-      {Key? key, required this.pharmaceuticalController, required this.stockController, required this.logController})
+      {Key? key,
+      required this.pharmaceuticalController,
+      required this.stockController,
+      required this.logProvider})
       : super(key: key);
 
   @override
@@ -77,7 +80,8 @@ class _AddStockState extends State<AddStock> {
   }
 
   List<Option<num>> options() {
-    var options = List.generate(5, (index) => Option<int>(value: (index + 1) * 5));
+    var options =
+        List.generate(5, (index) => Option<int>(value: (index + 1) * 5));
     options.add(VariableOption<int>(value: 5, min: 1, max: 100, step: 1));
 
     return options;
@@ -94,7 +98,7 @@ class _AddStockState extends State<AddStock> {
     StockEvent se = StockEvent.restock(DateTime.now(), si);
 
     widget.stockController.addStockItem(si);
-    widget.logController.addStockEvent(se);
+    widget.logProvider.addStockEvent(se);
     Navigator.pop(context);
   }
 
@@ -106,13 +110,20 @@ class _AddStockState extends State<AddStock> {
     setState(() => pharmaceutical = p);
   }
 
-  void setQuantity(num units) {
-    if (quantity != null && quantity! == units) {
-      //log
-      return;
-    }
+  void setQuantity(Option<num>? option) {
+    if (option != null) {
+      logger.fine("select quantity");
 
-    setState(() => quantity = units.toDouble());
+      num units = option.value;
+      if (quantity != null && quantity! == units) return;
+
+      setState(() => quantity = units.toDouble());
+    } else {
+      logger.fine("unselect quantity");
+
+      if (quantity == null) return;
+      setState(() => quantity = null);
+    }
   }
 
   void setExpiryDate(DateTime dt) {
@@ -142,7 +153,8 @@ class _AddStockState extends State<AddStock> {
 
   StockItem buildStockItem() {
     assert(pharmaceutical != null && quantity != null && expiryDate != null);
-    return StockItem.create(pharmaceutical!, quantity!, state ?? StockState.closed, expiryDate!);
+    return StockItem.create(
+        pharmaceutical!, quantity!, state ?? StockState.closed, expiryDate!);
   }
 
   /// stage 0 lets the user pick a pharmaceutical that he wants to edit
@@ -156,7 +168,8 @@ class _AddStockState extends State<AddStock> {
 
         setState(() => pharmaceutical = p);
       },
-      onSelectionFailed: (q) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
+      onSelectionFailed: (q) =>
+          Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 
@@ -175,7 +188,10 @@ class _AddStockState extends State<AddStock> {
             onLongPress: () => setState(() => pharmaceutical = null),
           ),
         ),
-        OptionSelector<num>(options: quantityOptions, onSelectValue: setQuantity, selected: -1),
+        OptionSelector<num>(
+            options: quantityOptions,
+            onSelectOption: setQuantity,
+            selected: -1),
       ],
     );
   }
@@ -195,7 +211,7 @@ class _AddStockState extends State<AddStock> {
         ),
         OptionSelector(
             options: quantityOptions,
-            onSelectValue: setQuantity,
+            onSelectOption: setQuantity,
             selected: quantityOptions.indexWhere((o) => o.value == quantity)),
         DateTimePicker.range(
           title: "expiryDate",
@@ -214,7 +230,10 @@ class _AddStockState extends State<AddStock> {
   /// TODO: add a press to goback // add onLongPress => goback stage
   Widget buildStage3(BuildContext context) {
     return Column(
-      children: [StockItemCard(stockItem: buildStockItem()), TextButton(onPressed: commit, child: Text("Submit"))],
+      children: [
+        StockItemCard(stockItem: buildStockItem()),
+        TextButton(onPressed: commit, child: Text("Submit"))
+      ],
     );
   }
 
