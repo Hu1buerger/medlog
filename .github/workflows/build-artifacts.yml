@@ -31,7 +31,7 @@ jobs:
       #- run: flutter format --set-exit-if-changed .
       #- run: flutter analyze .
 
-      - run: flutter test
+      - run: flutter test --no-pub --no-track-widget-creation --reporter expanded 
 
       # generate via cat medlog.keystore | base64 > keystore_base64
       - name: Configure Keystore for Android
