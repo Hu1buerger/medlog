@@ -2,11 +2,12 @@
 
 # medlog
 
+_Medlog is in alpha_
 Medlog is a project to keep a log about the medication taken by an individual.
-It also tracks the inventory of remaining medication.
+It also tracks data related to that. As of now data about the medication in stock is trackable.
 
 All data will be stored locally and "logs" shall only be generated from data that was voluntarily offered from the user
-to the user. 
+to the user. Data shall be confidential, as long as the user is not donating said data voluntarily. 
 
 ## Getting Started
 
@@ -22,12 +23,12 @@ consider sending me a email.
 ...
 I strongly believe that this kind of information should only be handled in an open source context.
 
-The intake of medication usualy is not timed perfectly or always on schedule.
+The intake of medication is usually not timed perfectly or always on schedule.
 Medlog shall compensate for that. 
 
 Starting and stopping a medication should not need the creation of a timer.
 
-Most otc pharamceuticals arent taken regularly.
+Most otc pharmaceuticals aren't taken regularly.
 Medlog shall still be able to track and inform the user about trends.
     Dose his* use of Ibuprofen increase.
 ### Features
