@@ -12,7 +12,9 @@ class MedicationIntakeDetails extends StatelessWidget {
   final MedicationIntakeEvent entry;
   final LogRepo logController;
 
-  const MedicationIntakeDetails({Key? key, required this.entry, required this.logController}) : super(key: key);
+  const MedicationIntakeDetails(
+      {Key? key, required this.entry, required this.logController})
+      : super(key: key);
 
   /// builds a widget with title and value
   ///
@@ -53,7 +55,9 @@ class MedicationIntakeDetails extends StatelessWidget {
               buildTitleValue("Active substance:", entry.activeSubstance),
               buildTitleValue("Date:", entry.eventTime.toString()),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: () => onDelete(context), child: const Text("delete me"))
+              ElevatedButton(
+                  onPressed: () => onDelete(context),
+                  child: const Text("delete me"))
             ],
           ),
         ));

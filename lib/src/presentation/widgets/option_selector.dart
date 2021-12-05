@@ -170,7 +170,6 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
 }
 
 class FixedOptionWidget<S, T extends Option<S>> extends StatelessWidget {
-
   final T option;
   final bool selected;
   final void Function()? onPressed;
@@ -192,8 +191,8 @@ class FixedOptionWidget<S, T extends Option<S>> extends StatelessWidget {
   }
 }
 
-class VariableOptionWidget<T extends num, S extends VariableOption<T>> extends StatefulWidget {
-
+class VariableOptionWidget<T extends num, S extends VariableOption<T>>
+    extends StatefulWidget {
   final S option;
   final bool selected;
   final void Function()? onPressed;
@@ -211,12 +210,13 @@ class VariableOptionWidget<T extends num, S extends VariableOption<T>> extends S
   State<StatefulWidget> createState() => _VariableOptionWidgetState<T, S>();
 }
 
-class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> extends State<VariableOptionWidget<T, S>> {
+class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>>
+    extends State<VariableOptionWidget<T, S>> {
   static Logger logger = Logger("FixedOptionWidget");
 
   VariableOption<T> get option => widget.option;
   bool get selected => widget.selected;
-  
+
   DateTime lastChange = DateTime.now();
   late T value;
   late double lowerBound;
@@ -284,10 +284,10 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
   ///  -
   void rescaleBounds() {
     double sliderLength = upperBound - lowerBound;
-    if(upperBound < option.max && value > lowerBound + 0.9 * sliderLength){
-        upperBound += 0.25 * sliderLength;
-        if(upperBound > option.max) upperBound = option.max.toDouble();
-        logger.fine("Updating the upper bounds to $upperBound");
+    if (upperBound < option.max && value > lowerBound + 0.9 * sliderLength) {
+      upperBound += 0.25 * sliderLength;
+      if (upperBound > option.max) upperBound = option.max.toDouble();
+      logger.fine("Updating the upper bounds to $upperBound");
     }
   }
 

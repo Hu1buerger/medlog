@@ -59,7 +59,8 @@ class LogView extends StatelessWidget with HomePagePage {
         //lazy build the list items
         return ListView.builder(
             restorationId: 'administrationLogListView',
-            reverse: false, //For reversing we need to change the smushing behaviour
+            reverse:
+                false, //For reversing we need to change the smushing behaviour
             itemCount: items.length,
             itemBuilder: (BuildContext context, int index) {
               final item = items[index];

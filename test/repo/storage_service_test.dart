@@ -64,7 +64,8 @@ void testReceiveEvents(MockStorageService ps) async {
     result.add(event);
   }, onDone: completer.complete);
 
-  List<String> data = List.generate(250, (index) => rng.nextInt(1 << 16).toString());
+  List<String> data =
+      List.generate(250, (index) => rng.nextInt(1 << 16).toString());
   for (var e in data) {
     ps.publish(e);
   }
@@ -81,7 +82,8 @@ class MockStorageService extends StorageService<String> {
   MockStorageService(this.data)
       : super("mock",
             logger: Logger("MockStorageService"),
-            jsonConverter: JsonConverter(toJson: (s) => {s: s}, fromJson: (m) => m.keys.first));
+            jsonConverter: JsonConverter(
+                toJson: (s) => {s: s}, fromJson: (m) => m.keys.first));
 
   @override
   Future<List<String>> loadFromDisk() async {

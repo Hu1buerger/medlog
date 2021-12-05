@@ -25,7 +25,7 @@ class PharmaceuticalRef implements Pharmaceutical {
   Dosage get dosage => ref.dosage;
 
   @override
-  double get smallestConsumableUnit => ref.smallestConsumableUnit;
+  double get minUnit => ref.minUnit;
 
   @override
   String? get human_known_name => ref.human_known_name;

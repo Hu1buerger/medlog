@@ -10,7 +10,11 @@ class HomePage extends StatefulWidget {
   final LogRepo logController;
   final StockRepo stockController;
 
-  const HomePage({Key? key, required this.logController, required this.stockController, int? selectPage = 0})
+  const HomePage(
+      {Key? key,
+      required this.logController,
+      required this.stockController,
+      int? selectPage = 0})
       : super(key: key);
 
   @override
@@ -50,7 +54,8 @@ class _HomePageState extends State<HomePage> {
         items: List.generate(pages.length, (i) {
           var page = pages[i];
 
-          return BottomNavigationBarItem(icon: Icon(Icons.title), label: page.tabtitle());
+          return BottomNavigationBarItem(
+              icon: Icon(Icons.title), label: page.tabtitle());
         }));
   }
 

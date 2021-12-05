@@ -5,10 +5,11 @@ import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 
-import '../../model/pharamaceutical/pharma_test_tools.dart';
+import '../test_tools/matcher/pharmaceutical_matcher.dart';
 
 main() {
-  final validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-.+#";
+  final validChars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-.+#";
 
   group("string test", () {
     for (int i = 0; i < 25; i++) {
@@ -16,8 +17,8 @@ main() {
         PharmaceuticalFilter filter = PharmaceuticalFilter.test(negate: false);
         Random rng = Random();
 
-        final value =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        final value = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
         final query = value;
 
         expect(filter.stringPartialMatch(value, query), isTrue);
@@ -27,8 +28,8 @@ main() {
         PharmaceuticalFilter filter = PharmaceuticalFilter.test(negate: true);
         Random rng = Random();
 
-        final value =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        final value = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
         final query = value;
 
         expect(filter.stringPartialMatch(value, query), isFalse);
@@ -38,14 +39,14 @@ main() {
         PharmaceuticalFilter filter = PharmaceuticalFilter.test(negate: false);
         Random rng = Random();
 
-        final query =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
-        var value =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        final query = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        var value = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
 
         while (value == query) {
-          value = String.fromCharCodes(
-              Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+          value = String.fromCharCodes(Iterable.generate(100,
+              (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
         }
 
         expect(filter.stringPartialMatch(value, query), isFalse);
@@ -55,14 +56,14 @@ main() {
         PharmaceuticalFilter filter = PharmaceuticalFilter.test(negate: true);
         Random rng = Random();
 
-        final query =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
-        var value =
-            String.fromCharCodes(Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        final query = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+        var value = String.fromCharCodes(Iterable.generate(
+            100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
 
         while (value == query) {
-          value = String.fromCharCodes(
-              Iterable.generate(100, (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
+          value = String.fromCharCodes(Iterable.generate(100,
+              (i) => validChars.codeUnitAt(rng.nextInt(validChars.length))));
         }
 
         expect(filter.stringPartialMatch(query, value), isTrue);
@@ -72,9 +73,18 @@ main() {
 
   test("test on pharmaceuticals", () {
     var pharms = [
-      Pharmaceutical(tradename: "Naproxen", dosage: Dosage.parse("10mg"), activeSubstance: "Naproxen"),
-      Pharmaceutical(tradename: "Abc-med", dosage: Dosage.parse("10mg"), activeSubstance: "abc-med"),
-      Pharmaceutical(tradename: "Ebcabc-med", dosage: Dosage.parse("10mg"), activeSubstance: "ebc-med"),
+      Pharmaceutical(
+          tradename: "Naproxen",
+          dosage: Dosage.parse("10mg"),
+          activeSubstance: "Naproxen"),
+      Pharmaceutical(
+          tradename: "Abc-med",
+          dosage: Dosage.parse("10mg"),
+          activeSubstance: "abc-med"),
+      Pharmaceutical(
+          tradename: "Ebcabc-med",
+          dosage: Dosage.parse("10mg"),
+          activeSubstance: "ebc-med"),
     ];
 
     var filter = PharmaceuticalFilter(matcher: "Name", negate: false);

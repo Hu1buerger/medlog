@@ -14,7 +14,9 @@ class StockItemDetail extends StatelessWidget {
 
   final StockRepo stockController;
 
-  const StockItemDetail({Key? key, required this.stockController, required this.stockItem}) : super(key: key);
+  const StockItemDetail(
+      {Key? key, required this.stockController, required this.stockItem})
+      : super(key: key);
 
   /// Deletes the stockItem
   ///
@@ -26,7 +28,10 @@ class StockItemDetail extends StatelessWidget {
   /// toggles the stockstate
   void toggleState(BuildContext context) {
     stockController.updateStockState(
-        stockItem, stockItem.state == StockState.open ? StockState.closed : StockState.open);
+        stockItem,
+        stockItem.state == StockState.open
+            ? StockState.closed
+            : StockState.open);
     Navigator.popAndPushNamed(context, routeName, arguments: stockItem);
   }
 
@@ -49,8 +54,9 @@ class StockItemDetail extends StatelessWidget {
       options.add(Option(value: stockItem.amount, leading: "-"));
     }
 
-    final min = stockItem.pharmaceutical.smallestConsumableUnit;
-    options.add(VariableOption<double>(value: 1, min: min, max: stockItem.amount, step: min));
+    final min = stockItem.pharmaceutical.minUnit;
+    options.add(VariableOption<double>(
+        value: 1, min: min, max: stockItem.amount, step: min));
 
     return options;
   }
@@ -70,14 +76,18 @@ class StockItemDetail extends StatelessWidget {
                 buildKeyValuePair(
                     "Pharmaceutical",
                     Flexible(
-                        flex: 7, child: Card(child: PharmaceuticalWidget(pharmaceutical: stockItem.pharmaceutical)))),
+                        flex: 7,
+                        child: Card(
+                            child: PharmaceuticalWidget(
+                                pharmaceutical: stockItem.pharmaceutical)))),
                 buildKeyValuePair(
                     "Expiry date",
                     DateTimeWidget(
                       dateTime: stockItem.expiryDate,
                       showTime: false,
                     )),
-                buildKeyValuePair("Remaining", Text(stockItem.amount.toString() + " Pcs")),
+                buildKeyValuePair(
+                    "Remaining", Text(stockItem.amount.toString() + " Pcs")),
                 buildKeyValuePair(
                     "State",
                     InkWell(
@@ -86,7 +96,8 @@ class StockItemDetail extends StatelessWidget {
                     )),
                 //TODO: add quickoptions as per #26
                 //OptionSelector<double>(options: quickActions(), onSelectValue: (d) => print(d)), clicking on one shoudnt trigger a removal asap
-                ElevatedButton(onPressed: delete, child: const Text("delete me"))
+                ElevatedButton(
+                    onPressed: delete, child: const Text("delete me"))
               ],
             )));
   }

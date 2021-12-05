@@ -28,7 +28,9 @@ void main() {
       versionHandler = MockVersionHandler();
       VersionHandler.Instance = versionHandler;
 
-      mktl.when(() => versionHandler.getVersion()).thenAnswer((_) => Future.value(appVersion));
+      mktl
+          .when(() => versionHandler.getVersion())
+          .thenAnswer((_) => Future.value(appVersion));
     });
 
     given("[AND] a file with content", () {

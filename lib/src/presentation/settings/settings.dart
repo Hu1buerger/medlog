@@ -48,16 +48,19 @@ class _SettingsState extends State<Settings> {
             FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (bc, asyncSnapshot) {
-                  if (asyncSnapshot.hasData == false) return const Text("versionNumber loading...");
+                  if (asyncSnapshot.hasData == false)
+                    return const Text("versionNumber loading...");
                   var packageInfo = asyncSnapshot.data!;
 
-                  return Text("${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
+                  return Text(
+                      "${packageInfo.version}+${packageInfo.buildNumber} \n ${packageInfo.buildSignature}");
                 }),
             ElevatedButton(
                 onPressed: () {
                   //var fx = FileExporter(widget.logController, pharmController, stockController);
                   //fx.write();
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("backup not performed")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("backup not performed")));
                 },
                 child: Text("backup")),
             ElevatedButton(
@@ -74,7 +77,8 @@ class _SettingsState extends State<Settings> {
                   stockController.stock.clear();
 
                   for (var p in pharmController.pharmaceuticals) {
-                    var stockItem = StockItem.create(p, 20, StockState.closed, DateTime.now().add(Duration(days: 187)));
+                    var stockItem = StockItem.create(p, 20, StockState.closed,
+                        DateTime.now().add(Duration(days: 187)));
 
                     stockController.addStockItem(stockItem);
                   }

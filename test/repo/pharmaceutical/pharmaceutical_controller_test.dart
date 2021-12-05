@@ -6,7 +6,7 @@ import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
-import '../../model/pharamaceutical/pharma_test_tools.dart';
+import '../../test_tools/matcher/pharmaceutical_matcher.dart';
 import 'mock_pharma_service.dart';
 
 /// The pharmaceutical controller is a unit that handles the keeping of records for pharmaceuticals
@@ -36,17 +36,24 @@ void main() async {
     var service = MockPharmaService([]);
     var controller = PharmaceuticalRepo(service);
 
-    test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller),
+    test("test retrieve a fresh created pharm by name and dosage",
+        () => _testRetrieveByNameAndDosage(controller),
         skip: "retrieving a pharm by name and dosage is currently unsupported");
-    test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
+    test("test pharms type post creation",
+        () => _testPCcontainsOnlyRefs(controller));
   });
 
   group("test collisionHandling", () {
+    //given a repo with the pharm a inserted
     test("insert twice the same", () {
+      //then inserting a again should throw...
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
+      var p = Pharmaceutical(
+          tradename: "idiotin",
+          dosage: Dosage.parse("20mg"),
+          activeSubstance: "masters");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -54,23 +61,30 @@ void main() async {
     });
 
     test("insert different", () {
+      // when inserting b
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p1 = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
-      var p2 = Pharmaceutical(tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p1 = Pharmaceutical(
+          tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p2 = Pharmaceutical(
+          tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p1);
+      // then it should return normaly
       controller.createPharmaceutical(p2);
 
+      // then 2 pharmaceuticals should be stored
       expect(controller.pharmaceuticals.length, 2);
+      //then it should be contained in the store
     });
 
     test("insert a authored version", () {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p = Pharmaceutical(
+          tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -84,7 +98,7 @@ void main() async {
       controller.addPharmaceutical(p2);
 
       var result = controller.pharmaceuticalByID(p2.id)!;
-      testEquals(result, p2);
+      expect(result, PharmaceuticalMatcher(p2));
     });
 
     test("reject downgrade", () {
@@ -99,18 +113,15 @@ void main() async {
           documentState: DocumentState.in_review));
       var p = controller.pharmaceuticals.first;
 
-      var p2 = PharmaceuticalRef.toRef(
-          (p as PharmaceuticalRef).ref.cloneAndUpdate(documentState: DocumentState.user_created));
+      var p2 = PharmaceuticalRef.toRef((p as PharmaceuticalRef)
+          .ref
+          .cloneAndUpdate(documentState: DocumentState.user_created));
       controller.addPharmaceutical(p2);
 
       expect(controller.pharmaceuticals.length, 1);
       expect(controller.pharmaceuticals.first.documentState, p.documentState);
     });
   });
-}
-
-void testEquals(Pharmaceutical actual, Pharmaceutical expected) {
-  expect(actual, PharmaceuticalMatcher(expected));
 }
 
 /// tests that all stored entrys are Refs to ensure updatablility
@@ -133,19 +144,23 @@ void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
   expect(retrieved != null, isTrue);
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour
   retrieved!.id = pharma.id;
-  testEquals(pharma, retrieved);
+  expect(pharma, PharmaceuticalMatcher(retrieved));
 }
 
 Future<PharmaceuticalRepo> createPharmaController(
-    {int items = 0, bool fetchEnabled = false, bool mockedService = false}) async {
+    {int items = 0,
+    bool fetchEnabled = false,
+    bool mockedService = false}) async {
   // all items are fully configured
   PharmaService service;
   if (mockedService) {
     service = MockPharmaService([]);
   } else {
-    if (SharedPreferencesStorePlatform.instance is! InMemorySharedPreferencesStore) {
+    if (SharedPreferencesStorePlatform.instance
+        is! InMemorySharedPreferencesStore) {
       // ignore: avoid_print
-      print("CAUTION the test is acting on data from file !!! CAVE: Production data???");
+      print(
+          "CAUTION the test is acting on data from file !!! CAVE: Production data???");
     }
     service = PharmaService();
   }
@@ -164,7 +179,9 @@ Future<PharmaceuticalRepo> createPharmaController(
 void populatePC(PharmaceuticalRepo pc) {
   if (pc.pharmaceuticals.isEmpty) {
     pc.createPharmaceutical(Pharmaceutical(
-        tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));
+        tradename: "TestPharamceutical",
+        dosage: Dosage.parse("10mg"),
+        activeSubstance: "TestSusbstance"));
   }
 }
 
@@ -172,5 +189,7 @@ List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
   return List.generate(
       count,
       (index) => Pharmaceutical(
-          tradename: "Tradename-$index", dosage: Dosage.parse("$index mg"), activeSubstance: "Substance-$index"));
+          tradename: "Tradename-$index",
+          dosage: Dosage.parse("$index mg"),
+          activeSubstance: "Substance-$index"));
 }

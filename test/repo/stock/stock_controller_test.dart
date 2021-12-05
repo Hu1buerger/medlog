@@ -38,7 +38,9 @@ main() {
 
     expect(stockController.stock, testStock);
     expect(stockController.stock.any((element) => element.id == ""), isFalse);
-    expect(stockController.stock.any((element) => element.pharmaceutical != null), isNot(throwsA(anything)));
+    expect(
+        stockController.stock.any((element) => element.pharmaceutical != null),
+        isNot(throwsA(anything)));
   });
 
   test("store items", () async {
@@ -83,27 +85,35 @@ main() {
     await stockc.load();
 
     //expect that all items are rehydrated
-    expect(stockc.stock.any((element) => element.pharmaceutical != null), isNot(throwsA(anything)));
-    expect(stockc.stock.map((e) => e.id), stockController.stock.map((e) => e.id));
+    expect(stockc.stock.any((element) => element.pharmaceutical != null),
+        isNot(throwsA(anything)));
+    expect(
+        stockc.stock.map((e) => e.id), stockController.stock.map((e) => e.id));
   });
 }
 
 DateTime futureTime() {
-  return DateTime.now().add(const Duration(days: 3, hours: 1, minutes: 8, seconds: 7));
+  return DateTime.now()
+      .add(const Duration(days: 3, hours: 1, minutes: 8, seconds: 7));
 }
 
-Future<Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>> setupStockController() async {
+Future<Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>>
+    setupStockController() async {
   var pharmaController = await createPharmaController(items: 3);
   var pharmaceuticals = pharmaController.pharmaceuticals;
 
   var testStock = List.generate(
       10,
       (index) => StockItem.create(
-          pharmaceuticals[index % pharmaceuticals.length], index + 1, StockState.closed, futureTime()));
+          pharmaceuticals[index % pharmaceuticals.length],
+          index + 1,
+          StockState.closed,
+          futureTime()));
 
   var stockService = StockService();
   var stockController = StockRepo(stockService, pharmaController);
   testStock.forEach(stockController.addStockItem);
 
-  return Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>(pharmaController, testStock, stockController);
+  return Tuple3<PharmaceuticalRepo, List<StockItem>, StockRepo>(
+      pharmaController, testStock, stockController);
 }

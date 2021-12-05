@@ -88,7 +88,8 @@ class _StockViewState extends State<StockView> {
           /// remaining days til spoiled stockItem.expiryDate.difference(DateTime.now()).inDays.toString()
           return StockItemCard(
             stockItem: stockItem,
-            onTap: () => Navigator.pushNamed(context, StockItemDetail.routeName, arguments: stockItem),
+            onTap: () => Navigator.pushNamed(context, StockItemDetail.routeName,
+                arguments: stockItem),
             onLongPress: () => widget.stockController.openItem(stockItem),
           );
         },

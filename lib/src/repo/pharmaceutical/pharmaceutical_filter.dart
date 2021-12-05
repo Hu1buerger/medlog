@@ -11,8 +11,8 @@ class PharmaceuticalFilter {
   };
 
   /// filters [pharmaceutical] with [filter] and includes all matches that any filter matches on
-  static List<Pharmaceutical> filter(
-      List<PharmaceuticalFilter> filter, List<Pharmaceutical> pharmaceutical, String query) {
+  static List<Pharmaceutical> filter(List<PharmaceuticalFilter> filter,
+      List<Pharmaceutical> pharmaceutical, String query) {
     var result = <Pharmaceutical>[];
 
     for (var p in pharmaceutical) {
@@ -31,13 +31,16 @@ class PharmaceuticalFilter {
 
   static List<PharmaceuticalFilter> all() {
     return List.generate(
-        _valueRetriever.length, (index) => PharmaceuticalFilter(matcher: _valueRetriever.keys.toList()[index]));
+        _valueRetriever.length,
+        (index) => PharmaceuticalFilter(
+            matcher: _valueRetriever.keys.toList()[index]));
   }
 
   @visibleForTesting
   PharmaceuticalFilter.test({required this.negate}) : matcher = "";
 
-  PharmaceuticalFilter({required this.matcher, this.negate = false}) : assert(_valueRetriever.keys.contains(matcher));
+  PharmaceuticalFilter({required this.matcher, this.negate = false})
+      : assert(_valueRetriever.keys.contains(matcher));
 
   /// the matcher that shall be used for this filter
   final String matcher;
@@ -58,7 +61,9 @@ class PharmaceuticalFilter {
 
   @visibleForTesting
   bool stringIsMatch(String value, String query) {
-    return partialMatch ? stringPartialMatch(value, query) : stringFullMatch(value, query);
+    return partialMatch
+        ? stringPartialMatch(value, query)
+        : stringFullMatch(value, query);
   }
 
   @visibleForTesting

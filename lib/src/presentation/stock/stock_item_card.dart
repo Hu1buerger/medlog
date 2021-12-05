@@ -9,7 +9,9 @@ class StockItemCard extends StatelessWidget {
   final void Function()? onTap;
   final void Function()? onLongPress;
 
-  const StockItemCard({Key? key, required this.stockItem, this.onTap, this.onLongPress}) : super(key: key);
+  const StockItemCard(
+      {Key? key, required this.stockItem, this.onTap, this.onLongPress})
+      : super(key: key);
 
   Widget buildState(BuildContext context) {
     return CircleAvatar(

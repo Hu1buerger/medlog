@@ -32,7 +32,8 @@ class LogProvider {
 
   void delete(LogEvent entry) {
     assert(cache.contains(entry));
-    assert(LogRepo.supportedTypes.any((element) => element == entry.runtimeType));
+    assert(
+        LogRepo.supportedTypes.any((element) => element == entry.runtimeType));
 
     _logController.delete(entry);
   }

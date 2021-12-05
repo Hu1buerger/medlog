@@ -7,7 +7,8 @@ import '../services/storage_service.dart';
 
 class LogService extends StorageService<LogEvent> {
   final Map<Type, StorageService> delegates = {
-    MedicationIntakeEvent: _MedicationIntakeStorageService(Logger("LogService.med")),
+    MedicationIntakeEvent:
+        _MedicationIntakeStorageService(Logger("LogService.med")),
     StockEvent: _StockEventStorageService(Logger("LogService.stock"))
   };
 
@@ -33,10 +34,12 @@ class LogService extends StorageService<LogEvent> {
   @override
   Future<void> store(List<LogEvent> list) async {
     // all items in list shall be of a type contained in delegate.keys
-    assert(list.any((e) => delegates.containsKey(e.runtimeType) == false) == false);
+    assert(list.any((e) => delegates.containsKey(e.runtimeType) == false) ==
+        false);
 
     for (var e in delegates.entries) {
-      var applicableItems = list.where((element) => element.runtimeType == e.key).toList();
+      var applicableItems =
+          list.where((element) => element.runtimeType == e.key).toList();
 
       switch (e.key) {
         case MedicationIntakeEvent:
@@ -58,7 +61,8 @@ class LogService extends StorageService<LogEvent> {
     return delegates[T]! as StorageService<T>;
   }
 
-  Map<String, List<Map<String, dynamic>>> getJson<T extends LogEvent>(List<LogEvent> items) =>
+  Map<String, List<Map<String, dynamic>>> getJson<T extends LogEvent>(
+          List<LogEvent> items) =>
       _storageServiceByT<T>().toJsonArray(items.whereType<T>().toList());
 
   @override
@@ -73,18 +77,22 @@ class LogService extends StorageService<LogEvent> {
   }
 }
 
-class _MedicationIntakeStorageService extends StorageService<MedicationIntakeEvent> {
-  _MedicationIntakeStorageService(Logger logger) : super("medicationIntakeEvents", logger: logger);
+class _MedicationIntakeStorageService
+    extends StorageService<MedicationIntakeEvent> {
+  _MedicationIntakeStorageService(Logger logger)
+      : super("medicationIntakeEvents", logger: logger);
 
   @override
   Map<String, dynamic> toJson(MedicationIntakeEvent t) => t.toJson();
 
   @override
-  MedicationIntakeEvent fromJson(Map<String, dynamic> json) => MedicationIntakeEvent.fromJson(json);
+  MedicationIntakeEvent fromJson(Map<String, dynamic> json) =>
+      MedicationIntakeEvent.fromJson(json);
 }
 
 class _StockEventStorageService extends StorageService<StockEvent> {
-  _StockEventStorageService(Logger logger) : super("stockEvents", logger: logger);
+  _StockEventStorageService(Logger logger)
+      : super("stockEvents", logger: logger);
 
   @override
   Map<String, dynamic> toJson(StockEvent t) => t.toJson();

@@ -20,7 +20,10 @@ import 'package:medlog/src/repo/stock/stock_controller.dart';
 /// The Widget that configures your application.
 class MedlogApp extends StatefulWidget {
   const MedlogApp(
-      {Key? key, required this.logController, required this.pharmaController, required this.stockController})
+      {Key? key,
+      required this.logController,
+      required this.pharmaController,
+      required this.stockController})
       : super(key: key);
 
   final LogRepo logController;
@@ -81,7 +84,8 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
         Locale('en', ''), // English, no country code
       ],
 
-      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (BuildContext context) =>
+          AppLocalizations.of(context)!.appTitle,
       theme: ThemeData.dark(),
 
       // Define a function to handle named routes in order to support
@@ -103,7 +107,8 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
                     pharmaController: widget.pharmaController,
                     stockController: widget.stockController);
               case AddPharmaceutical.routeName:
-                return AddPharmaceutical(pharmController: widget.pharmaController);
+                return AddPharmaceutical(
+                    pharmController: widget.pharmaController);
               case AddStock.routeName:
                 return AddStock(
                   pharmaceuticalController: widget.pharmaController,

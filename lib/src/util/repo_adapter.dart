@@ -12,7 +12,8 @@ class RepoAdapter {
   List<Function(RepoAdapter)> shutdownHook = [];
 
   T load<T>(String key, T Function(Object json) adapter) {
-    if (kvstore.containsKey(key) == false) throw ArgumentError.value(key, "", "not stored in kv-store");
+    if (kvstore.containsKey(key) == false)
+      throw ArgumentError.value(key, "", "not stored in kv-store");
 
     return adapter(kvstore.get(key));
   }
@@ -22,7 +23,8 @@ class RepoAdapter {
   }
 
   List<T> loadList<T>(String key, T Function(Object) adapter) {
-    if (kvstore.containsKey(key) == false) throw ArgumentError.value(key, "", "not stored in kv-store");
+    if (kvstore.containsKey(key) == false)
+      throw ArgumentError.value(key, "", "not stored in kv-store");
 
     final storedValue = kvstore.get(key);
     final list = storedValue as List<Object>;

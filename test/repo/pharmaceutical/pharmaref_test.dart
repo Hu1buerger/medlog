@@ -3,7 +3,7 @@ import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 
-import 'pharmaceutical_controller_test.dart' show testEquals;
+import '../../test_tools/matcher/pharmaceutical_matcher.dart';
 
 /// test the updating of a ref (matches the usecase of updating a pharmaceutical i.e. changing the name)
 void main() {
@@ -21,12 +21,11 @@ void main() {
 
   PharmaceuticalRef ref = PharmaceuticalRef(a);
 
-
-  test("test values equals", () => testEquals(a, ref));
+  test("test values equals", () => expect(a, PharmaceuticalMatcher(ref)));
   test("replace ref", () {
     ref.ref = b;
 
-    testEquals(b, ref);
+    expect(b, PharmaceuticalMatcher(ref));
     expect(b, equals(ref.ref));
     expect(a, isNot(equals(ref.ref)));
   });

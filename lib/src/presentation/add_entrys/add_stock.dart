@@ -34,7 +34,10 @@ class AddStock extends StatefulWidget {
   final LogProvider logProvider;
 
   const AddStock(
-      {Key? key, required this.pharmaceuticalController, required this.stockController, required this.logProvider})
+      {Key? key,
+      required this.pharmaceuticalController,
+      required this.stockController,
+      required this.logProvider})
       : super(key: key);
 
   @override
@@ -77,7 +80,8 @@ class _AddStockState extends State<AddStock> {
   }
 
   List<Option<num>> options() {
-    var options = List.generate(5, (index) => Option<int>(value: (index + 1) * 5));
+    var options =
+        List.generate(5, (index) => Option<int>(value: (index + 1) * 5));
     options.add(VariableOption<int>(value: 5, min: 1, max: 100, step: 1));
 
     return options;
@@ -149,7 +153,8 @@ class _AddStockState extends State<AddStock> {
 
   StockItem buildStockItem() {
     assert(pharmaceutical != null && quantity != null && expiryDate != null);
-    return StockItem.create(pharmaceutical!, quantity!, state ?? StockState.closed, expiryDate!);
+    return StockItem.create(
+        pharmaceutical!, quantity!, state ?? StockState.closed, expiryDate!);
   }
 
   /// stage 0 lets the user pick a pharmaceutical that he wants to edit
@@ -163,7 +168,8 @@ class _AddStockState extends State<AddStock> {
 
         setState(() => pharmaceutical = p);
       },
-      onSelectionFailed: (q) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
+      onSelectionFailed: (q) =>
+          Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 
@@ -182,7 +188,10 @@ class _AddStockState extends State<AddStock> {
             onLongPress: () => setState(() => pharmaceutical = null),
           ),
         ),
-        OptionSelector<num>(options: quantityOptions, onSelectOption: setQuantity, selected: -1),
+        OptionSelector<num>(
+            options: quantityOptions,
+            onSelectOption: setQuantity,
+            selected: -1),
       ],
     );
   }
@@ -221,7 +230,10 @@ class _AddStockState extends State<AddStock> {
   /// TODO: add a press to goback // add onLongPress => goback stage
   Widget buildStage3(BuildContext context) {
     return Column(
-      children: [StockItemCard(stockItem: buildStockItem()), TextButton(onPressed: commit, child: Text("Submit"))],
+      children: [
+        StockItemCard(stockItem: buildStockItem()),
+        TextButton(onPressed: commit, child: Text("Submit"))
+      ],
     );
   }
 

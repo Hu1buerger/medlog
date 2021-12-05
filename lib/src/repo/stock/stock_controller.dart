@@ -9,7 +9,7 @@ import 'package:uuid/uuid.dart';
 
 //TODO: extend this mofo and override load and store => ExampleDataStockController
 class StockRepo with ChangeNotifier {
-  Logger logger = Logger("StockController");
+  Logger logger = Logger("StockRepo");
 
   PharmaceuticalRepo pharmaController;
   Uuid uuid = const Uuid();
@@ -31,7 +31,11 @@ class StockRepo with ChangeNotifier {
   double remainingUnits(Pharmaceutical p) {
     var stockOfP = stockItemByPharmaceutical(p);
 
-    return stockOfP.isEmpty ? 0 : stockOfP.map((e) => e.amount).reduce((value, element) => value += element);
+    return stockOfP.isEmpty
+        ? 0
+        : stockOfP
+            .map((e) => e.amount)
+            .reduce((value, element) => value += element);
   }
 
   void addStockItem(StockItem item) {
@@ -84,7 +88,9 @@ class StockRepo with ChangeNotifier {
     assert(item.amount >= 0);
 
     if (item.amount < 0) {
-      logger.severe("items {${item.id} ${item.pharmaceutical.displayName}} amount is less than 0.", item.toJson());
+      logger.severe(
+          "items {${item.id} ${item.pharmaceutical.displayName}} amount is less than 0.",
+          item.toJson());
     }
 
     if (item.amount == 0) {
@@ -98,7 +104,8 @@ class StockRepo with ChangeNotifier {
     var items = await service.loadFromDisk();
 
     for (var i in items) {
-      var pharmaceutical = pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
+      var pharmaceutical =
+          pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
       if (pharmaceutical == null) logger.severe("cannot rehydrate for ${i.id}");
       i.pharmaceutical = pharmaceutical!;
     }
@@ -114,7 +121,8 @@ class StockRepo with ChangeNotifier {
   void openItem(StockItem stockItem) {
     if (stockItem.state == StockState.closed) {
       stockItem.state = StockState.open;
-      logger.fine("opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
+      logger.fine(
+          "opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
       notifyListeners();
     }
   }

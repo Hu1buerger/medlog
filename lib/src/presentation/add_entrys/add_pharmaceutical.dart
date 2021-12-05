@@ -9,7 +9,8 @@ class AddPharmaceutical extends StatefulWidget {
 
   final PharmaceuticalRepo pharmController;
 
-  const AddPharmaceutical({Key? key, required this.pharmController}) : super(key: key);
+  const AddPharmaceutical({Key? key, required this.pharmController})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddPharmaceuticalState();
@@ -58,7 +59,8 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
 
   String? dosageValidator(String? value) {
     if (value == null || value.isEmpty) return "Illegal dosage name";
-    if (["mg", "ng", "g", "ug", "IU"].any((unit) => value.contains(unit)) == false) return "Illegal dosage, use unit";
+    if (["mg", "ng", "g", "ug", "IU"].any((unit) => value.contains(unit)) ==
+        false) return "Illegal dosage, use unit";
 
     return null;
   }
@@ -100,7 +102,9 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                 ),
                 TextFormField(
                   controller: activeSubstCrtl,
-                  decoration: const InputDecoration(hintText: "Activesubstance:", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      hintText: "Activesubstance:",
+                      border: OutlineInputBorder()),
                   validator: medNameValidator,
                 ),
                 const SizedBox(
@@ -108,7 +112,8 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
                 ),
                 TextFormField(
                   controller: dosageCrtl,
-                  decoration: const InputDecoration(hintText: "Dosage:", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      hintText: "Dosage:", border: OutlineInputBorder()),
                   validator: dosageValidator,
                 ),
                 const SizedBox(

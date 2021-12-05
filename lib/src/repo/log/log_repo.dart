@@ -15,7 +15,7 @@ import 'package:medlog/src/model/log_entry/stock_event.dart';
 /// TODO: The [LogProvider] will take over
 ///  and its responsibility is to just combine all LogEvents and thats it
 class LogRepo with ChangeNotifier {
-  static final _logger = Logger("LogController");
+  static final _logger = Logger("LogRepo");
   static final supportedTypes = [MedicationIntakeEvent, StockEvent];
 
   LogService logService;
@@ -59,7 +59,8 @@ class LogRepo with ChangeNotifier {
     await logService.store(_log);
   }
 
-  Map<String, List<Map<String, dynamic>>> jsonKV() => logService.toJsonArray(log);
+  Map<String, List<Map<String, dynamic>>> jsonKV() =>
+      logService.toJsonArray(log);
 
   int nextID() => _lastID++;
 

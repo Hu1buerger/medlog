@@ -28,7 +28,8 @@ Map<String, dynamic> _$PharmaceuticalToJson(Pharmaceutical instance) =>
       'tradename': instance.tradename,
       'dosage': const DosageJsonConverter().toJson(instance.dosage),
       'activeSubstance': instance.activeSubstance,
-      'smallestConsumableUnit': instance.smallestConsumableUnit,
+      //TODO: rename
+      'smallestConsumableUnit': instance.minUnit,
     };
 
 K _$enumDecode<K, V>(

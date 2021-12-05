@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Adapter to store typed data
-/// 
+///
 /// This instance handles on key.
 /// It can i.e. store a list of Pharmaceuticals
 class StorageService<T> {
@@ -22,7 +22,8 @@ class StorageService<T> {
 
   Stream<T> get events => _streamController.stream;
 
-  StorageService(String storageKey, {Logger? logger, JsonConverter<T>? jsonConverter})
+  StorageService(String storageKey,
+      {Logger? logger, JsonConverter<T>? jsonConverter})
       : _storageKey = storageKey,
         logger = logger ?? Logger(storageKey),
         _jsonConverter = jsonConverter {
@@ -69,7 +70,8 @@ class StorageService<T> {
 
         // ignore: deprecated_member_use, the runtime throws CastError when our converter functions cast to the new type while an old type is stored
       } on CastError catch (e) {
-        logger.severe("Error while converting the jsonStrings to objects", e, StackTrace.current);
+        logger.severe("Error while converting the jsonStrings to objects", e,
+            StackTrace.current);
         //combine all jsonobjects to a jsonList
         onIllegalDataFormat(o);
       }
@@ -114,11 +116,13 @@ class StorageService<T> {
   @protected
   void publish(T t) {
     if (_streamController.isClosed) {
-      logger.severe("streamController is closed but still trying to publish", null, StackTrace.current);
+      logger.severe("streamController is closed but still trying to publish",
+          null, StackTrace.current);
     }
 
     if (backLog != null) {
-      if (_streamController.hasListener == false || _streamController.isPaused) {
+      if (_streamController.hasListener == false ||
+          _streamController.isPaused) {
         logger.fine("publishing $t to the backlog");
         backLog?.add(t);
 
@@ -131,7 +135,9 @@ class StorageService<T> {
   }
 
   void _publishBackLog() {
-    assert(backLog == null || (backLog != null && (backLog!.isEmpty || _streamController.isClosed == false)));
+    assert(backLog == null ||
+        (backLog != null &&
+            (backLog!.isEmpty || _streamController.isClosed == false)));
 
     if (backLog != null) {
       logger.finer("publishing the backlog with ${backLog!.length} items");
@@ -171,7 +177,8 @@ class StorageService<T> {
     if (_streamController.isClosed) {
       logger.finest("signaling done to closed controller");
       if (backLog?.isNotEmpty ?? false) {
-        logger.severe("elements were backlogged but the eventStream was already closed");
+        logger.severe(
+            "elements were backlogged but the eventStream was already closed");
       }
     }
 
@@ -191,7 +198,9 @@ class StorageService<T> {
 
     final listOfJsons = preferences!.getStringList(_storageKey)!;
 
-    return listOfJsons.map((e) => json.decode(e) as Map<String, dynamic>).toList();
+    return listOfJsons
+        .map((e) => json.decode(e) as Map<String, dynamic>)
+        .toList();
   }
 
   /// encodes the hole list to Strings using the jsonConverter object
@@ -207,7 +216,8 @@ class StorageService<T> {
   }
 
   @protected
-  Future<void> onIllegalDataFormat(Map<String, dynamic> illegalDataformatItem) async {
+  Future<void> onIllegalDataFormat(
+      Map<String, dynamic> illegalDataformatItem) async {
     logger.severe("policy for illegalConversion is clearing...");
     //write the data to the disk as for now... this can be a security risk due to dumping possibly encrypted data to logcat
     //"$_storageKey: [${obsMaps.map((e) => jsonEncode(e)).reduce((value, element) => value = value + "," + element)}]";
@@ -219,7 +229,8 @@ class StorageService<T> {
   @protected
   T fromJson(Map<String, dynamic> json) {
     if (_jsonConverter == null) {
-      throw StateError("the jsonConverter needs to be initialized or this function be overriden");
+      throw StateError(
+          "the jsonConverter needs to be initialized or this function be overriden");
     }
     return _jsonConverter!.fromJson(json);
   }
@@ -227,7 +238,8 @@ class StorageService<T> {
   @protected
   Map<String, dynamic> toJson(T t) {
     if (_jsonConverter == null) {
-      throw StateError("the jsonConverter needs to be initialized or this function be overriden");
+      throw StateError(
+          "the jsonConverter needs to be initialized or this function be overriden");
     }
     return _jsonConverter!.toJson(t);
   }

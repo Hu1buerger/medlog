@@ -21,7 +21,8 @@ class Dosage {
 
   static Dosage parse(String s) {
     if (units.any((element) => s.contains(element)) == false) {
-      throw ArgumentError.value(s, "arg", "dosnt contain unit and cnnt be parsed");
+      throw ArgumentError.value(
+          s, "arg", "dosnt contain unit and cnnt be parsed");
     }
 
     var unit = "";
@@ -35,7 +36,9 @@ class Dosage {
     assert(unit.isNotEmpty);
 
     var sSplit = s.split(unit);
-    if (sSplit.length != 2) throw ArgumentError.value(s, "argument", "dosnt seem to contain any value");
+    if (sSplit.length != 2)
+      throw ArgumentError.value(
+          s, "argument", "dosnt seem to contain any value");
 
     var valuePart = sSplit.first;
     var value = double.parse(valuePart);

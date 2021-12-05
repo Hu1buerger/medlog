@@ -12,9 +12,10 @@ class PharmaceuticalRepo with ChangeNotifier {
   /// uid generator using crypto random number generator;
   static const Uuid _uuid = Uuid();
 
-  PharmaceuticalRepo(PharmaService pharmaservice, {this.fetchEnabled = true}) : _pharmaservice = pharmaservice;
+  PharmaceuticalRepo(PharmaService pharmaservice, {this.fetchEnabled = true})
+      : _pharmaservice = pharmaservice;
 
-  final Logger _logger = Logger("PharmaceuticalController");
+  final Logger _logger = Logger("PharmaceuticalRepo");
 
   @visibleForTesting
   PharmaService get pharmaservice => _pharmaservice;
@@ -143,7 +144,8 @@ class PharmaceuticalRepo with ChangeNotifier {
       // no need to update
       if (isEqual && other.documentState == toInsert.documentState) return;
 
-      if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
+      if (other.documentState == DocumentState.user_created &&
+          other.human_known_name != toInsert.human_known_name) {
         // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
         other.cloneAndUpdate(id: createPharmaID());
         notifyListeners();
@@ -151,7 +153,8 @@ class PharmaceuticalRepo with ChangeNotifier {
         return;
       }
 
-      if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
+      if (toInsert.documentState == DocumentState.user_created &&
+          other.human_known_name != toInsert.human_known_name) {
         // and the new item is userCreated, we can just change the id
         // aka the user wants to create a new Pharmaceutical
         toInsert.cloneAndUpdate(id: createPharmaID());
@@ -173,7 +176,10 @@ class PharmaceuticalRepo with ChangeNotifier {
         //maybe the pharmaceutical should track a versionID
         //collision and no change in documentState.
         // or the remote is always right
-        _logger.severe("Unfixable collison of $other and $toInsert while adding", null, StackTrace.current);
+        _logger.severe(
+            "Unfixable collison of $other and $toInsert while adding",
+            null,
+            StackTrace.current);
         //throw StateError("unfixable collision of $other and $toInsert while adding");
       }
 
@@ -198,7 +204,8 @@ class PharmaceuticalRepo with ChangeNotifier {
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(
+        fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
   @visibleForTesting

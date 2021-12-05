@@ -19,7 +19,8 @@ class StockEvent extends LogEvent {
   Pharmaceutical? _pharmaceutical;
 
   Pharmaceutical get pharmaceutical {
-    if (_pharmaceutical == null) throw StateError("this item needs to be loaded fully, but isnt");
+    if (_pharmaceutical == null)
+      throw StateError("this item needs to be loaded fully, but isnt");
     return _pharmaceutical!;
   }
 
@@ -32,12 +33,15 @@ class StockEvent extends LogEvent {
   @JsonKey()
   double amount;
 
-  StockEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount) : super(id, eventTime);
+  StockEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount)
+      : super(id, eventTime);
 
-  factory StockEvent.create(DateTime eventTime, Pharmaceutical p, double amount) {
+  factory StockEvent.create(
+      DateTime eventTime, Pharmaceutical p, double amount) {
     assert(amount != 0);
 
-    return StockEvent(LogEvent.unsetID, eventTime, p.id, amount)..pharmaceutical = p;
+    return StockEvent(LogEvent.unsetID, eventTime, p.id, amount)
+      ..pharmaceutical = p;
   }
 
   factory StockEvent.restock(DateTime eventTime, StockItem item) {
@@ -46,7 +50,8 @@ class StockEvent extends LogEvent {
     return StockEvent.create(eventTime, item.pharmaceutical, item.amount);
   }
 
-  factory StockEvent.fromJson(Map<String, dynamic> json) => _$StockEventFromJson(json);
+  factory StockEvent.fromJson(Map<String, dynamic> json) =>
+      _$StockEventFromJson(json);
 
   Map<String, dynamic> toJson() {
     pharmaceuticalID = _pharmaceutical?.id ?? pharmaceuticalID;

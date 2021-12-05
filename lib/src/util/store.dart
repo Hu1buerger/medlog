@@ -41,7 +41,8 @@ abstract class Store {
 //TODO: maybe hide certain keys ie HIDDEN-VersionKey
 class JsonStore implements Store {
   JsonStore({required File file, this.backupmanager}) {
-    if (file.parent.existsSync() == false) throw ArgumentError("the directory which contains file dosnt exist");
+    if (file.parent.existsSync() == false)
+      throw ArgumentError("the directory which contains file dosnt exist");
 
     if (!file.existsSync()) {
       logger.fine("creating file ${file.path}");
@@ -75,7 +76,8 @@ class JsonStore implements Store {
       // check if we need to make a backup of the underlying file
       await backupmanager!.checkAndDoBackup(this);
       // update the current version in cache
-      _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
+      _cache[backupmanager!.versionKey] =
+          await VersionHandler.Instance.getVersion();
     }
   }
 
@@ -128,7 +130,8 @@ class JsonStore implements Store {
 
   @override
   dynamic drop(String key) {
-    if (containsKey(key) == false) throw ArgumentError.value(key, "key", "not present");
+    if (containsKey(key) == false)
+      throw ArgumentError.value(key, "key", "not present");
     return _cache.remove(key);
   }
 }
@@ -184,7 +187,8 @@ class Backupmanager {
     if (state) {
       logger.fine("version missmatch doing backup");
 
-      String path = store.file.parent.newFilePath("${DateTime.now().fileSystemName()}.json");
+      String path = store.file.parent
+          .newFilePath("${DateTime.now().fileSystemName()}.json");
       await store.file.copy(path);
       logger.info("copyed the current state to $path");
       //_updateFiles();

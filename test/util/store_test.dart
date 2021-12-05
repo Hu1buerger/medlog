@@ -36,7 +36,9 @@ void main() {
       Store store = JsonStore(file: file);
 
       throwOnMissingStub(file as Mock);
-      mktl.when(() => file.writeAsString(any())).thenAnswer((invocation) => Future.value(file));
+      mktl
+          .when(() => file.writeAsString(any()))
+          .thenAnswer((invocation) => Future.value(file));
 
       await store.flush();
       var res = verify(() => file.writeAsString(any())).called(1);
@@ -55,7 +57,8 @@ void main() {
 
     when("loading from file", () {
       then("the store shall not throw", () async {
-        expect(() => store.load(), returnsNormally, reason: "the store shall handle an empty file");
+        expect(() => store.load(), returnsNormally,
+            reason: "the store shall handle an empty file");
       });
     });
     when("storing a valid store", () {
@@ -109,7 +112,9 @@ void main() {
       const String value = "value";
 
       when("inserting string", () {
-        then("inserting the same key, even though it is already contained should throw", () {
+        then(
+            "inserting the same key, even though it is already contained should throw",
+            () {
           store.insertString(key, value);
 
           expect(() => store.insertString(key, value), throwsA(anything));
@@ -182,7 +187,8 @@ String _randomString() {
   Random rng = Random();
   int length = rng.nextInt(59) + 1;
 
-  return String.fromCharCodes(List.generate(length, (index) => rng.nextInt(33) + 89));
+  return String.fromCharCodes(
+      List.generate(length, (index) => rng.nextInt(33) + 89));
 }
 
 class MockFile extends Mock implements File {}

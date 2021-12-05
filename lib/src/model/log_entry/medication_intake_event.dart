@@ -21,14 +21,17 @@ class MedicationIntakeEvent extends LogEvent {
   @JsonKey()
   PharmaceuticalSource source;
 
-  MedicationIntakeEvent(int id, DateTime eventTime, this.pharmaceuticalID, this.amount,
+  MedicationIntakeEvent(
+      int id, DateTime eventTime, this.pharmaceuticalID, this.amount,
       {this.source = PharmaceuticalSource.other})
       : super(id, eventTime) {
     if (amount <= 0) throw ArgumentError.value(amount);
   }
 
-  factory MedicationIntakeEvent.create(Pharmaceutical p, DateTime eventTime, double amount) {
-    return MedicationIntakeEvent(LogEvent.unsetID, eventTime, p.id, amount, source: PharmaceuticalSource.other)
+  factory MedicationIntakeEvent.create(
+      Pharmaceutical p, DateTime eventTime, double amount) {
+    return MedicationIntakeEvent(LogEvent.unsetID, eventTime, p.id, amount,
+        source: PharmaceuticalSource.other)
       ..pharmaceutical = p;
   }
 
@@ -47,7 +50,8 @@ class MedicationIntakeEvent extends LogEvent {
 
   String get activeSubstance => pharmaceutical.activeSubstance ?? "Unassigned";
 
-  factory MedicationIntakeEvent.fromJson(Map<String, dynamic> json) => _$MedicationIntakeEventFromJson(json);
+  factory MedicationIntakeEvent.fromJson(Map<String, dynamic> json) =>
+      _$MedicationIntakeEventFromJson(json);
 
   Map<String, dynamic> toJson() {
     pharmaceuticalID = _pharmaceutical?.id ?? pharmaceuticalID;
