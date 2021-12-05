@@ -1,24 +1,27 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
-import 'package:medlog/src/repo/stock/stock_service.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
+import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
 //TODO: extend this mofo and override load and store => ExampleDataStockController
 class StockRepo with ChangeNotifier {
+  static const String key = "stock";
+
   Logger logger = Logger("StockRepo");
 
   PharmaceuticalRepo pharmaController;
   Uuid uuid = const Uuid();
 
-  StockService service;
+  final RepoAdapter repoAdapter;
   List<StockItem> _stock = [];
   List<StockItem> get stock => _stock;
 
-  StockRepo(this.service, this.pharmaController);
+  StockRepo(this.repoAdapter, this.pharmaController);
 
   List<StockItem> stockItemByPharmaceutical(Pharmaceutical p) {
     return stock.where((element) => element.pharmaceutical == p).toList();
@@ -31,11 +34,7 @@ class StockRepo with ChangeNotifier {
   double remainingUnits(Pharmaceutical p) {
     var stockOfP = stockItemByPharmaceutical(p);
 
-    return stockOfP.isEmpty
-        ? 0
-        : stockOfP
-            .map((e) => e.amount)
-            .reduce((value, element) => value += element);
+    return stockOfP.isEmpty ? 0 : stockOfP.map((e) => e.amount).reduce((value, element) => value += element);
   }
 
   void addStockItem(StockItem item) {
@@ -88,9 +87,7 @@ class StockRepo with ChangeNotifier {
     assert(item.amount >= 0);
 
     if (item.amount < 0) {
-      logger.severe(
-          "items {${item.id} ${item.pharmaceutical.displayName}} amount is less than 0.",
-          item.toJson());
+      logger.severe("items {${item.id} ${item.pharmaceutical.displayName}} amount is less than 0.", item.toJson());
     }
 
     if (item.amount == 0) {
@@ -101,11 +98,10 @@ class StockRepo with ChangeNotifier {
   }
 
   Future load() async {
-    var items = await service.loadFromDisk();
+    var items = repoAdapter.loadListOrDefault<Json, StockItem>(key, (json) => StockItem.fromJson(json), []);
 
     for (var i in items) {
-      var pharmaceutical =
-          pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
+      var pharmaceutical = pharmaController.pharmaceuticalByID(i.pharmaceuticalID);
       if (pharmaceutical == null) logger.severe("cannot rehydrate for ${i.id}");
       i.pharmaceutical = pharmaceutical!;
     }
@@ -114,15 +110,14 @@ class StockRepo with ChangeNotifier {
     notifyListeners();
   }
 
-  Future store() {
-    return service.store(stock);
+  store() {
+    repoAdapter.storeList(key, stock, (StockItem s) => s.toJson());
   }
 
   void openItem(StockItem stockItem) {
     if (stockItem.state == StockState.closed) {
       stockItem.state = StockState.open;
-      logger.fine(
-          "opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
+      logger.fine("opening ${stockItem.id} ${stockItem.pharmaceutical.displayName}");
       notifyListeners();
     }
   }

@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/pharmaceutical/remote_update.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import '../../test_tools/matcher/pharmaceutical_matcher.dart';
@@ -36,11 +36,9 @@ void main() async {
     var service = MockPharmaService([]);
     var controller = PharmaceuticalRepo(service);
 
-    test("test retrieve a fresh created pharm by name and dosage",
-        () => _testRetrieveByNameAndDosage(controller),
+    test("test retrieve a fresh created pharm by name and dosage", () => _testRetrieveByNameAndDosage(controller),
         skip: "retrieving a pharm by name and dosage is currently unsupported");
-    test("test pharms type post creation",
-        () => _testPCcontainsOnlyRefs(controller));
+    test("test pharms type post creation", () => _testPCcontainsOnlyRefs(controller));
   });
 
   group("test collisionHandling", () {
@@ -50,10 +48,7 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p = Pharmaceutical(
-          tradename: "idiotin",
-          dosage: Dosage.parse("20mg"),
-          activeSubstance: "masters");
+      var p = Pharmaceutical(tradename: "idiotin", dosage: Dosage.parse("20mg"), activeSubstance: "masters");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -65,10 +60,8 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p1 = Pharmaceutical(
-          tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
-      var p2 = Pharmaceutical(
-          tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p1 = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p2 = Pharmaceutical(tradename: "b", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p1);
       // then it should return normaly
@@ -83,8 +76,7 @@ void main() async {
       var service = MockPharmaService([]);
       var controller = PharmaceuticalRepo(service);
 
-      var p = Pharmaceutical(
-          tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
+      var p = Pharmaceutical(tradename: "a", dosage: Dosage.parse("1g"), activeSubstance: "a");
 
       controller.createPharmaceutical(p);
       p = controller.getTrackedInstance(p);
@@ -113,9 +105,8 @@ void main() async {
           documentState: DocumentState.in_review));
       var p = controller.pharmaceuticals.first;
 
-      var p2 = PharmaceuticalRef.toRef((p as PharmaceuticalRef)
-          .ref
-          .cloneAndUpdate(documentState: DocumentState.user_created));
+      var p2 = PharmaceuticalRef.toRef(
+          (p as PharmaceuticalRef).ref.cloneAndUpdate(documentState: DocumentState.user_created));
       controller.addPharmaceutical(p2);
 
       expect(controller.pharmaceuticals.length, 1);
@@ -140,6 +131,7 @@ void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
   c.createPharmaceutical(pharma);
   var retrieved = null;
   //var retrieved = c.pharmaceuticalByNameAndDosage("RETARDIN AL 25mg", Dosage.parse("25mg"));
+  throw UnimplementedError("fucked this one up, retrieving by name is currently not possible / not designed");
 
   expect(retrieved != null, isTrue);
   // set the id of pharma to the id of retrieved bcs that gets updated on working behaviour
@@ -148,19 +140,15 @@ void _testRetrieveByNameAndDosage(PharmaceuticalRepo c) {
 }
 
 Future<PharmaceuticalRepo> createPharmaController(
-    {int items = 0,
-    bool fetchEnabled = false,
-    bool mockedService = false}) async {
+    {int items = 0, bool fetchEnabled = false, bool mockedService = false}) async {
   // all items are fully configured
-  PharmaService service;
+  /*PharmaService service;
   if (mockedService) {
     service = MockPharmaService([]);
   } else {
-    if (SharedPreferencesStorePlatform.instance
-        is! InMemorySharedPreferencesStore) {
+    if (SharedPreferencesStorePlatform.instance is! InMemorySharedPreferencesStore) {
       // ignore: avoid_print
-      print(
-          "CAUTION the test is acting on data from file !!! CAVE: Production data???");
+      print("CAUTION the test is acting on data from file !!! CAVE: Production data???");
     }
     service = PharmaService();
   }
@@ -173,15 +161,14 @@ Future<PharmaceuticalRepo> createPharmaController(
     testData.forEach(controller.createPharmaceutical);
   }
 
-  return controller;
+  return controller;*/
+  throw UnimplementedError();
 }
 
 void populatePC(PharmaceuticalRepo pc) {
   if (pc.pharmaceuticals.isEmpty) {
     pc.createPharmaceutical(Pharmaceutical(
-        tradename: "TestPharamceutical",
-        dosage: Dosage.parse("10mg"),
-        activeSubstance: "TestSusbstance"));
+        tradename: "TestPharamceutical", dosage: Dosage.parse("10mg"), activeSubstance: "TestSusbstance"));
   }
 }
 
@@ -189,7 +176,5 @@ List<Pharmaceutical> testPharmaceuticals({int count = 1}) {
   return List.generate(
       count,
       (index) => Pharmaceutical(
-          tradename: "Tradename-$index",
-          dosage: Dosage.parse("$index mg"),
-          activeSubstance: "Substance-$index"));
+          tradename: "Tradename-$index", dosage: Dosage.parse("$index mg"), activeSubstance: "Substance-$index"));
 }

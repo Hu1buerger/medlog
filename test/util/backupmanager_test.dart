@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:given_when_then_unit_test/given_when_then_unit_test.dart';
+import 'package:medlog/src/util/backupmanager.dart';
 import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:medlog/src/util/store.dart';
 import 'package:medlog/src/util/version_handler.dart';
@@ -28,9 +29,7 @@ void main() {
       versionHandler = MockVersionHandler();
       VersionHandler.Instance = versionHandler;
 
-      mktl
-          .when(() => versionHandler.getVersion())
-          .thenAnswer((_) => Future.value(appVersion));
+      mktl.when(() => versionHandler.getVersion()).thenAnswer((_) => Future.value(appVersion));
     });
 
     given("[AND] a file with content", () {

@@ -14,8 +14,7 @@ import '../test_tools/pharma_test_tools.dart';
 typedef Adapter = dynamic Function(dynamic);
 
 /// key, loadAdapter, storeAdapter, encodedState, runtimeObject / matcher, the expected runtimetype after loading
-typedef Testcase
-    = Tuple5<String, dynamic Function(dynamic), dynamic, dynamic, Type>;
+typedef Testcase = Tuple5<String, dynamic Function(dynamic), dynamic, dynamic, Type>;
 
 /// Test the RepoAdapter
 ///
@@ -34,8 +33,7 @@ main() {
         Testcase("int, int", (i) => i, 1, 1, int),
         Testcase("bool, bool", (i) => i, true, true, bool),
         Testcase("string, int", (val) => int.parse(val), "1", 1, int),
-        Testcase(
-            "string, int", (enc) => enc as String, "string", "string", String),
+        Testcase("string, int", (enc) => enc as String, "string", "string", String),
       ];
 
       _runTestcases(testcases, _trivialTypesLoad);
@@ -46,11 +44,7 @@ main() {
         // Map<String, dynamic> -> Pharmaceutical
         ...List.generate(10, (index) {
           var p = generatePharmaceutical();
-          return Testcase(
-              "json, Pharmaceutical: pharm-$index",
-              pharmaLoadAdapter,
-              p.toJson(),
-              PharmaceuticalMatcher(p),
+          return Testcase("json, Pharmaceutical: pharm-$index", pharmaLoadAdapter, p.toJson(), PharmaceuticalMatcher(p),
               Pharmaceutical);
         })
       ];
@@ -61,11 +55,9 @@ main() {
 
     given("lists", () {
       List<Testcase> testcases = [
-        Testcase(
-            "key", (val) => int.parse(val), ["1", "2", "3"], [1, 2, 3], List),
+        Testcase("key", (val) => int.parse(val), ["1", "2", "3"], [1, 2, 3], List),
         ...List.generate(2, (index) {
-          var pharmaList =
-              List.generate(10, (index) => generatePharmaceutical());
+          var pharmaList = List.generate(10, (index) => generatePharmaceutical());
           var jsonList = pharmaList.map((e) => e.toJson()).toList();
 
           return Testcase("pharmaList-$index", pharmaLoadAdapter, jsonList,
@@ -84,8 +76,7 @@ main() {
         Testcase("int, int", (i) => i, 1, 1, int),
         Testcase("bool, bool", (i) => i, true, true, bool),
         Testcase("string, int", (val) => int.parse(val), "1", 1, int),
-        Testcase(
-            "string, int", (enc) => enc as String, "string", "string", String),
+        Testcase("string, int", (enc) => enc as String, "string", "string", String),
       ];
 
       _runTestcases(testcases, _trivialTypesStore);
@@ -96,8 +87,7 @@ main() {
         // Map<String, dynamic> -> Pharmaceutical
         ...List.generate(10, (index) {
           var p = generatePharmaceutical();
-          return Testcase("json, Pharmaceutical: pharm-$index",
-              pharmaStoreAdapter, p, p.toJson(), Json);
+          return Testcase("json, Pharmaceutical: pharm-$index", pharmaStoreAdapter, p, p.toJson(), Json);
         })
       ];
 
@@ -106,15 +96,12 @@ main() {
 
     given("lists", () {
       List<Testcase> testcases = [
-        Testcase(
-            "key", (val) => int.parse(val), ["1", "2", "3"], [1, 2, 3], List),
+        Testcase("key", (val) => int.parse(val), ["1", "2", "3"], [1, 2, 3], List),
         ...List.generate(2, (index) {
-          var pharmaList =
-              List.generate(10, (index) => generatePharmaceutical());
+          var pharmaList = List.generate(10, (index) => generatePharmaceutical());
           var jsonList = pharmaList.map((e) => e.toJson()).toList();
 
-          return Testcase("pharmaList-$index", pharmaStoreAdapter, pharmaList,
-              jsonList, List);
+          return Testcase("pharmaList-$index", pharmaStoreAdapter, pharmaList, jsonList, List);
         })
       ];
 
@@ -123,15 +110,13 @@ main() {
   });
 }
 
-_runTestcases(List<Testcase> cases, Function(Testcase) test) =>
-    cases.forEach(test);
+_runTestcases(List<Testcase> cases, Function(Testcase) test) => cases.forEach(test);
 
 _trivialTypesLoad(Testcase testcase) {
   final String key = testcase.item1;
   final adapter = testcase.item2;
   final dynamic valEncoded = testcase.item3;
-  String partialValEnc =
-      valEncoded.toString().substring(0, min(valEncoded.toString().length, 20));
+  String partialValEnc = valEncoded.toString().substring(0, min(valEncoded.toString().length, 20));
   final dynamic matcher = testcase.item4;
   final resultType = testcase.item5;
 
@@ -164,12 +149,16 @@ _trivialTypesLoad(Testcase testcase) {
         expect(() => rpoAdpt.load(key, adapter), returnsNormally);
       });
 
+      test("load should have been called on the kvstore", () {
+        rpoAdpt.load(key, adapter);
+        mctl.verify(() => kvstore.load()).called(1);
+      }, skip: "currently not implemented on, and compensated by the app");
+
       then("the value should have been converted", () {
         expect(rpoAdpt.load(key, adapter), matcher);
       });
 
-      then("the retrieved value should be of type ${resultType.toString()}",
-          () {
+      then("the retrieved value should be of type ${resultType.toString()}", () {
         final val = rpoAdpt.load(key, adapter);
         expect(val.runtimeType, resultType);
       });
@@ -198,9 +187,13 @@ _trivialTypesStore(Testcase testcase) {
     });
 
     then("store shouldnt throw", () {
-      expect(() => rpoAdpt.store(key, runtimeObject, storeAdapter),
-          returnsNormally);
+      expect(() => rpoAdpt.store(key, runtimeObject, storeAdapter), returnsNormally);
     });
+
+    test("load should have been called on the kvstore", () {
+      rpoAdpt.store(key, runtimeObject, storeAdapter);
+      mctl.verify(() => kvstore.flush()).called(1);
+    }, skip: "currently not implemented on, and compensated by the app");
 
     then("storing should write the value", () {
       rpoAdpt.store(key, runtimeObject, storeAdapter);
@@ -215,8 +208,7 @@ _testComplexTypesLoad(Testcase testcase) {
   final String key = testcase.item1;
   final adapter = testcase.item2;
   final dynamic valEncoded = testcase.item3;
-  String partialValEnc =
-      valEncoded.toString().substring(0, min(valEncoded.toString().length, 20));
+  String partialValEnc = valEncoded.toString().substring(0, min(valEncoded.toString().length, 20));
   final List<dynamic> matcher = testcase.item4;
   final resultType = testcase.item5;
 
@@ -236,12 +228,10 @@ _testComplexTypesLoad(Testcase testcase) {
       });
     });
 
-    when("the store holds a non list value", () {
+    when("the store holds another value, but not ours", () {
       before(() {
         mctl.when(() => kvstore.containsKey(key)).thenReturn(true);
-        mctl
-            .when(() => kvstore.get(key))
-            .thenReturn("{}"); // string is definitely not a list
+        mctl.when(() => kvstore.get(key)).thenReturn("{}"); // string is definitely not a list
       });
     });
 
@@ -255,15 +245,18 @@ _testComplexTypesLoad(Testcase testcase) {
         expect(() => rpoAdpt.loadList(key, adapter), returnsNormally);
       });
 
+      test("load should have been called on the kvstore", () {
+        rpoAdpt.loadList(key, adapter);
+        mctl.verify(() => kvstore.load()).called(1);
+      }, skip: "currently not implemented on, and compensated by the app");
+
       then("the value should have been converted", () {
         expect(rpoAdpt.loadList(key, adapter), unorderedMatches(matcher));
       });
 
-      then("the retrieved value should be of type ${resultType.toString()}",
-          () {
+      then("the retrieved value should be of type ${resultType.toString()}", () {
         final val = rpoAdpt.loadList(key, adapter);
-        expect(val.runtimeType, resultType,
-            skip: "cannot hold the type as of now");
+        expect(val.runtimeType, resultType, skip: "cannot hold the type as of now");
       });
     });
   });
@@ -292,9 +285,13 @@ _complexTypesStore(Testcase testcase) {
     });
 
     then("store shouldnt throw", () {
-      expect(() => rpoAdpt.storeList(key, runtimeObject, storeAdapter),
-          returnsNormally);
+      expect(() => rpoAdpt.storeList(key, runtimeObject, storeAdapter), returnsNormally);
     });
+
+    test("store should have been called on the kvstore", () {
+      rpoAdpt.storeList(key, runtimeObject, storeAdapter);
+      mctl.verify(() => kvstore.load()).called(1);
+    }, skip: "currently not implemented on, and compensated by the app");
 
     then("storing should write the value", () {
       rpoAdpt.storeList(key, runtimeObject, storeAdapter);

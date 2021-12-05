@@ -16,19 +16,18 @@ import 'package:medlog/src/repo/log/log_provider.dart';
 import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/repo/stock/stock_controller.dart';
+import 'package:medlog/src/util/store.dart';
 
 /// The Widget that configures your application.
 class MedlogApp extends StatefulWidget {
   const MedlogApp(
-      {Key? key,
-      required this.logController,
-      required this.pharmaController,
-      required this.stockController})
+      {Key? key, required this.logRepo, required this.pharmaRepo, required this.stockRepo, required this.store})
       : super(key: key);
 
-  final LogRepo logController;
-  final PharmaceuticalRepo pharmaController;
-  final StockRepo stockController;
+  final LogRepo logRepo;
+  final PharmaceuticalRepo pharmaRepo;
+  final StockRepo stockRepo;
+  final Store store;
 
   @override
   State<StatefulWidget> createState() => _AppState();
@@ -43,7 +42,7 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
   void initState() {
     logger.fine("initializing state");
     WidgetsBinding.instance!.addObserver(this);
-    logProvider = LogProvider(widget.logController);
+    logProvider = LogProvider(widget.logRepo);
     super.initState();
   }
 
@@ -63,9 +62,12 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) {
       // store all data once the app gets disposed of
       logger.info("writing the apps state back to the disk");
-      widget.pharmaController.store();
-      widget.logController.storeLog();
-      widget.stockController.store();
+      widget.pharmaRepo.store();
+      widget.logRepo.store();
+      widget.stockRepo.store();
+
+      // all data should now be in the store
+      widget.store.flush();
     }
   }
 
@@ -84,8 +86,7 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
         Locale('en', ''), // English, no country code
       ],
 
-      onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
       theme: ThemeData.dark(),
 
       // Define a function to handle named routes in order to support
@@ -98,39 +99,36 @@ class _AppState extends State<MedlogApp> with WidgetsBindingObserver {
               case "/":
               case HomePage.route:
                 return HomePage(
-                  logController: widget.logController,
-                  stockController: widget.stockController,
+                  logController: widget.logRepo,
+                  stockController: widget.stockRepo,
                 );
               case AddLogEntry.routeName:
                 return AddLogEntry(
-                    logProvider: logProvider,
-                    pharmaController: widget.pharmaController,
-                    stockController: widget.stockController);
+                    logProvider: logProvider, pharmaController: widget.pharmaRepo, stockController: widget.stockRepo);
               case AddPharmaceutical.routeName:
-                return AddPharmaceutical(
-                    pharmController: widget.pharmaController);
+                return AddPharmaceutical(pharmController: widget.pharmaRepo);
               case AddStock.routeName:
                 return AddStock(
-                  pharmaceuticalController: widget.pharmaController,
-                  stockController: widget.stockController,
+                  pharmaceuticalController: widget.pharmaRepo,
+                  stockController: widget.stockRepo,
                   logProvider: logProvider,
                 );
               case MedicationIntakeDetails.routeName:
                 return MedicationIntakeDetails(
                   entry: routeSettings.arguments! as MedicationIntakeEvent,
-                  logController: widget.logController,
+                  logController: widget.logRepo,
                 );
               case StockItemDetail.routeName:
                 return StockItemDetail(
                   stockItem: routeSettings.arguments! as StockItem,
-                  stockController: widget.stockController,
+                  stockController: widget.stockRepo,
                 );
               case Settings.route_name:
                 return Settings(
-                  pharmaceuticalController: widget.pharmaController,
+                  pharmaceuticalController: widget.pharmaRepo,
                   logProvider: logProvider,
-                  logController: widget.logController,
-                  stockController: widget.stockController,
+                  logController: widget.logRepo,
+                  stockController: widget.stockRepo,
                 );
               default:
                 return Text("ILLEGAL ROUTE ${routeSettings.name}");

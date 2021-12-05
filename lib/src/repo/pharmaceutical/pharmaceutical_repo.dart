@@ -4,67 +4,53 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
+import 'package:medlog/src/repo/provider.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
+import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
 class PharmaceuticalRepo with ChangeNotifier {
   /// uid generator using crypto random number generator;
+  static const String storageKey = "pharmaceuticals";
   static const Uuid _uuid = Uuid();
 
-  PharmaceuticalRepo(PharmaService pharmaservice, {this.fetchEnabled = true})
-      : _pharmaservice = pharmaservice;
+  PharmaceuticalRepo(this.repoAdapter, {this.fetchEnabled = true});
 
   final Logger _logger = Logger("PharmaceuticalRepo");
 
-  @visibleForTesting
-  PharmaService get pharmaservice => _pharmaservice;
-
-  List<Pharmaceutical> get pharmaceuticals => _pharmaStore;
-
-  final PharmaService _pharmaservice;
-
-  // ignore: unused_field
-  late final StreamSubscription<Pharmaceutical> _eventsSubscription;
+  final RepoAdapter repoAdapter;
 
   final List<PharmaceuticalRef> _pharmaStore = [];
+
+  List<Pharmaceutical> get pharmaceuticals => _pharmaStore;
 
   @visibleForTesting
   final bool fetchEnabled;
 
   /// loads all data from disk and restores the _pharmastore
   Future<void> load() async {
-    pharmaservice.enableBacklog();
+    var items =
+        repoAdapter.loadListOrDefault<Json, Pharmaceutical>(storageKey, (Json p0) => Pharmaceutical.fromJson(p0), []);
 
-    var items = await pharmaservice.loadFromDisk();
     items.forEach(addPharmaceutical);
-
-    pharmaservice.clearBacklog();
-    pharmaservice.disableBacklog();
-
     _logger.fine("finished adding all ${items.length}");
-    // enable the subscription
-    _eventsSubscription = pharmaservice.events.listen((event) {
-      addPharmaceutical(event);
-    });
 
-    if (fetchEnabled) pharmaservice.startRemoteFetch();
+    //FIXME if (fetchEnabled) pharmaservice.startRemoteFetch();
 
     _logger.fine("finished loading all pharmaceuticals with #${items.length}");
     return;
   }
 
-  Future<void> store() async {
-    pharmaservice.store(pharmaceuticals);
-  }
-
-  Map<String, List<Map<String, dynamic>>> jsonKV() {
-    return _pharmaservice.toJsonArray(pharmaceuticals);
+  store() {
+    _logger.info("storing ${_pharmaStore.length} pharmaceuticals");
+    repoAdapter.storeList(storageKey, _pharmaStore, (Pharmaceutical p) => p.toJson());
   }
 
   void startRemoteFetch() {
     _logger.info("enabling fetch");
-    pharmaservice.startRemoteFetch();
+    throw UnimplementedError();
+    //pharmaservice.startRemoteFetch();
   }
 
   /// creates a new pharmaceutical and adds it to the local knowledgebase.
@@ -144,8 +130,7 @@ class PharmaceuticalRepo with ChangeNotifier {
       // no need to update
       if (isEqual && other.documentState == toInsert.documentState) return;
 
-      if (other.documentState == DocumentState.user_created &&
-          other.human_known_name != toInsert.human_known_name) {
+      if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
         other.cloneAndUpdate(id: createPharmaID());
         notifyListeners();
@@ -153,8 +138,7 @@ class PharmaceuticalRepo with ChangeNotifier {
         return;
       }
 
-      if (toInsert.documentState == DocumentState.user_created &&
-          other.human_known_name != toInsert.human_known_name) {
+      if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
         // and the new item is userCreated, we can just change the id
         // aka the user wants to create a new Pharmaceutical
         toInsert.cloneAndUpdate(id: createPharmaID());
@@ -176,10 +160,7 @@ class PharmaceuticalRepo with ChangeNotifier {
         //maybe the pharmaceutical should track a versionID
         //collision and no change in documentState.
         // or the remote is always right
-        _logger.severe(
-            "Unfixable collison of $other and $toInsert while adding",
-            null,
-            StackTrace.current);
+        _logger.severe("Unfixable collison of $other and $toInsert while adding", null, StackTrace.current);
         //throw StateError("unfixable collision of $other and $toInsert while adding");
       }
 
@@ -204,8 +185,7 @@ class PharmaceuticalRepo with ChangeNotifier {
 
   bool _isValidPharmaID(String id) {
     // enforce RFC4122 UUIDS, this refuses to validate GUID from microsoft.
-    return Uuid.isValidUUID(
-        fromString: id, validationMode: ValidationMode.strictRFC4122);
+    return Uuid.isValidUUID(fromString: id, validationMode: ValidationMode.strictRFC4122);
   }
 
   @visibleForTesting

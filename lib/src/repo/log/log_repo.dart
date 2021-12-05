@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/log/log_service.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
+import 'package:medlog/src/util/store.dart';
 
 /// Handles the keeping of records
 ///
@@ -15,10 +16,14 @@ import 'package:medlog/src/model/log_entry/stock_event.dart';
 /// TODO: The [LogProvider] will take over
 ///  and its responsibility is to just combine all LogEvents and thats it
 class LogRepo with ChangeNotifier {
+  static const String key = "log";
+  static const String keyMedIntake = "$key-medIn";
+  static const String keyStock = "$key-stock";
+
   static final _logger = Logger("LogRepo");
   static final supportedTypes = [MedicationIntakeEvent, StockEvent];
 
-  LogService logService;
+  final RepoAdapter repoAdapter;
   PharmaceuticalRepo pharmaController;
 
   int _lastID = 0;
@@ -29,16 +34,22 @@ class LogRepo with ChangeNotifier {
 
   List<LogEvent> _itemsInNeedToRehydrate = [];
 
-  LogRepo(this.pharmaController, this.logService) {
+  LogRepo(this.repoAdapter, this.pharmaController) {
     pharmaController.addListener(_tryRehydrate);
   }
 
-  Future<void> loadLog() async {
+  Future<void> load() async {
     _logger.fine("starting to load the log");
 
-    var logs = await logService.loadFromDisk();
+    var medIn = repoAdapter.loadListOrDefault<Json, MedicationIntakeEvent>(
+        keyMedIntake, (Json json) => MedicationIntakeEvent.fromJson(json), []);
+    var stockE =
+        repoAdapter.loadListOrDefault<Json, StockEvent>(keyStock, (Json json) => StockEvent.fromJson(json), []);
+    var logs = [...medIn, ...stockE];
 
     if (logs.isNotEmpty) {
+      _sortLog(logs);
+
       _itemsInNeedToRehydrate = logs;
       _lastID = logs.map((e) => e.id).reduce(max);
       _tryRehydrate();
@@ -51,16 +62,17 @@ class LogRepo with ChangeNotifier {
     return;
   }
 
-  Future<void> storeLog() async {
+  store() {
     // also store items that would need to rehydrate
     _log.addAll(_itemsInNeedToRehydrate);
-
     _logger.fine("storing ${_log.length} events");
-    await logService.store(_log);
-  }
 
-  Map<String, List<Map<String, dynamic>>> jsonKV() =>
-      logService.toJsonArray(log);
+    var stockEvents = _log.whereType<StockEvent>().toList();
+    repoAdapter.storeList(keyStock, stockEvents, (StockEvent s) => s.toJson());
+
+    var miEvents = _log.whereType<MedicationIntakeEvent>().toList();
+    repoAdapter.storeList(keyMedIntake, miEvents, (MedicationIntakeEvent e) => e.toJson());
+  }
 
   int nextID() => _lastID++;
 
@@ -86,7 +98,7 @@ class LogRepo with ChangeNotifier {
 
     _logger.fine("inserted ${le.id} as ${le.runtimeType.toString()}");
     log.add(le);
-    _sortLog();
+    _sortLog(_log);
     notifyListeners();
   }
 
@@ -106,9 +118,8 @@ class LogRepo with ChangeNotifier {
     }
   }
 
-  _sortLog() {
-    _log.sort((a, b) => a.eventTime.compareTo(b.eventTime));
+  _sortLog(List<LogEvent> list) {
+    list.sort((a, b) => a.eventTime.compareTo(b.eventTime));
+    return list;
   }
 }
-
-class MedicationIntakeController {}

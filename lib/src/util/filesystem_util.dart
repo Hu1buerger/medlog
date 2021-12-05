@@ -7,6 +7,7 @@ extension FilesystemEntityExtension on FileSystemEntity {
 
   bool isLink() => this is Link;
 
+  /// gathers the name of this entry (ie. the name of the file, dir or link)
   String name() {
     var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
     return path.substring(lastSeparator);
@@ -14,15 +15,18 @@ extension FilesystemEntityExtension on FileSystemEntity {
 }
 
 extension DirectoryExtension on Directory {
+  /// creates a file in this dir
   File createNamed(String fileName) {
     final newPath = newFilePath(fileName);
     return File(newPath);
   }
 
+  /// creates a sub-entry path
   String newFilePath(String named) {
     if (named.isEmpty) throw ArgumentError.value(named);
-    if (named.contains(Platform.pathSeparator))
+    if (named.contains(Platform.pathSeparator)) {
       throw ArgumentError.value(named, null, "contains the platformSeperator");
+    }
 
     return "$path${Platform.pathSeparator}$named";
   }

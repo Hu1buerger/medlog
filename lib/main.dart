@@ -3,11 +3,10 @@ import 'package:logging/logging.dart';
 import 'package:logging_to_logcat/logging_to_logcat.dart';
 import 'package:medlog/src/app.dart';
 import 'package:medlog/src/repo/log/log_repo.dart';
-import 'package:medlog/src/repo/log/log_service.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharma_service.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/repo/stock/stock_controller.dart';
-import 'package:medlog/src/repo/stock/stock_service.dart';
+import 'package:medlog/src/util/backupmanager.dart';
+import 'package:medlog/src/util/repo_adapter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,18 +14,22 @@ void main() async {
   _initializeLogger();
   Logger.root.info("starting the app");
 
-  final pharmController = PharmaceuticalRepo(PharmaService());
-  final logController = LogRepo(pharmController, LogService());
-  final stockC = StockRepo(StockService(), pharmController);
+  final store = (await backupmanager()).createStore();
+  final repoAdapter = RepoAdapter(store);
+  final pharmController = PharmaceuticalRepo(repoAdapter);
+  final logController = LogRepo(repoAdapter, pharmController);
+  final stockC = StockRepo(repoAdapter, pharmController);
 
+  await store.load();
   await pharmController.load();
-  await logController.loadLog();
+  await logController.load();
   await stockC.load();
 
   runApp(MedlogApp(
-    logController: logController,
-    pharmaController: pharmController,
-    stockController: stockC,
+    logRepo: logController,
+    pharmaRepo: pharmController,
+    stockRepo: stockC,
+    store: store,
   ));
 }
 

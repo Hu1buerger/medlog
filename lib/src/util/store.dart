@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/util/date_time_extension.dart';
-import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:medlog/src/util/version_handler.dart';
+
+import 'backupmanager.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -41,8 +41,7 @@ abstract class Store {
 //TODO: maybe hide certain keys ie HIDDEN-VersionKey
 class JsonStore implements Store {
   JsonStore({required File file, this.backupmanager}) {
-    if (file.parent.existsSync() == false)
-      throw ArgumentError("the directory which contains file dosnt exist");
+    if (file.parent.existsSync() == false) throw ArgumentError("the directory which contains file dosnt exist");
 
     if (!file.existsSync()) {
       logger.fine("creating file ${file.path}");
@@ -76,8 +75,7 @@ class JsonStore implements Store {
       // check if we need to make a backup of the underlying file
       await backupmanager!.checkAndDoBackup(this);
       // update the current version in cache
-      _cache[backupmanager!.versionKey] =
-          await VersionHandler.Instance.getVersion();
+      _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
     }
   }
 
@@ -130,68 +128,7 @@ class JsonStore implements Store {
 
   @override
   dynamic drop(String key) {
-    if (containsKey(key) == false)
-      throw ArgumentError.value(key, "key", "not present");
+    if (containsKey(key) == false) throw ArgumentError.value(key, "key", "not present");
     return _cache.remove(key);
-  }
-}
-
-class Backupmanager {
-  static const String appIdentifier = "io.hu1buerger.medlog";
-  static const String constVersionKey = "$appIdentifier/version";
-
-  static const String latestFileName = "latest.json";
-
-  static final Logger logger = Logger("Backupmanager");
-
-  // ignore: unused_field
-  late Directory _managedDir;
-  late File _latest;
-
-  Backupmanager(Directory dir) {
-    if (dir.existsSync() == false) throw ArgumentError();
-
-    var possibleLatest = dir.createNamed(latestFileName);
-    if (possibleLatest.existsSync() == false) possibleLatest.createSync();
-
-    _latest = possibleLatest;
-  }
-
-  String get versionKey => constVersionKey;
-
-  JsonStore createStore() {
-    return JsonStore(file: _latest, backupmanager: this);
-  }
-
-  Future<bool> _shouldBackup(Store store) async {
-    if (store.containsKey(versionKey)) {
-      final filesAppVersion = store.getString(versionKey);
-
-      if (filesAppVersion.isEmpty) {
-        logger.severe("the file did contain the VERSION_KEY but no version");
-        return true;
-      }
-      final currentVersion = await VersionHandler.Instance.getVersion();
-
-      if (filesAppVersion == currentVersion) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Future checkAndDoBackup(JsonStore store) async {
-    //assert(_latestFile == store.file);
-
-    final state = await _shouldBackup(store);
-    if (state) {
-      logger.fine("version missmatch doing backup");
-
-      String path = store.file.parent
-          .newFilePath("${DateTime.now().fileSystemName()}.json");
-      await store.file.copy(path);
-      logger.info("copyed the current state to $path");
-      //_updateFiles();
-    }
   }
 }
