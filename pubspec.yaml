@@ -33,7 +33,7 @@ dev_dependencies:
   build_runner: ^2.1.5
   file: ^6.1.2
   flutter_lints: ^1.0.4
-  given_when_then_unit_test: ^0.0.4
+  given_when_then_unit_test: ^0.0.9
   json_serializable: ^6.1.1
   mocktail: 0.2.0
   tuple: ^2.0.0

@@ -58,7 +58,7 @@ class LogRepo with ChangeNotifier {
       _lastID = 0;
     }
 
-    _logger.fine("finished loading with ${logs.length} entrys");
+    _logger.fine("finished loading with ${log.length} entrys");
     return;
   }
 
@@ -74,7 +74,12 @@ class LogRepo with ChangeNotifier {
     repoAdapter.storeList(keyMedIntake, miEvents, (MedicationIntakeEvent e) => e.toJson());
   }
 
-  int nextID() => _lastID++;
+  int nextID() {
+    _lastID += 1;
+    assert(log.map((e) => e.id).contains(_lastID) == false);
+
+    return _lastID;
+  }
 
   void addLogEvent(LogEvent event) {
     assert(log.contains(event) == false);
