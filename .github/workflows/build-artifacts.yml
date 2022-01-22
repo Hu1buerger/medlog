@@ -1,4 +1,4 @@
-name: CI-Test
+name: Test and build
 
 on:
   push:
@@ -31,8 +31,7 @@ jobs:
       #- run: flutter format --set-exit-if-changed .
       #- run: flutter analyze .
 
-      - run: flutter test --no-pub --no-track-widget-creation --reporter expanded 
-
+      - run: flutter test --no-pub --no-track-widget-creation --reporter expanded
       # generate via cat medlog.keystore | base64 > keystore_base64
       - name: Configure Keystore for Android
         run: |
@@ -47,12 +46,17 @@ jobs:
           KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
         working-directory: android
-      - run: flutter build apk --verbose
-      - name: rename
-        run: |
-          mv build/app/outputs/apk/release/app-release.apk app-release.apk
+      - name: Flutter Tag
+        uses: jacopocarlini/action-autotag@2.0.4
+        with:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          tag_prefix: "v"
+      - name: Build
+        run: cd .github/workflows/; make
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: medlog.apk
-          path: app-release.apk
+          name: apks
+          path: |
+            build/medlog/*-release.apk
+            build/medlog/*-debug.apk
