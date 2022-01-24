@@ -44,7 +44,7 @@ class Backupmanager {
     return JsonStore(file: _latest, backupmanager: this);
   }
 
-  Future<bool> _shouldBackup(Store store) async {
+  Future<bool> shouldBackup(Store store) async {
     if (store.containsKey(versionKey)) {
       final filesAppVersion = store.getString(versionKey);
 
@@ -61,19 +61,15 @@ class Backupmanager {
     return true;
   }
 
-  Future checkAndDoBackup(JsonStore store) async {
+  Future doBackup(JsonStore store) async {
     //assert(_latestFile == store.file);
+    logger.fine("version missmatch doing backup");
 
-    final state = await _shouldBackup(store);
-    if (state) {
-      logger.fine("version missmatch doing backup");
-
-      // ignore: invalid_use_of_protected_member
-      String path = store.file.parent.newFilePath("${DateTime.now().filesystemName()}.json");
-      // ignore: invalid_use_of_protected_member
-      await store.file.copy(path);
-      logger.info("copyed the current state to $path");
-      //_updateFiles();
-    }
+    // ignore: invalid_use_of_protected_member
+    String path = store.file.parent.newFilePath("${DateTime.now().filesystemName()}.json");
+    // ignore: invalid_use_of_protected_member
+    await store.file.copy(path);
+    logger.info("copyed the current state to $path");
+    //_updateFiles();
   }
 }

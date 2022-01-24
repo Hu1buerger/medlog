@@ -73,7 +73,9 @@ class JsonStore implements Store {
 
     if (backupmanager != null) {
       // check if we need to make a backup of the underlying file
-      await backupmanager!.checkAndDoBackup(this);
+      bool shouldBackup = await backupmanager!.shouldBackup(this);
+      //fornow always backup
+      await backupmanager!.doBackup(this);
       // update the current version in cache
       _cache[backupmanager!.versionKey] = await VersionHandler.Instance.getVersion();
     }
