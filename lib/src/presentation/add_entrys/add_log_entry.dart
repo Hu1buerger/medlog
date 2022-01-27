@@ -28,10 +28,7 @@ class AddLogEntry extends StatefulWidget {
   final StockRepo stockController;
 
   const AddLogEntry(
-      {Key? key,
-      required this.pharmaController,
-      required this.logProvider,
-      required this.stockController})
+      {Key? key, required this.pharmaController, required this.logProvider, required this.stockController})
       : super(key: key);
 
   @override
@@ -89,15 +86,13 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(adminTime != null);
     assert(selectedUnits > 0);
 
-    if (selectedUnits % selectedPharmaceutical!.minUnit != 0) {
+    if (selectedUnits % selectedPharmaceutical!.smallestDosageSize != 0) {
       logger.info("selected unit is not safely supported");
     }
 
-    var intakeEvent = MedicationIntakeEvent.create(
-        selectedPharmaceutical!, adminTime!, selectedUnits);
+    var intakeEvent = MedicationIntakeEvent.create(selectedPharmaceutical!, adminTime!, selectedUnits);
 
-    if (stockController.remainingUnits(intakeEvent.pharmaceutical) <
-        intakeEvent.amount) {
+    if (stockController.remainingUnits(intakeEvent.pharmaceutical) < intakeEvent.amount) {
       logger.severe(
           "to little stock to log the event and insure that the stock remains in a valid state aka contains no negative items");
       // as for now set source to stock.
@@ -113,10 +108,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
     double remainingUnits = intakeEvent.amount;
 
     while (remainingUnits > 0) {
-      var stockItems =
-          stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
-      var openItems =
-          stockItems.where((element) => element.state == StockState.open);
+      var stockItems = stockController.stockItemByPharmaceutical(intakeEvent.pharmaceutical);
+      var openItems = stockItems.where((element) => element.state == StockState.open);
 
       StockItem? stockItemToTakeFrom;
 
@@ -152,12 +145,10 @@ class _AddLogEntryState extends State<AddLogEntry> {
       assert(stockItemToTakeFrom!.pharmaceutical == intakeEvent.pharmaceutical);
 
       if (stockItemToTakeFrom!.amount < intakeEvent.amount) {
-        logger.severe(
-            "unhandled the stock has to little units available to handle this shit");
+        logger.severe("unhandled the stock has to little units available to handle this shit");
       }
 
-      remainingUnits = stockController.takeFromStockItem(
-          stockItemToTakeFrom!, intakeEvent.amount);
+      remainingUnits = stockController.takeFromStockItem(stockItemToTakeFrom!, intakeEvent.amount);
     }
 
     // as for now set source to stock.
@@ -207,8 +198,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
             actions: <Widget>[
               TextButton(
                 child: const Text("No"),
-                onPressed: () =>
-                    Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
+                onPressed: () => Navigator.of(context).pop(DIALOG_ADD_PHARM_ABORT),
               ),
               TextButton(
                 child: const Text("Yes"),
@@ -242,8 +232,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
         selectedPharmaceutical = p;
         setState(() {});
       },
-      onSelectionFailed: (query) =>
-          Navigator.pushNamed(context, AddPharmaceutical.routeName),
+      onSelectionFailed: (query) => Navigator.pushNamed(context, AddPharmaceutical.routeName),
     );
   }
 
@@ -251,7 +240,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(modus == _Modus.medication_selected);
     assert(selectedPharmaceutical != null);
 
-    double unitSize = selectedPharmaceutical!.minUnit;
+    double unitSize = selectedPharmaceutical!.smallestDosageSize;
     var unitOptions = List<Option<double>>.generate(5, (index) {
       double unitOption = unitSize * (index + 1);
 
@@ -260,9 +249,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
       );
     });
 
-    // TODO: do some elaborate shit to define minUnitSize and more
-    unitOptions.add(VariableOption(
-        value: 1, title: "custom", min: 0.25, max: 100 * unitSize, step: 0.25));
+    unitOptions.add(VariableOption(value: 1, title: "custom", min: unitSize, max: 100 * unitSize, step: 0.25));
 
     // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
@@ -293,15 +280,11 @@ class _AddLogEntryState extends State<AddLogEntry> {
         child: OptionSelector<num>(
             options: [...unitOptions],
             onSelectOption: onSelectUnits,
-            selected: unitOptions
-                .indexWhere((element) => element.value == selectedUnits)),
+            selected: unitOptions.indexWhere((element) => element.value == selectedUnits)),
       )
     ];
 
-    return SingleChildScrollView(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: gollum));
+    return SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: gollum));
   }
 
   @override

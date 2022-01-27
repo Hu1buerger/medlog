@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 
 class AddPharmaceutical extends StatefulWidget {
   static const String routeName = "Add_Pharmaceutical";
@@ -34,10 +34,10 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
     var dosage = Dosage.parse(dosageCrtl.text);
     var tradeName = humanKnownName.split(dosageCrtl.text).first;
 
+    //TODO: allow for grouping of pharmaceuticals. This was introduced by tradename, but is retired for now
     var p = Pharmaceutical(
-      human_known_name: humanKnownName,
-      tradename: tradeName,
-      activeSubstance: activeSubstCrtl.text,
+      tradename: humanKnownName,
+      substances: [activeSubstCrtl.text], //TODO allow for multiple substances
       dosage: dosage,
     );
 

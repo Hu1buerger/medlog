@@ -1,6 +1,6 @@
 class Dosage {
   ///units that are recognized rn
-  static const units = ["mg", "ng", "g", "mg/ml"];
+  static const units = ["mg", "ng", "g", "mg/ml", "units"];
 
   final double value;
   final String unit;

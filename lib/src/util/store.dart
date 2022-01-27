@@ -86,7 +86,9 @@ class JsonStore implements Store {
     if (clean) logger.fine("flushing even though the store is clean");
 
     var content = jsonEncode(_cache);
-    return _file.writeAsString(content);
+    _file.writeAsStringSync(content);
+    return Future.sync(() => null);
+    //return _file.writeAsString(content);
   }
 
   @override

@@ -20,8 +20,7 @@ class PharmaceuticalWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
         title: Text(pharmaceutical.displayName),
-        subtitle: Text(
-            "${pharmaceutical.activeSubstance} ${pharmaceutical.dosage.scale(units)}"),
+        subtitle: Text("${pharmaceutical.displaySubstances} ${pharmaceutical.dosage.scale(units)}"),
         onTap: onTap,
         onLongPress: onLongPress);
   }

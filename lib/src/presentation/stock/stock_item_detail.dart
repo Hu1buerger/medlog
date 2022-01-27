@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 class StockItemDetail extends StatelessWidget {
   static const String routeName = "/stockItemDetail";
@@ -54,9 +54,8 @@ class StockItemDetail extends StatelessWidget {
       options.add(Option(value: stockItem.amount, leading: "-"));
     }
 
-    final min = stockItem.pharmaceutical.minUnit;
-    options.add(VariableOption<double>(
-        value: 1, min: min, max: stockItem.amount, step: min));
+    final min = stockItem.pharmaceutical.smallestDosageSize;
+    options.add(VariableOption<double>(value: 1, min: min, max: stockItem.amount, step: min));
 
     return options;
   }

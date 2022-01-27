@@ -64,22 +64,28 @@ class PharmaceuticalRepo with ChangeNotifier {
   }
 
   Pharmaceutical getTrackedInstance(Pharmaceutical p) {
-    List<Pharmaceutical> matches;
+    List<Pharmaceutical> matches = [];
+
+    if (p.isIded) {
+      matches = pharmaceuticals.where((element) => element.id == p.id).toList();
+      assert(matches.length < 2);
+    }
     // non user_created instances can assure that the id is unique
-    if (p.documentState != DocumentState.user_created) {
+    else if (p.documentState != DocumentState.user_created) {
       // get match by id
       matches = pharmaceuticals.where((element) => element.id == p.id).toList();
       assert(matches.length < 2);
     } else {
       //TODO: matching for retrieval should be firstly done by id and only later by equality.
       // THis is a result of allowing the condtion of same uuid (even though quite unlikely)
-      matches = pharmaceuticals
+      assert(false);
+      /*matches = pharmaceuticals
           .where((element) =>
               element.human_known_name == p.human_known_name &&
               element.dosage == p.dosage &&
               element.tradename == p.tradename &&
               element.activeSubstance == p.activeSubstance)
-          .toList();
+          .toList();*/
     }
 
     assert(matches.length == 1);
@@ -100,12 +106,6 @@ class PharmaceuticalRepo with ChangeNotifier {
       pharmaceutical = PharmaceuticalRef.toRef(pharmaceutical);
     }
 
-    if (pharmaceutical.activeSubstance == "Naproxen") {
-      //TODO: update on remote and remove. THis is only for testing...
-      print("updating naproxen to 0.5");
-      pharmaceutical.cloneAndUpdate(smallestPartialUnit: 0.5);
-    }
-
     var toInsert = pharmaceutical as PharmaceuticalRef;
     // the id is set so it is either already tracked or from the server
 
@@ -120,51 +120,8 @@ class PharmaceuticalRepo with ChangeNotifier {
       * Semantic versioning, or numeric versioning is impossible, bcs only oneway communication is automated
       */
 
-      // if there is a collison;
-      // might / should be a method of Pharmaceutical?
-      bool isEqual = other.activeSubstance == toInsert.activeSubstance &&
-          other.dosage.toString() == toInsert.dosage.toString() &&
-          other.tradename == toInsert.tradename &&
-          other.human_known_name == toInsert.human_known_name;
-
-      // no need to update
-      if (isEqual && other.documentState == toInsert.documentState) return;
-
-      if (other.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
-        // if the pharmaceutical from the store is not servertracked and the humanknown_name dosnt match
-        other.cloneAndUpdate(id: createPharmaID());
-        notifyListeners();
-        //other is already in the store so no need to insert.
-        return;
-      }
-
-      if (toInsert.documentState == DocumentState.user_created && other.human_known_name != toInsert.human_known_name) {
-        // and the new item is userCreated, we can just change the id
-        // aka the user wants to create a new Pharmaceutical
-        toInsert.cloneAndUpdate(id: createPharmaID());
-        _insert(toInsert);
-        return;
-      }
-
-      //assert(toInsert.documentState != DocumentState.user_created && other.documentState != DocumentState.user_created);
-      //no easy fix is possible
-
-      if (toInsert.documentState.isHeavier(other.documentState)) {
-        //toInsert is has more authority, so it will be the data
-        (other as PharmaceuticalRef).ref = toInsert.ref;
-        notifyListeners();
-        return;
-      }
-
-      if (other.documentState == toInsert.documentState) {
-        //maybe the pharmaceutical should track a versionID
-        //collision and no change in documentState.
-        // or the remote is always right
-        _logger.severe("Unfixable collison of $other and $toInsert while adding", null, StackTrace.current);
-        //throw StateError("unfixable collision of $other and $toInsert while adding");
-      }
-
-      _logger.fine("refusing to downgrade item from $other to $toInsert");
+      //TODO:
+      throw UnimplementedError("todo add eventual consistency");
     } else {
       _insert(toInsert);
     }

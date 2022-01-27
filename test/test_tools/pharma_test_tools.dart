@@ -13,7 +13,7 @@ Pharmaceutical generatePharmaceutical() {
       id: PharmaceuticalRepo.createPharmaID(),
       tradename: _listGetRnd(_tradenames),
       dosage: Dosage.parse(_listGetRnd(_dosages)),
-      activeSubstance: _listGetRnd(_substance));
+      substances: [_listGetRnd(_substance)]); //TODO: generate multiple substances
 }
 
 T _listGetRnd<T>(List<T> list) {

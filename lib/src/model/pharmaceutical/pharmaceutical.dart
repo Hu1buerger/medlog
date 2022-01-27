@@ -16,43 +16,43 @@ class Pharmaceutical {
   @JsonKey(name: "id")
   String id;
 
+  @Deprecated("documentState versioning is just causing issues")
   final DocumentState documentState;
-
-  /// the name under which humans buy / know this medication
-  // ignore: non_constant_identifier_names
-  final String? human_known_name;
 
   /// the name under which the pharmaceutical gets marketed
   /// I.e. Ibuflam 400mg where "Ibuflam" is the tradename and "Ibuflam 400mg" is the name that humans use
   final String tradename;
   final Dosage dosage;
-  final String? activeSubstance;
+
+  final List<String> substances;
 
   /// the smallest unit one can take
   ///
   /// this would be = 0.5 if this pharmaceutical is halfable
-  final double? _minUnit;
-  double get minUnit => _minUnit ?? 0.25;
+  final double smallestDosageSize;
 
   /// the string to display for the user
-  String get displayName => human_known_name ?? tradename;
+  String get displayName => tradename;
 
   /// marks that this item has a id. this shall be valid
   bool get isIded => id.isNotEmpty;
 
+  String? get displaySubstances {
+    if (substances.isEmpty) return "";
+    return (substances.fold(substances.first, (String previousValue, String element) => previousValue + ", " + element)
+        as String);
+  }
+
   /// dont call me directly
   Pharmaceutical(
-      {required this.tradename,
+      {this.id = Pharmaceutical.emptyID,
+      required this.tradename,
       required this.dosage,
-      required this.activeSubstance,
-      this.human_known_name,
+      this.substances = const [],
       this.documentState = DocumentState.user_created,
-      this.id = Pharmaceutical.emptyID,
-      double? smallestConsumableUnit})
-      : _minUnit = smallestConsumableUnit;
+      this.smallestDosageSize = 1});
 
-  factory Pharmaceutical.fromJson(Map<String, dynamic> json) =>
-      _$PharmaceuticalFromJson(json);
+  factory Pharmaceutical.fromJson(Map<String, dynamic> json) => _$PharmaceuticalFromJson(json);
 
   Map<String, dynamic> toJson() {
     assert(isIded);
@@ -62,23 +62,15 @@ class Pharmaceutical {
 
   /// consider carefully if changing a value is a good idea
   Pharmaceutical cloneAndUpdate(
-      {String? humanName,
-      String? tradename,
-      Dosage? dosage,
-      String? activeSubstance,
-      String? pzn,
-      DocumentState? documentState,
-      String? id,
-      double? smallestPartialUnit}) {
+      {String? tradename, Dosage? dosage, List<String>? substances, String? id, double? smallestPartialUnit}) {
     return Pharmaceutical(
         tradename: tradename ?? this.tradename,
         dosage: dosage ?? this.dosage,
-        activeSubstance: activeSubstance ?? this.activeSubstance,
+        substances: substances ?? this.substances,
         // ignore: unnecessary_this
-        human_known_name: humanName ?? this.human_known_name,
-        documentState: documentState ?? this.documentState,
+        documentState: documentState,
         id: id ?? this.id,
-        smallestConsumableUnit: smallestPartialUnit ?? minUnit);
+        smallestDosageSize: smallestPartialUnit ?? smallestDosageSize);
   }
 }
 

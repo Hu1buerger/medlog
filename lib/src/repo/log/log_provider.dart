@@ -1,9 +1,9 @@
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
+import 'package:medlog/src/repo/log/log_repo.dart';
 
 class LogProvider {
   LogProvider(this._logController) {

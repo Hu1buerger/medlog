@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_function_declarations_over_variables
+
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -149,7 +151,7 @@ _trivialTypesLoad(Testcase testcase) {
         expect(() => rpoAdpt.load(key, adapter), returnsNormally);
       });
 
-      test("load should have been called on the kvstore", () {
+      then("load should have been called on the kvstore", () {
         rpoAdpt.load(key, adapter);
         mctl.verify(() => kvstore.load()).called(1);
       }, skip: "currently not implemented on, and compensated by the app");
@@ -190,7 +192,7 @@ _trivialTypesStore(Testcase testcase) {
       expect(() => rpoAdpt.store(key, runtimeObject, storeAdapter), returnsNormally);
     });
 
-    test("load should have been called on the kvstore", () {
+    then("load should have been called on the kvstore", () {
       rpoAdpt.store(key, runtimeObject, storeAdapter);
       mctl.verify(() => kvstore.flush()).called(1);
     }, skip: "currently not implemented on, and compensated by the app");
@@ -245,7 +247,7 @@ _testComplexTypesLoad(Testcase testcase) {
         expect(() => rpoAdpt.loadList(key, adapter), returnsNormally);
       });
 
-      test("load should have been called on the kvstore", () {
+      then("load should have been called on the kvstore", () {
         rpoAdpt.loadList(key, adapter);
         mctl.verify(() => kvstore.load()).called(1);
       }, skip: "currently not implemented on, and compensated by the app");
@@ -288,7 +290,7 @@ _complexTypesStore(Testcase testcase) {
       expect(() => rpoAdpt.storeList(key, runtimeObject, storeAdapter), returnsNormally);
     });
 
-    test("store should have been called on the kvstore", () {
+    then("store should have been called on the kvstore", () {
       rpoAdpt.storeList(key, runtimeObject, storeAdapter);
       mctl.verify(() => kvstore.load()).called(1);
     }, skip: "currently not implemented on, and compensated by the app");

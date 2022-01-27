@@ -25,18 +25,11 @@ class PharmaceuticalMatcher extends Matcher {
   bool matches(item, Map matchState) {
     bool mismatch = false;
     mismatch |= _testMatch(matchState, "id", item.id, expected.id);
-    mismatch |= _testMatch(matchState, "human_known_name",
-        item.human_known_name, expected.human_known_name);
-    mismatch |= _testMatch(
-        matchState, "displayName", item.displayName, expected.displayName);
-    mismatch |= _testMatch(matchState, "activeSubstance", item.activeSubstance,
-        expected.activeSubstance);
-    mismatch |= _testMatch(matchState, "dosage", item.dosage.toString(),
-        expected.dosage.toString());
-    mismatch |=
-        _testMatch(matchState, "tradename", item.tradename, expected.tradename);
-    mismatch |= _testMatch(matchState, "documentState", item.documentState,
-        expected.documentState);
+    mismatch |= _testMatch(matchState, "displayName", item.displayName, expected.displayName);
+    mismatch |= _testMatch(matchState, "displaySubstance", item.displaySubstances, expected.displaySubstances);
+    mismatch |= _testMatch(matchState, "dosage", item.dosage.toString(), expected.dosage.toString());
+    mismatch |= _testMatch(matchState, "tradename", item.tradename, expected.tradename);
+    mismatch |= _testMatch(matchState, "documentState", item.documentState, expected.documentState);
 
     return !mismatch;
   }

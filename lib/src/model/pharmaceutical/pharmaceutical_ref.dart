@@ -3,68 +3,10 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'dosage.dart';
 
 class PharmaceuticalRef implements Pharmaceutical {
+  PharmaceuticalRef(this.ref);
+
   bool registered = false;
   Pharmaceutical ref;
-
-  @override
-  String get id => ref.id;
-
-  @override
-  set id(value) => ref.id = value;
-
-  @override
-  bool get isIded => ref.isIded;
-
-  @override
-  DocumentState get documentState => ref.documentState;
-
-  @override
-  String? get activeSubstance => ref.activeSubstance;
-
-  @override
-  Dosage get dosage => ref.dosage;
-
-  @override
-  double get minUnit => ref.minUnit;
-
-  @override
-  String? get human_known_name => ref.human_known_name;
-
-  @override
-  String get tradename => ref.tradename;
-
-  @override
-  String get displayName => ref.displayName;
-
-  @override
-  Map<String, dynamic> toJson() => ref.toJson();
-
-  PharmaceuticalRef(this.ref) {
-    if (ref is PharmaceuticalRef) throw ArgumentError();
-  }
-
-  @override
-  Pharmaceutical cloneAndUpdate(
-      {String? humanName,
-      String? tradename,
-      Dosage? dosage,
-      String? activeSubstance,
-      String? pzn,
-      DocumentState? documentState,
-      String? id,
-      double? smallestPartialUnit}) {
-    ref = ref.cloneAndUpdate(
-        humanName: humanName,
-        tradename: tradename,
-        dosage: dosage,
-        activeSubstance: activeSubstance,
-        pzn: pzn,
-        documentState: documentState,
-        id: id,
-        smallestPartialUnit: smallestPartialUnit);
-
-    return this;
-  }
 
   static PharmaceuticalRef toRef(Pharmaceutical p) {
     if (p is Pharmaceutical) {
@@ -72,5 +14,48 @@ class PharmaceuticalRef implements Pharmaceutical {
       return PharmaceuticalRef(p);
     }
     return p as PharmaceuticalRef;
+  }
+
+  @override
+  Pharmaceutical cloneAndUpdate(
+      {String? tradename, Dosage? dosage, List<String>? substances, String? id, double? smallestPartialUnit}) {
+    ref = ref.cloneAndUpdate(
+        tradename: tradename, dosage: dosage, substances: substances, id: id, smallestPartialUnit: smallestPartialUnit);
+    return this;
+  }
+
+  @override
+  String get id => ref.id;
+
+  @override
+  String get displayName => ref.displayName;
+
+  @override
+  String? get displaySubstances => ref.displaySubstances;
+
+  @override
+  DocumentState get documentState => ref.documentState;
+
+  @override
+  Dosage get dosage => ref.dosage;
+
+  @override
+  bool get isIded => ref.isIded;
+
+  @override
+  double get smallestDosageSize => ref.smallestDosageSize;
+
+  @override
+  List<String> get substances => ref.substances;
+
+  @override
+  Map<String, dynamic> toJson() => ref.toJson();
+
+  @override
+  String get tradename => ref.tradename;
+
+  @override
+  set id(String _id) {
+    throw Error();
   }
 }

@@ -6,7 +6,7 @@ import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 class PharmaceuticalFilter {
   static final Map<String, String Function(Pharmaceutical)> _valueRetriever = {
     "Name": (Pharmaceutical p) => p.displayName,
-    "Substance": (p) => p.activeSubstance ?? "",
+    "Substance": (p) => p.displaySubstances ?? "", //TODO: use substances to match List...
     "Dosage": (p) => p.dosage.toString(),
   };
 

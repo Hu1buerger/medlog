@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/pharmaceutical/dosage.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 
 part 'medication_intake_event.g.dart';
 
@@ -48,7 +48,7 @@ class MedicationIntakeEvent extends LogEvent {
 
   Dosage get dosage => pharmaceutical.dosage.scale(amount);
 
-  String get activeSubstance => pharmaceutical.activeSubstance ?? "Unassigned";
+  String get activeSubstance => pharmaceutical.displaySubstances ?? "Unassigned";
 
   factory MedicationIntakeEvent.fromJson(Map<String, dynamic> json) =>
       _$MedicationIntakeEventFromJson(json);

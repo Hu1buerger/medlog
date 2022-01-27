@@ -10,13 +10,13 @@ void main() {
   Pharmaceutical a = Pharmaceutical(
       tradename: "TRADENAME_A",
       dosage: Dosage.parse("10mg"),
-      activeSubstance: "stupidity",
+      substances: ["stupidity"],
       documentState: DocumentState.user_created);
 
   Pharmaceutical b = Pharmaceutical(
       tradename: "TRADENAME_B",
       dosage: Dosage.parse("20mg"),
-      activeSubstance: "truth",
+      substances: ["truth"],
       documentState: DocumentState.in_review);
 
   PharmaceuticalRef ref = PharmaceuticalRef(a);
