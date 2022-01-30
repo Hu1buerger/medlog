@@ -11,6 +11,7 @@ HASH = $(shell sh -c "git rev-parse --short HEAD")
 
 all: prerequesite setup release debug
 setup: cleanversioned mkoutdir
+    @flutter pub run build_runner build
 
 prerequesite:
 	@echo "Building medlog for hash" $(HASH)
