@@ -37,11 +37,11 @@ void main() {
       Store store = JsonStore(file: file);
 
       throwOnMissingStub(file as Mock);
-      mktl.when(() => file.writeAsString(any())).thenAnswer((invocation) => Future.value(file));
+      //mktl.when(() => file.writeAsString(any())).thenAnswer((invocation) => Future.value(file));
+      mktl.when(() => file.writeAsStringSync(any())).thenReturn(null);
 
       await store.flush();
-      var res = verify(() => file.writeAsString(any())).called(1);
-      res;
+      var res = verify(() => file.writeAsStringSync(any())).called(1);
     });
   });
 
