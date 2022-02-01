@@ -38,9 +38,14 @@ class Pharmaceutical {
   bool get isIded => id.isNotEmpty;
 
   String? get displaySubstances {
-    if (substances.isEmpty) return "";
-    return (substances.fold(substances.first, (String previousValue, String element) => previousValue + ", " + element)
-        as String);
+    if (substances.isEmpty) return null;
+
+    String displayString = substances.first;
+    for (int i = 1; i < substances.length; i++) {
+      displayString += ", ${substances[i]}";
+    }
+
+    return displayString;
   }
 
   /// dont call me directly

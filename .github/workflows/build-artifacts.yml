@@ -30,13 +30,19 @@ jobs:
           cache-key: flutter # optional, change this to force refresh cache
           cache-path: ${{ runner.tool_cache }}/flutter # optional, change this to specify the cache path
 
-      - run: |
-              flutter pub get
-              flutter pub run build_runner build
+      - name: Flutter version
+        run: flutter --version
+      - name: Setup dependencies
+        run: flutter pub get
+      - name: Generate json code
+        run: flutter pub run build_runner build
+
       #- run: flutter format --set-exit-if-changed .
       #- run: flutter analyze .
+      - name: Unit tests
+        #run: flutter test --no-pub --no-track-widget-creation --reporter expanded
+        run: flutter test --no-pub --no-track-widget-creation
 
-      - run: flutter test --no-pub --no-track-widget-creation --reporter expanded
       # generate via cat medlog.keystore | base64 > keystore_base64
       - name: Configure Keystore for Android
         run: |
@@ -51,17 +57,26 @@ jobs:
           KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
         working-directory: android
+
       - name: Flutter Tag
         uses: jacopocarlini/action-autotag@2.0.4
         with:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           tag_prefix: "v"
       - name: Build
-        run: cd .github/workflows/; make
-      - name: Upload a Build Artifact
+        working-directory: .github/workflows/
+        run: make
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: apks
+          name: medlog-release
           path: |
             build/medlog/*-release.apk
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: medlog-debug
+          path: |
             build/medlog/*-debug.apk

@@ -8,6 +8,18 @@ part 'medication_intake_event.g.dart';
 
 @JsonSerializable(ignoreUnannotated: true)
 class MedicationIntakeEvent extends LogEvent {
+  MedicationIntakeEvent(
+      int id, DateTime eventTime, this.pharmaceuticalID, this.amount,
+      {this.source = PharmaceuticalSource.other})
+      : super(id, eventTime) {
+    if (amount <= 0) throw ArgumentError.value(amount);
+  }
+
+  factory MedicationIntakeEvent.create(Pharmaceutical p, DateTime eventTime, double amount) {
+    return MedicationIntakeEvent(LogEvent.unsetID, eventTime, p.id, amount, source: PharmaceuticalSource.other)
+      ..pharmaceutical = p;
+  }
+
   @JsonKey()
   String pharmaceuticalID;
 
@@ -20,20 +32,6 @@ class MedicationIntakeEvent extends LogEvent {
   /// Wheter the pharmaceutical has been taken from the stock
   @JsonKey()
   PharmaceuticalSource source;
-
-  MedicationIntakeEvent(
-      int id, DateTime eventTime, this.pharmaceuticalID, this.amount,
-      {this.source = PharmaceuticalSource.other})
-      : super(id, eventTime) {
-    if (amount <= 0) throw ArgumentError.value(amount);
-  }
-
-  factory MedicationIntakeEvent.create(
-      Pharmaceutical p, DateTime eventTime, double amount) {
-    return MedicationIntakeEvent(LogEvent.unsetID, eventTime, p.id, amount,
-        source: PharmaceuticalSource.other)
-      ..pharmaceutical = p;
-  }
 
   Pharmaceutical get pharmaceutical {
     return _pharmaceutical!;
