@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -23,13 +24,15 @@ import 'package:medlog/src/repo/stock/stock_controller.dart';
 class AddLogEntry extends StatefulWidget {
   static const String routeName = "/addMedicationIntakeLog";
 
-  final PharmaceuticalRepo pharmaController;
-  final LogProvider logProvider;
-  final StockRepo stockController;
+  final APIProvider provider;
 
-  const AddLogEntry(
-      {Key? key, required this.pharmaController, required this.logProvider, required this.stockController})
-      : super(key: key);
+  PharmaceuticalRepo get pharmaController => provider.pharmaRepo;
+
+  LogProvider get logProvider => provider.logProvider;
+
+  StockRepo get stockController => provider.stockRepository;
+
+  const AddLogEntry({Key? key, required this.provider}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AddLogEntryState();

@@ -1,21 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/stock/stock_controller.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/add_entrys/add_stock.dart';
-import 'package:medlog/src/presentation/home_page/home_page.dart';
-import 'package:medlog/src/presentation/settings/settings.dart';
+import 'package:medlog/src/presentation/home_page.dart';
+import 'package:medlog/src/presentation/settings.dart';
 import 'package:medlog/src/presentation/stock/stock_item_card.dart';
 import 'package:medlog/src/presentation/stock/stock_item_detail.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 class StockView extends StatefulWidget with HomePagePage {
   static const String routeName = "/viewStock";
   static const String title = "Stock";
 
-  final StockRepo stockController;
+  final APIProvider provider;
 
-  const StockView({Key? key, required this.stockController}) : super(key: key);
+  StockRepo get stockController => provider.stockRepository;
+
+  const StockView({Key? key, required this.provider}) : super(key: key);
 
   @override
   State<StockView> createState() => _StockViewState();

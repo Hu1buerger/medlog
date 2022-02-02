@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/log/log_provider.dart';
-import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
-import 'package:medlog/src/repo/stock/stock_controller.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
@@ -12,6 +10,9 @@ import 'package:medlog/src/presentation/widgets/date_time_picker.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_selector.dart';
 import 'package:medlog/src/presentation/widgets/pharmaceutical_widget.dart';
+import 'package:medlog/src/repo/log/log_provider.dart';
+import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
+import 'package:medlog/src/repo/stock/stock_controller.dart';
 
 // ignore_for_file: curly_braces_in_flow_control_structures
 
@@ -28,17 +29,15 @@ class AddStock extends StatefulWidget {
   static const String routeName = "/addStock";
   final String title = "Edit stock";
 
-  final PharmaceuticalRepo pharmaceuticalController;
+  final APIProvider provider;
 
-  final StockRepo stockController;
-  final LogProvider logProvider;
+  PharmaceuticalRepo get pharmaceuticalController => provider.pharmaRepo;
 
-  const AddStock(
-      {Key? key,
-      required this.pharmaceuticalController,
-      required this.stockController,
-      required this.logProvider})
-      : super(key: key);
+  StockRepo get stockController => provider.stockRepository;
+
+  LogProvider get logProvider => provider.logProvider;
+
+  const AddStock({Key? key, required this.provider}) : super(key: key);
 
   @override
   _AddStockState createState() => _AddStockState();

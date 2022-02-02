@@ -6,18 +6,19 @@ import 'package:medlog/src/util/store.dart';
  *
  */
 class RepoAdapter {
-  RepoAdapter(this.kvstore);
+  RepoAdapter(this._kvstore);
 
-  Store kvstore;
+  final Store _kvstore;
 
-  List<Function(RepoAdapter)> shutdownHook = [];
+  //THOUGHT: maybe we should register the owner of the hook to check for duplicates
+  final List<Function(RepoAdapter)> shutdownHook = [];
 
   O load<I, O>(String key, O Function(I json) adapter) {
-    if (kvstore.containsKey(key) == false) {
+    if (_kvstore.containsKey(key) == false) {
       throw ArgumentError.value(key, "", "not stored in kv-store");
     }
 
-    return adapter(kvstore.get(key));
+    return adapter(_kvstore.get(key));
   }
 
   O loadOrDefault<I, O>(String key, O Function(I) adapter, O defaultVal) {
@@ -29,15 +30,15 @@ class RepoAdapter {
   }
 
   void store<T>(String key, T val, Object Function(T) adapter) {
-    kvstore.update(key, adapter(val));
+    _kvstore.update(key, adapter(val));
   }
 
   List<O> loadList<I, O>(String key, O Function(I) adapter) {
-    if (kvstore.containsKey(key) == false) {
+    if (_kvstore.containsKey(key) == false) {
       throw ArgumentError.value(key, "", "not stored in kv-store");
     }
 
-    final storedValue = kvstore.get(key);
+    final storedValue = _kvstore.get(key);
     final list = (storedValue as List).cast<I>();
     return list.map(adapter).toList();
   }
@@ -53,6 +54,17 @@ class RepoAdapter {
   /// store a list of
   storeList<T>(String key, List<T> list, Object Function(T) adapter) {
     var jsonList = list.map(adapter).toList();
-    kvstore.update(key, jsonList);
+    _kvstore.update(key, jsonList);
+  }
+
+  registerShutdownHook(Function(RepoAdapter) hook) {
+    if (shutdownHook.contains(hook)) return;
+    shutdownHook.add(hook);
+  }
+
+  void execShutdownHooks() {
+    for (var hook in shutdownHook) {
+      hook(this);
+    }
   }
 }

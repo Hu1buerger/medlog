@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:medlog/src/repo/log/log_repo.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
+import 'package:medlog/src/repo/log/log_provider.dart';
 
 class MedicationIntakeDetails extends StatelessWidget {
   static const String routeName = "/detailedLogEntry";
@@ -9,12 +10,13 @@ class MedicationIntakeDetails extends StatelessWidget {
 
   static final Logger _logger = Logger("DetailedLogEntryWidget");
 
-  final MedicationIntakeEvent entry;
-  final LogRepo logController;
+  final APIProvider provider;
 
-  const MedicationIntakeDetails(
-      {Key? key, required this.entry, required this.logController})
-      : super(key: key);
+  final MedicationIntakeEvent entry;
+
+  LogProvider get logProvider => provider.logProvider;
+
+  const MedicationIntakeDetails({Key? key, required this.entry, required this.provider}) : super(key: key);
 
   /// builds a widget with title and value
   ///
@@ -29,7 +31,7 @@ class MedicationIntakeDetails extends StatelessWidget {
 
   void onDelete(BuildContext context) {
     _logger.fine("onDelete for $entry");
-    logController.delete(entry);
+    logProvider.delete(entry);
     Navigator.of(context).pop();
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/presentation/widgets/date_time_widget.dart';
 import 'package:medlog/src/presentation/widgets/option_selector.dart';
@@ -10,28 +11,23 @@ class StockItemDetail extends StatelessWidget {
   static const String routeName = "/stockItemDetail";
   static const String title = "Details";
 
+  final APIProvider provider;
+
+  StockRepo get stockRepo => provider.stockRepository;
   final StockItem stockItem;
 
-  final StockRepo stockController;
-
-  const StockItemDetail(
-      {Key? key, required this.stockController, required this.stockItem})
-      : super(key: key);
+  const StockItemDetail({Key? key, required this.provider, required this.stockItem}) : super(key: key);
 
   /// Deletes the stockItem
   ///
   /// method called by button press
   void delete() {
-    stockController.delete(stockItem);
+    stockRepo.delete(stockItem);
   }
 
   /// toggles the stockstate
   void toggleState(BuildContext context) {
-    stockController.updateStockState(
-        stockItem,
-        stockItem.state == StockState.open
-            ? StockState.closed
-            : StockState.open);
+    stockRepo.updateStockState(stockItem, stockItem.state == StockState.open ? StockState.closed : StockState.open);
     Navigator.popAndPushNamed(context, routeName, arguments: stockItem);
   }
 

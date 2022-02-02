@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/repo/log/log_provider.dart';
-import 'package:medlog/src/repo/log/log_repo.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/repo/stock/stock_controller.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -9,18 +9,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 class Settings extends StatefulWidget {
   static const String route_name = "/settings";
 
-  final PharmaceuticalRepo pharmaceuticalController;
-  final LogProvider logProvider;
-  final LogRepo logController;
-  final StockRepo stockController;
+  final APIProvider provider;
 
-  const Settings(
-      {Key? key,
-      required this.pharmaceuticalController,
-      required this.logProvider,
-      required this.stockController,
-      required this.logController})
-      : super(key: key);
+  const Settings({Key? key, required this.provider}) : super(key: key);
 
   @override
   _SettingsState createState() => _SettingsState();
@@ -29,11 +20,11 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   static String title = "Settings";
 
-  PharmaceuticalRepo get pharmController => widget.pharmaceuticalController;
+  PharmaceuticalRepo get pharmController => widget.provider.pharmaRepo;
 
-  LogProvider get logProvider => widget.logProvider;
+  LogProvider get logProvider => widget.provider.logProvider;
 
-  StockRepo get stockController => widget.stockController;
+  StockRepo get stockController => widget.provider.stockRepository;
 
   @override
   Widget build(BuildContext context) {
