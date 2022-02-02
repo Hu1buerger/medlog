@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:medlog/src/util/date_time_extension.dart';
 
 class DateTimeWidget extends StatelessWidget {
-  static const int maxDays = 7;
+  final int maxDays;
 
   final DateTime dateTime;
   final bool showDate;
   final bool showTime;
 
   //TODO: show "in 3 days" instead of a date
-  const DateTimeWidget(
-      {Key? key,
-      required this.dateTime,
-      this.showDate = true,
-      this.showTime = true})
+  const DateTimeWidget({Key? key, required this.dateTime, this.showDate = true, this.showTime = true, this.maxDays = 7})
       : assert(showDate || showTime),
         super(key: key);
 

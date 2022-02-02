@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/api_provider.dart';
+import 'package:medlog/src/presentation/analysis/analysis_view.dart';
 import 'package:medlog/src/presentation/log/log_view.dart';
 import 'package:medlog/src/presentation/stock/view_stock.dart';
 
@@ -25,21 +26,16 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     pages = [
-      LogView(
-        provider: widget.provider,
-      ),
-      StockView(
-        provider: widget.provider,
-      )
+      LogView(provider: widget.provider),
+      StockView(provider: widget.provider),
+      AnalysisView(provider: widget.provider)
     ];
   }
 
   void selectPage(int i) {
     if (selectedPage == i) return;
 
-    setState(() {
-      selectedPage = i;
-    });
+    setState(() => selectedPage = i);
   }
 
   Widget buildNavBar() {
@@ -49,8 +45,7 @@ class _HomePageState extends State<HomePage> {
         items: List.generate(pages.length, (i) {
           var page = pages[i];
 
-          return BottomNavigationBarItem(
-              icon: Icon(Icons.title), label: page.tabtitle());
+          return BottomNavigationBarItem(icon: const Icon(Icons.title), label: page.tabtitle());
         }));
   }
 
