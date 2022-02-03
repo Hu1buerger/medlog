@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:given_when_then_unit_test/given_when_then_unit_test.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/util/backupmanager.dart';
 import 'package:medlog/src/util/filesystem_util.dart';
 import 'package:medlog/src/util/store.dart';

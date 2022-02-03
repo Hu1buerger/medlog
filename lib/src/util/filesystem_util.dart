@@ -21,6 +21,11 @@ extension DirectoryExtension on Directory {
     return File(newPath);
   }
 
+  Directory subdir(String dirname) {
+    final newPath = newFilePath(dirname);
+    return Directory(newPath);
+  }
+
   /// creates a sub-entry path
   String newFilePath(String named) {
     if (named.isEmpty) throw ArgumentError.value(named);
@@ -39,5 +44,10 @@ class FilesystemUtil {
     if (dir.existsSync() == false) return [];
 
     return dir.listSync().whereType<File>().toList(growable: false);
+  }
+
+  /// Join as if the prefix is the directory and name is the enitity name
+  static String joinPath({String prefix = "/", String name = ""}) {
+    return Directory(prefix).newFilePath(name);
   }
 }

@@ -10,7 +10,9 @@ HASH = $(shell sh -c "git rev-parse --short HEAD")
 # git rev-parse --short=6 HEAD  # get the hash of the current commit
 
 all: prerequesite setup release debug
-setup: cleanversioned mkoutdir
+setup: cleanversioned mkoutdir jsonconverter
+
+jsonconverter:
 	@flutter pub run build_runner build
 
 prerequesite:

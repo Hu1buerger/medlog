@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/stock/stock_entry.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/util/repo_adapter.dart';
-import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
 //TODO: extend this mofo and override load and store => ExampleDataStockController

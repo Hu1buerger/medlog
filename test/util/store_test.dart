@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:given_when_then_unit_test/given_when_then_unit_test.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/util/store.dart';
 import 'package:mocktail/mocktail.dart' hide when;
 import 'package:mocktail/mocktail.dart' as mktl show when;

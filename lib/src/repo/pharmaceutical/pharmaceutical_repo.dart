@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical_ref.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_filter.dart';
 import 'package:medlog/src/repo/provider.dart';
 import 'package:medlog/src/util/repo_adapter.dart';
-import 'package:medlog/src/util/store.dart';
 import 'package:uuid/uuid.dart';
 
 class PharmaceuticalRepo with ChangeNotifier {

@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/util/version_handler.dart';
 
 import 'backupmanager.dart';
-
-typedef Json = Map<String, dynamic>;
 
 abstract class Store {
   Future<void> load();

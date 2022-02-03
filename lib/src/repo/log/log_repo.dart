@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/model/log_entry/log_event.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/log_entry/stock_event.dart';
 import 'package:medlog/src/repo/pharmaceutical/pharmaceutical_repo.dart';
 import 'package:medlog/src/util/repo_adapter.dart';
-import 'package:medlog/src/util/store.dart';
 
 /// Handles the keeping of records
 ///
