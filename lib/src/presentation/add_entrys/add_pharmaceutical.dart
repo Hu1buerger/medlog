@@ -37,6 +37,7 @@ class _AddPharmaceuticalState extends State<AddPharmaceutical> {
 
     //TODO: allow for grouping of pharmaceuticals. This was introduced by tradename, but is retired for now
     var p = Pharmaceutical(
+      changeTime: DateTime.now(),
       tradename: humanKnownName,
       substances: [activeSubstCrtl.text], //TODO allow for multiple substances
       dosage: dosage,

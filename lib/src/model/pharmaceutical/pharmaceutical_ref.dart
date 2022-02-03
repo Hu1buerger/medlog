@@ -9,18 +9,28 @@ class PharmaceuticalRef implements Pharmaceutical {
   Pharmaceutical ref;
 
   static PharmaceuticalRef toRef(Pharmaceutical p) {
-    if (p is Pharmaceutical) {
-      assert(p is PharmaceuticalRef == false);
+    if (p is! PharmaceuticalRef) {
       return PharmaceuticalRef(p);
     }
-    return p as PharmaceuticalRef;
+
+    return p;
   }
 
   @override
   Pharmaceutical cloneAndUpdate(
-      {String? tradename, Dosage? dosage, List<String>? substances, String? id, double? smallestPartialUnit}) {
+      {String? tradename,
+      Dosage? dosage,
+      List<String>? substances,
+      String? id,
+      double? smallestPartialUnit,
+      DateTime? changeTime}) {
     ref = ref.cloneAndUpdate(
-        tradename: tradename, dosage: dosage, substances: substances, id: id, smallestPartialUnit: smallestPartialUnit);
+        tradename: tradename,
+        dosage: dosage,
+        substances: substances,
+        id: id,
+        smallestPartialUnit: smallestPartialUnit,
+        changeTime: changeTime);
     return this;
   }
 
@@ -55,7 +65,12 @@ class PharmaceuticalRef implements Pharmaceutical {
   String get tradename => ref.tradename;
 
   @override
-  set id(String _id) {
-    throw Error();
+  DateTime get changeTime => ref.changeTime;
+
+  @override
+  noSuchMethod(Invocation invocation) {
+    if (invocation.isSetter) return;
+
+    super.noSuchMethod(invocation);
   }
 }
