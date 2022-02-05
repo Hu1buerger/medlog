@@ -9,7 +9,7 @@ List<String> _dosages = ["10mg", "20mg", "25mg", "1g"];
 List<String> _substance = ["Substance 1", "Substance 2", "Substance 3"];
 
 Pharmaceutical generatePharmaceutical() {
-  return Pharmaceutical(
+  return Pharmaceutical.create(
       id: PharmaceuticalRepo.createPharmaID(),
       tradename: _listGetRnd(_tradenames),
       dosage: Dosage.parse(_listGetRnd(_dosages)),

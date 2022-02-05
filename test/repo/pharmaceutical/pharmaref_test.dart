@@ -7,17 +7,15 @@ import '../../test_tools/matcher/pharmaceutical_matcher.dart';
 
 /// test the updating of a ref (matches the usecase of updating a pharmaceutical i.e. changing the name)
 void main() {
-  Pharmaceutical a = Pharmaceutical(
+  Pharmaceutical a = Pharmaceutical.create(
       tradename: "TRADENAME_A",
       dosage: Dosage.parse("10mg"),
-      substances: ["stupidity"],
-      documentState: DocumentState.user_created);
+      substances: ["stupidity"]);
 
-  Pharmaceutical b = Pharmaceutical(
+  Pharmaceutical b = Pharmaceutical.create(
       tradename: "TRADENAME_B",
       dosage: Dosage.parse("20mg"),
-      substances: ["truth"],
-      documentState: DocumentState.in_review);
+      substances: ["truth"]);
 
   PharmaceuticalRef ref = PharmaceuticalRef(a);
 

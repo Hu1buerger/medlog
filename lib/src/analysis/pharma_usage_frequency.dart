@@ -7,7 +7,7 @@ class PharmaUsageFrequency {
 
   final APIProvider provider;
 
-  Map<Pharmaceutical, int> get usage {
+  Map<Pharmaceutical, int> get usageNumerics {
     final Map<Pharmaceutical, int> res = {};
 
     for (final logEvent in provider.logProvider.getLog()) {
@@ -18,4 +18,16 @@ class PharmaUsageFrequency {
 
     return res;
   }
+
+  Map<Pharmaceutical, List<DateTime>> get usageTimes{
+    Map<Pharmaceutical, List<DateTime>> datetimes = {};
+    provider.logProvider.getLog()
+    .whereType<MedicationIntakeEvent>()
+    .forEach((element) => datetimes.update(element.pharmaceutical, (value) {
+      value.add(element.eventTime);
+      return value;
+    }));
+
+    return datetimes;
+  } 
 }

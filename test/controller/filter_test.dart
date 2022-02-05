@@ -72,9 +72,9 @@ main() {
 
   test("test on pharmaceuticals", () {
     var pharms = [
-      Pharmaceutical(tradename: "Naproxen", dosage: Dosage.parse("10mg"), substances: ["Naproxen"]),
-      Pharmaceutical(tradename: "Abc-med", dosage: Dosage.parse("10mg"), substances: ["abc-med"]),
-      Pharmaceutical(tradename: "Ebcabc-med", dosage: Dosage.parse("10mg"), substances: ["ebc-med"]),
+      Pharmaceutical.create(tradename: "Naproxen", dosage: Dosage.parse("10mg"), substances: ["Naproxen"]),
+      Pharmaceutical.create(tradename: "Abc-med", dosage: Dosage.parse("10mg"), substances: ["abc-med"]),
+      Pharmaceutical.create(tradename: "Ebcabc-med", dosage: Dosage.parse("10mg"), substances: ["ebc-med"]),
     ];
 
     var filter = PharmaceuticalFilter(matcher: "Name", negate: false);
