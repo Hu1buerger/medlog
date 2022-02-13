@@ -46,33 +46,29 @@ class _AnalysisViewState extends State<AnalysisView> {
     final eventsPerPharm = usageAnalyser.usageTimes.entries.toList();
 
     return ListView.builder(
-      itemCount: eventsPerPharm.length,
-      itemBuilder: (bc, index) {
-        final stat = eventsPerPharm[index];
-        return UsageWidget(stat.key, stat.value.length, stat.value);
-      },
-    );
-  }
-}
+        itemCount: eventsPerPharm.length,
+        itemBuilder: (bc, index) {
+          final stat = eventsPerPharm[index];
+          final pharmaceutical = stat.key;
+          final usageEvents = stat.value;
+          final meanDelta = usageAnalyser.meanIntakeDurationForPharm(pharmaceutical);
 
-class UsageWidget extends StatelessWidget {
-  UsageWidget(this.pharmaceutical, this.totalUsageEvents, this.usageEvents);
-
-  final Pharmaceutical pharmaceutical;
-  final int totalUsageEvents;
-  final List<DateTime> usageEvents;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(pharmaceutical.displayName),
-      trailing: Text("used $usageEvents times"),
-      subtitle: charts.ScatterPlotChart([charts.Series(
-              id: "usageTimes",
-              data: usageEvents,
-              domainFn: (dt, _) => dt.hour,
-              measureFn: (dt, _) => 1,
-            )]),
-    );
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(stat.key.displayName),
+              Text("used $usageEvents times"),
+              Text("and a mean of ${meanDelta.toString()}"),
+              charts.ScatterPlotChart([charts.Series(
+                id: "usageTimes",
+                data: usageEvents,
+                domainFn: (dt, _) => dt.hour,
+                measureFn: (dt, _) => 1,
+              )
+              ],
+              ),
+            ],
+          );
+        });
   }
 }
