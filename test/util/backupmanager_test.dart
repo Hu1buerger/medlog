@@ -34,59 +34,14 @@ void main() {
       mktl.when(() => versionHandler.getVersion()).thenAnswer((_) => Future.value(appVersion));
     });
 
-    given("[AND] a file with content", () {
-      late JsonStore jsonStore;
-
-      before(() {
-        file.createSync();
-
-        var bckmgr = Backupmanager(backupmanagerDir);
-        jsonStore = bckmgr.createStore();
-      });
-
-      when("the versionKey is not contained", () {
-        const String content = '{}';
-
-        before(() => file.writeAsStringSync(content));
-
-        then("the backupmanager should create a backup", () async {
-          await jsonStore.load();
-
-          var files = backupmanagerDir.listFiles();
-          expect(files.length, 2);
-        });
-      });
-
-      when("the versionKey is contained", () {
-        when("it is equal to the running version", () {
-          String fileVersion = appVersion;
-
-          before(() => writeMockStoreToFile(file, fileVersion));
-
-          then("no new backupfile should be created", () async {
-            await jsonStore.load();
-
-            var files = backupmanagerDir.listFiles();
-            //just one file should be created
-            expect(files.length, 1);
-          });
-        });
-        when("[AND] the versions dont match", () {
-          String fileVersion = "1.2.1.1";
-
-          assert(appVersion != fileVersion);
-
-          then("a new file should be created dueto backup", () async {
-            await jsonStore.load();
-
-            var files = backupmanagerDir.listFiles();
-
-            // a backupfile and the current one should be created
-            expect(files.length, 2);
-          });
-        });
-      });
-    });
+    // TODO: rewrite the tests,
+    /*
+     * Function:
+     * - createBackup:
+     *    + check that a backup has been created.
+     * - should backup
+     *
+     */
   });
 }
 

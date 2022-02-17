@@ -19,6 +19,7 @@ class APIProvider {
 
     repoAdapter = RepoAdapter(store);
     pharmaRepo = PharmaceuticalRepo(repoAdapter);
+    // ignore: deprecated_member_use_from_same_package
     logRepo = LogRepo(repoAdapter, pharmaRepo);
     logProvider = LogProvider(logRepo);
     stockRepository = StockRepo(repoAdapter, pharmaRepo);

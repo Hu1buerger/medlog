@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:medlog/src/api_provider.dart';
 import 'package:medlog/src/model/log_entry/medication_intake_event.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';

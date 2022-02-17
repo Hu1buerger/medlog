@@ -62,7 +62,6 @@ class Backupmanager {
   }
 
   Future doBackup(JsonStore store) async {
-    //assert(_latestFile == store.file);
     logger.fine("version missmatch doing backup");
 
     // ignore: invalid_use_of_protected_member

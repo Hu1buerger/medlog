@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/model/json.dart';
 import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';

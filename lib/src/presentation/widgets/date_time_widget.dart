@@ -8,7 +8,6 @@ class DateTimeWidget extends StatelessWidget {
   final bool showDate;
   final bool showTime;
 
-  //TODO: show "in 3 days" instead of a date
   const DateTimeWidget({Key? key, required this.dateTime, this.showDate = true, this.showTime = true, this.maxDays = 7})
       : assert(showDate || showTime),
         super(key: key);

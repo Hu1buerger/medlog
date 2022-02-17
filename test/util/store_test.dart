@@ -131,7 +131,7 @@ void main() {
 
       when("updating key", () {
         when("[AND] the key is not present", () {
-          then(",it should be inserted", () {
+          then("it should be inserted", () {
             assert(store.containsKey(key) == false);
 
             store.updateString(key, value);
