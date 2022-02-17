@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:medlog/src/api_provider.dart';
@@ -8,6 +7,7 @@ import 'package:medlog/src/presentation/home_page.dart';
 import 'package:medlog/src/presentation/log/log_entry_widgets.dart';
 import 'package:medlog/src/presentation/settings.dart';
 import 'package:medlog/src/repo/log/log_provider.dart';
+import 'package:medlog/src/util/date_time_extension.dart';
 
 class LogView extends StatelessWidget with HomePagePage {
   static const String title = "Log";
@@ -56,35 +56,44 @@ class LogView extends StatelessWidget with HomePagePage {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: logProvider,
-      builder: (BuildContext context, Widget? child) {
-        logger.fine("rebuilding due to change");
+        animation: logProvider,
+        builder: (BuildContext context, Widget? child) {
+          logger.fine("rebuilding due to change");
 
-        //lazy build the list items
-        return ListView.builder(
+          var events = List<LogEvent>.of(items, growable: false);
+          events.sort((a, b) => a.eventTime.compareTo(b.eventTime));
+          assert(events.first.eventTime.isBefore(events.last.eventTime));
+
+          events = events.reversed.toList();
+
+          // clustering the logEvents by day
+          List<List<LogEvent>> loggedDays = [];
+          List<LogEvent> day = [];
+          for (int i = 0; i < events.length; i++) {
+            final currentEvent = events[i];
+
+            if (day.isEmpty) {
+              day.add(currentEvent);
+              continue;
+            }
+
+            final lastEvent = day.last;
+            if (lastEvent.eventTime.isSameDay(currentEvent.eventTime)) {
+              day.add(currentEvent);
+              continue;
+            }
+
+            assert(day.isNotEmpty);
+            loggedDays.add(day);
+            day = [];
+          }
+
+          return ListView.builder(
             restorationId: 'administrationLogListView',
-            reverse: false, //For reversing we need to change the smushing behaviour
-            itemCount: items.length,
-            itemBuilder: (BuildContext context, int index) {
-              final item = items[index];
-
-              bool showDateChip = false;
-              if (index == 0) {
-                showDateChip = true;
-              } else {
-                var previous = items[index - 1];
-
-                showDateChip = previous.eventTime.day != item.eventTime.day ||
-                    previous.eventTime.difference(item.eventTime).inDays > 0;
-              }
-
-              return LogEventWidget.build(
-                key: ObjectKey(item),
-                item: item,
-                showDate: showDateChip,
-              );
-            });
-      },
-    );
+            reverse: false,
+            itemCount: loggedDays.length,
+            itemBuilder: (BuildContext context, int index) => LogDayWidget(logEvents: loggedDays[index]),
+          );
+        });
   }
 }
