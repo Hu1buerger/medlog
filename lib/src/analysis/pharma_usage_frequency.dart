@@ -21,13 +21,14 @@ class PharmaUsageFrequency {
 
   Map<Pharmaceutical, List<DateTime>> get usageTimes {
     Map<Pharmaceutical, List<DateTime>> datetimes = {};
-    provider.logProvider
-        .getLog()
-        .whereType<MedicationIntakeEvent>()
-        .forEach((element) => datetimes.update(element.pharmaceutical, (value) {
-              value.add(element.eventTime);
-              return value;
-            }));
+    provider.logProvider.getLog().whereType<MedicationIntakeEvent>().forEach((element) => datetimes.update(
+          element.pharmaceutical,
+          (value) {
+            value.add(element.eventTime);
+            return value;
+          },
+          ifAbsent: () => [],
+        ));
 
     return datetimes;
   }
@@ -50,6 +51,7 @@ class PharmaUsageFrequency {
 
     if (intakes.length <= 1) {
       //no duration is measurable;
+      return Duration(days: 0);
       throw Error();
     }
 
@@ -67,7 +69,7 @@ class PharmaUsageFrequency {
         assert(dt1 != dt2);
       }
 
-      durations.add(dt1.difference(dt2));
+      durations.add(dt2.difference(dt1));
     }
     assert(durations.length == intakes.length - 1);
 

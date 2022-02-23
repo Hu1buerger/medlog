@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medlog/src/analysis/pharma_usage_frequency.dart';
 import 'package:medlog/src/api_provider.dart';
-import 'package:medlog/src/model/pharmaceutical/pharmaceutical.dart';
 import 'package:medlog/src/presentation/home_page.dart';
 import 'package:medlog/src/presentation/settings.dart';
-
-import 'package:charts_flutter/flutter.dart' as charts;
 
 class AnalysisView extends StatefulWidget with HomePagePage {
   static const String title = "Statistics";
@@ -57,16 +54,16 @@ class _AnalysisViewState extends State<AnalysisView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(stat.key.displayName),
-              Text("used $usageEvents times"),
+              Text("used ${usageEvents.length} times"),
               Text("and a mean of ${meanDelta.toString()}"),
-              charts.ScatterPlotChart([charts.Series(
+              /*charts.ScatterPlotChart([charts.Series(
                 id: "usageTimes",
                 data: usageEvents,
                 domainFn: (dt, _) => dt.hour,
                 measureFn: (dt, _) => 1,
               )
               ],
-              ),
+              ),*/
             ],
           );
         });
