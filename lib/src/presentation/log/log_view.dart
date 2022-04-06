@@ -63,7 +63,7 @@ class LogView extends StatelessWidget with HomePagePage {
           var events = List<LogEvent>.of(items, growable: false);
           events.sort((a, b) => a.eventTime.compareTo(b.eventTime));
 
-          assert(events.isEmpty || events.first.eventTime.isBefore(events.last.eventTime));
+          if (events.length > 2) assert(events.first.eventTime.isBefore(events.last.eventTime));
 
           events = events.reversed.toList();
 
@@ -85,12 +85,18 @@ class LogView extends StatelessWidget with HomePagePage {
             }
 
             assert(day.isNotEmpty);
+            assert(i > 0);
+
             loggedDays.add(day);
             day = [];
+            i -= 1;
           }
 
+          assert(day.isNotEmpty);
+          loggedDays.add(day);
+
           return ListView.builder(
-            restorationId: 'administrationLogListView',
+            //restorationId: 'administrationLogListView',
             reverse: false,
             itemCount: loggedDays.length,
             itemBuilder: (BuildContext context, int index) => LogDayWidget(logEvents: loggedDays[index]),

@@ -54,7 +54,7 @@ class _AnalysisViewState extends State<AnalysisView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(stat.key.displayName),
-              Text("used ${usageEvents.length} times"),
+              Text("used ${usageEvents.length} times"), //FIXME this is of
               Text("and a mean of ${meanDelta.toString()}"),
               /*charts.ScatterPlotChart([charts.Series(
                 id: "usageTimes",
