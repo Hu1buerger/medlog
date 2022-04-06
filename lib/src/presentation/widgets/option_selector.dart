@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -15,6 +15,8 @@ class Option<T> {
 
   T get value => _value;
 
+  set value(T val) {}
+
   String getTitle() {
     return title ?? (leading ?? "") + value.toString();
   }
@@ -27,8 +29,10 @@ class VariableOption<T extends num> extends Option<T> {
         step = step as T,
         assert(min >= 0),
         assert(max > min),
+        assert(min <= value && value <= max),
         assert(step > 0),
-        assert(value % step == 0),
+        //assert((max - min) % step == 0),
+        //assert(value % step == 0),
         super(value: value, title: title, leading: leading);
 
   @override
@@ -38,11 +42,20 @@ class VariableOption<T extends num> extends Option<T> {
   T max;
   T step;
 
+  @override
   set value(num val) {
     var kSteps = val / step;
     var alligned = kSteps.round();
 
     _value = alligned * step as T;
+
+    //maybe move to bounds
+    if (_value < min) {
+      _value = min;
+    }
+    if (_value > max) {
+      _value = max;
+    }
   }
 }
 
@@ -217,7 +230,9 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
   VariableOption<T> get option => widget.option;
 
   T get value => option.value;
-  late double lowerBound;
+
+  double get minSliderLength => 10 * option.step.toDouble();
+  late final double lowerBound;
   late double upperBound;
 
   @override
@@ -225,8 +240,8 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
     super.initState();
 
     lowerBound = option.min.toDouble();
-    upperBound = lowerBound + option.step.toDouble() * 10;
-    upperBound = max(option.value.toDouble(), upperBound);
+    upperBound = lowerBound + minSliderLength;
+    upperBound = math.max(option.value.toDouble(), upperBound);
   }
 
   /// set the value of the option model.
@@ -235,16 +250,14 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
   ///   and typemismatched
   /// option.value = value;
   void setOptionValue(num value) {
-    logger.fine("change of sliderval to $value");
+    logger.finest("change of sliderval to $value");
+
     if (value < option.min) value = option.min;
     if (value > option.max) value = option.max;
 
     setState(() {
       option.value = value;
     });
-
-    logger.fine(option.value);
-    logger.fine(this.value);
   }
 
   /// commit the value the user selected
@@ -280,21 +293,25 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
     double sliderLength = upperBound - lowerBound;
 
     // && the value is in the upper 90 % of the slider
-    if (upperBound < option.max && value > lowerBound + 0.9 * sliderLength) {
-      upperBound += 0.25 * sliderLength;
+    if (value > lowerBound + 0.9 * sliderLength) {
+      upperBound += 0.125 * sliderLength;
+
+      if (upperBound > option.max) upperBound = option.max.toDouble();
+      upperBound = upperBound.ceilToDouble();
+    } // but scaling up takes precedence; or the slider is in the lower 10%
+    else if (value < lowerBound + 0.1 * sliderLength) {
+      upperBound *= 0.9;
+      upperBound = math.max(upperBound, lowerBound + minSliderLength);
     }
 
-    if (upperBound > option.max) upperBound = option.max.toDouble();
     if (upperBound < option.value) upperBound = option.value.toDouble();
 
-    logger.fine("Updating the upper bounds to $upperBound");
+    logger.finest("Updating the upper bounds to $upperBound");
   }
 
   @override
   Widget build(BuildContext context) {
     var chip = FixedOptionWidget(option: option, selected: selected, onPressed: widget.onPressed);
-
-    logger.fine(identityHashCode(option));
 
     if (selected) {
       return Column(
@@ -307,7 +324,7 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> ext
             min: lowerBound,
             max: upperBound,
             onChanged: onSliderChange,
-            onChangeEnd: (val) => commit(),
+            onChangeEnd: (_) => commit(),
           )
         ],
       );

@@ -9,6 +9,7 @@ part 'pharmaceutical.g.dart';
 ///     - It contains a substance that is causing the treatment effect (including homeopathics)
 ///     - It is identified by an id. This can either be created on the client device and is denoted by the [DocumentState.user_created]
 @JsonSerializable()
+@UriConverter()
 @DosageJsonConverter()
 @DateTimeConverter()
 class Pharmaceutical {
@@ -111,6 +112,16 @@ class Pharmaceutical {
   }
 
   static String newUUID() => const Uuid().v4();
+}
+
+class UriConverter extends JsonConverter<Uri, String> {
+  const UriConverter();
+
+  @override
+  Uri fromJson(String json) => Uri.parse(json);
+
+  @override
+  String toJson(Uri object) => object.toString();
 }
 
 class DosageJsonConverter extends JsonConverter<Dosage, String> {

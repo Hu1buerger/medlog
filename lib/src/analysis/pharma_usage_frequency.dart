@@ -52,7 +52,6 @@ class PharmaUsageFrequency {
     if (intakes.length <= 1) {
       //no duration is measurable;
       return Duration(days: 0);
-      throw Error();
     }
 
     final List<Duration> durations = [];
