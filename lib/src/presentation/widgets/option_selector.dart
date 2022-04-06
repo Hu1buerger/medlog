@@ -1,14 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class Option<T> {
+  Option({required T value, this.title, this.leading}) : _value = value;
+
   String? leading;
   String? title;
 
   bool get fixedValue => true;
-  T value;
 
-  Option({required this.value, this.title, this.leading});
+  late T _value;
+
+  T get value => _value;
 
   String getTitle() {
     return title ?? (leading ?? "") + value.toString();
@@ -16,6 +21,16 @@ class Option<T> {
 }
 
 class VariableOption<T extends num> extends Option<T> {
+  VariableOption({required T value, String? title = "custom", String? leading, num min = 0, num max = 1, num step = 1})
+      : min = min as T,
+        max = max as T,
+        step = step as T,
+        assert(min >= 0),
+        assert(max > min),
+        assert(step > 0),
+        assert(value % step == 0),
+        super(value: value, title: title, leading: leading);
+
   @override
   bool get fixedValue => false;
 
@@ -23,20 +38,15 @@ class VariableOption<T extends num> extends Option<T> {
   T max;
   T step;
 
-  VariableOption(
-      {required T value,
-      String? title = "custom",
-      String? leading,
-      num min = 0,
-      num max = 1,
-      num step = 1})
-      : min = min as T,
-        max = max as T,
-        step = step as T,
-        super(value: value, title: title, leading: leading);
+  set value(num val) {
+    var kSteps = val / step;
+    var alligned = kSteps.round();
+
+    _value = alligned * step as T;
+  }
 }
 
-//TODO: Add a onCancle / unselect callback to represent the rigth state
+//TODO: Add a onCancle / unselect callback to represent the right state
 /// This widget is WIP
 ///  and supposed to select 1 option out of {...}.
 ///
@@ -47,15 +57,12 @@ class OptionSelector<T> extends StatefulWidget {
   Logger get logger => _logger;
 
   final List<Option<T>> options;
+
   //TODO: Migrate to this callback bcs it is superior.
   final void Function(Option<T>? option) onSelectOption;
   final int selected;
 
-  const OptionSelector(
-      {Key? key,
-      required this.options,
-      required this.onSelectOption,
-      this.selected = -1})
+  const OptionSelector({Key? key, required this.options, required this.onSelectOption, this.selected = -1})
       : super(key: key);
 
   @override
@@ -124,7 +131,7 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
 
   @override
   Widget build(BuildContext context) {
-    widget.logger.fine("building");
+    widget.logger.fine("building with optionlist as ${identityHashCode(widget.options)}");
 
     //var size = context.size;
     List<Widget> options;
@@ -151,8 +158,7 @@ class _OptionSelectorState<T> extends State<OptionSelector<T>> {
         var optionI = widget.options[i];
         bool isSelected = selected == i;
 
-        options.add(Expanded(
-            flex: isSelected ? 3 : 1, child: buildOption(optionI, isSelected)));
+        options.add(Expanded(flex: isSelected ? 3 : 1, child: buildOption(optionI, isSelected)));
       }
     } else {
       options = List.generate(widget.options.length, (index) {
@@ -174,16 +180,13 @@ class FixedOptionWidget<S, T extends Option<S>> extends StatelessWidget {
   final bool selected;
   final void Function()? onPressed;
 
-  const FixedOptionWidget(
-      {Key? key, required this.option, this.selected = false, this.onPressed})
-      : super(key: key);
+  const FixedOptionWidget({Key? key, required this.option, this.selected = false, this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var chip = InputChip(
       label: Text(option.getTitle()),
-      onPressed:
-          onPressed ?? () => print("clicked on option ${option.getTitle()}"),
+      onPressed: onPressed ?? () => print("clicked on option ${option.getTitle()}"),
       selected: selected,
     );
 
@@ -191,44 +194,39 @@ class FixedOptionWidget<S, T extends Option<S>> extends StatelessWidget {
   }
 }
 
-class VariableOptionWidget<T extends num, S extends VariableOption<T>>
-    extends StatefulWidget {
+class VariableOptionWidget<T extends num, S extends VariableOption<T>> extends StatefulWidget {
   final S option;
   final bool selected;
   final void Function()? onPressed;
   final void Function()? onValueChange;
 
   const VariableOptionWidget(
-      {Key? key,
-      required this.option,
-      this.selected = false,
-      this.onPressed,
-      this.onValueChange})
+      {Key? key, required this.option, this.selected = false, this.onPressed, this.onValueChange})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _VariableOptionWidgetState<T, S>();
 }
 
-class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>>
-    extends State<VariableOptionWidget<T, S>> {
-  static Logger logger = Logger("FixedOptionWidget");
+class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>> extends State<VariableOptionWidget<T, S>> {
+  static Logger logger = Logger("VariableOptionWidget");
+
+  bool get selected => widget.selected;
+  DateTime lastChange = DateTime.now();
 
   VariableOption<T> get option => widget.option;
-  bool get selected => widget.selected;
 
-  DateTime lastChange = DateTime.now();
-  late T value;
+  T get value => option.value;
   late double lowerBound;
   late double upperBound;
 
   @override
   void initState() {
     super.initState();
-    value = option.value;
 
     lowerBound = option.min.toDouble();
     upperBound = lowerBound + option.step.toDouble() * 10;
+    upperBound = max(option.value.toDouble(), upperBound);
   }
 
   /// set the value of the option model.
@@ -237,42 +235,38 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>>
   ///   and typemismatched
   /// option.value = value;
   void setOptionValue(num value) {
-    assert(option.value is T);
-
+    logger.fine("change of sliderval to $value");
     if (value < option.min) value = option.min;
+    if (value > option.max) value = option.max;
 
-    if (option.value is int) {
-      option.value = value.toInt() as T;
-    }
-    if (option.value is double) {
-      option.value = value.toDouble() as T;
-    }
+    setState(() {
+      option.value = value;
+    });
 
-    this.value = option.value;
+    logger.fine(option.value);
+    logger.fine(this.value);
   }
 
   /// commit the value the user selected
   /// and inform the callback.
-  void onChangeEnd(num value) {
+  void commit() {
     if (widget.onValueChange == null) return;
 
-    setOptionValue(value);
     widget.onValueChange!();
   }
 
   void onSliderChange(double val) {
-    num newValue = (val - (val % option.step));
-    num d = value - newValue;
+    //calculate change velocity
+    num delta = value - val;
+
     DateTime oldChangeStamp = lastChange;
     lastChange = DateTime.now();
+    Duration deltaT = oldChangeStamp.difference(lastChange);
+    num vx = delta / deltaT.abs().inMilliseconds;
 
-    Duration changeDuration = oldChangeStamp.difference(lastChange);
-    num vx = d / changeDuration.abs().inMilliseconds;
-
+    //
     rescaleBounds();
-    print("change of d $d as vx $vx with dt ${changeDuration.inMilliseconds}");
-
-    setState(() => value = newValue as T);
+    setOptionValue(val);
   }
 
   /// resaling the bounds of the slider
@@ -284,22 +278,25 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>>
   ///  -
   void rescaleBounds() {
     double sliderLength = upperBound - lowerBound;
+
+    // && the value is in the upper 90 % of the slider
     if (upperBound < option.max && value > lowerBound + 0.9 * sliderLength) {
       upperBound += 0.25 * sliderLength;
-      if (upperBound > option.max) upperBound = option.max.toDouble();
-      logger.fine("Updating the upper bounds to $upperBound");
     }
+
+    if (upperBound > option.max) upperBound = option.max.toDouble();
+    if (upperBound < option.value) upperBound = option.value.toDouble();
+
+    logger.fine("Updating the upper bounds to $upperBound");
   }
 
   @override
   Widget build(BuildContext context) {
-    var chip = FixedOptionWidget(
-        option: option, selected: selected, onPressed: widget.onPressed);
+    var chip = FixedOptionWidget(option: option, selected: selected, onPressed: widget.onPressed);
+
+    logger.fine(identityHashCode(option));
 
     if (selected) {
-      option.value = option.value < option.min ? option.min : option.value;
-
-      //TODO: dynamically expand max
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -310,7 +307,7 @@ class _VariableOptionWidgetState<T extends num, S extends VariableOption<T>>
             min: lowerBound,
             max: upperBound,
             onChanged: onSliderChange,
-            onChangeEnd: (val) => onChangeEnd(value),
+            onChangeEnd: (val) => commit(),
           )
         ],
       );

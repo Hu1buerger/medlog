@@ -62,7 +62,8 @@ class LogView extends StatelessWidget with HomePagePage {
 
           var events = List<LogEvent>.of(items, growable: false);
           events.sort((a, b) => a.eventTime.compareTo(b.eventTime));
-          assert(events.first.eventTime.isBefore(events.last.eventTime));
+
+          assert(events.isEmpty || events.first.eventTime.isBefore(events.last.eventTime));
 
           events = events.reversed.toList();
 

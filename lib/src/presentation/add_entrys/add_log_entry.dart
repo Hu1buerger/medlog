@@ -243,7 +243,7 @@ class _AddLogEntryState extends State<AddLogEntry> {
     assert(selectedPharmaceutical != null);
 
     double unitSize = selectedPharmaceutical!.smallestDosageSize;
-    var unitOptions = List<Option<double>>.generate(5, (index) {
+    var unitOptions = List<Option<double>>.generate(3, (index) {
       double unitOption = unitSize * (index + 1);
 
       return Option(
@@ -251,7 +251,8 @@ class _AddLogEntryState extends State<AddLogEntry> {
       );
     });
 
-    unitOptions.add(VariableOption(value: 1, title: "custom", min: unitSize, max: 100 * unitSize, step: 0.25));
+    unitOptions
+        .add(VariableOption(value: selectedUnits, title: "custom", min: unitSize, max: 100 * unitSize, step: 0.25));
 
     // TODO_FUTURE: add dismissable to swipe on the Card to unselect
     var gollum = <Widget>[
