@@ -51,6 +51,8 @@ jobs:
           echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
           echo "storePassword=$KEYSTORE_STORE_PASSWORD" >> key.properties
           echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
+          echo $BASE64_KEYSTORE
+          cat key.properties
         env:
           BASE64_KEYSTORE: ${{ secrets.BASE64_KEYSTORE }}
           KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
